@@ -1,0 +1,35 @@
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { AppStateProvider } from './store/app-state'
+import { AdminPsPlusPage } from './pages/admin-ps-plus-page'
+import { RootLayout } from './components/root-layout'
+import { CartPage } from './pages/cart-page'
+import { CatalogPage } from './pages/catalog-page'
+import { CheckoutPage } from './pages/checkout-page'
+import { FavoritesPage } from './pages/favorites-page'
+import { HomePage } from './pages/home-page'
+import { ProductPage } from './pages/product-page'
+import { SupportPage } from './pages/support-page'
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppStateProvider>
+        <Routes>
+          <Route element={<RootLayout />}>
+            <Route index element={<HomePage />} />
+            <Route path="/catalog" element={<CatalogPage />} />
+            <Route path="/product/:productId" element={<ProductPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/support" element={<SupportPage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/admin" element={<AdminPsPlusPage />} />
+            <Route path="/admin/ps-plus" element={<AdminPsPlusPage />} />
+          </Route>
+        </Routes>
+      </AppStateProvider>
+    </BrowserRouter>
+  )
+}
+
+export default App

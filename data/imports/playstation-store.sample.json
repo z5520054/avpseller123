@@ -1,0 +1,135 @@
+[
+  {
+    "source": "playstation-store",
+    "sourceKey": "ps-tr-god-of-war-ragnarok",
+    "slug": "god-of-war-ragnarok",
+    "title": "God of War Ragnarok",
+    "kind": "game",
+    "productUrl": "https://store.playstation.com/",
+    "coverUrl": "https://example.com/god-of-war-ragnarok.jpg",
+    "releaseDate": "2022-11-09",
+    "publisher": "Sony Interactive Entertainment",
+    "developer": "Santa Monica Studio",
+    "status": "active",
+    "platforms": ["PS5", "PS4"],
+    "tags": ["Action", "Adventure", "Story"],
+    "offers": [
+      {
+        "region": "Turkey",
+        "currency": "TRY",
+        "basePriceMinor": 699000,
+        "discountedPriceMinor": 549000,
+        "discountPercent": 21,
+        "saleStartAt": null,
+        "saleEndAt": null,
+        "plusTier": null,
+        "saleName": "Featured sale",
+        "availability": "active",
+        "sourceUpdatedAt": null
+      }
+    ]
+  },
+  {
+    "source": "playstation-store",
+    "sourceKey": "ps-tr-horizon-forbidden-west",
+    "slug": "horizon-forbidden-west",
+    "title": "Horizon Forbidden West",
+    "kind": "game",
+    "productUrl": "https://store.playstation.com/",
+    "coverUrl": "https://example.com/horizon-forbidden-west.jpg",
+    "releaseDate": "2022-02-18",
+    "publisher": "Sony Interactive Entertainment",
+    "developer": "Guerrilla",
+    "status": "active",
+    "platforms": ["PS5", "PS4"],
+    "tags": ["Action", "Open World", "Adventure"],
+    "offers": [
+      {
+        "region": "Turkey",
+        "currency": "TRY",
+        "basePriceMinor": 599000,
+        "discountedPriceMinor": 449000,
+        "discountPercent": 25,
+        "saleStartAt": null,
+        "saleEndAt": null,
+        "plusTier": null,
+        "saleName": "Featured sale",
+        "availability": "active",
+        "sourceUpdatedAt": null
+      },
+      {
+        "region": "India",
+        "currency": "INR",
+        "basePriceMinor": 399900,
+        "discountedPriceMinor": 319900,
+        "discountPercent": 20,
+        "saleStartAt": null,
+        "saleEndAt": null,
+        "plusTier": null,
+        "saleName": "Featured sale",
+        "availability": "active",
+        "sourceUpdatedAt": null
+      }
+    ]
+  },
+  {
+    "source": "playstation-store",
+    "sourceKey": "ps-in-elden-ring",
+    "slug": "elden-ring",
+    "title": "ELDEN RING",
+    "kind": "game",
+    "productUrl": "https://store.playstation.com/",
+    "coverUrl": "https://example.com/elden-ring.jpg",
+    "releaseDate": "2022-02-25",
+    "publisher": "Bandai Namco Entertainment",
+    "developer": "FromSoftware",
+    "status": "active",
+    "platforms": ["PS5", "PS4"],
+    "tags": ["RPG", "Souls-like", "Open World"],
+    "offers": [
+      {
+        "region": "India",
+        "currency": "INR",
+        "basePriceMinor": 599900,
+        "discountedPriceMinor": 479900,
+        "discountPercent": 20,
+        "saleStartAt": null,
+        "saleEndAt": null,
+        "plusTier": null,
+        "saleName": "Spring sale",
+        "availability": "active",
+        "sourceUpdatedAt": null
+      }
+    ]
+  },
+  {
+    "source": "playstation-store",
+    "sourceKey": "ps-tr-wallet-topup-500",
+    "slug": "wallet-topup-500",
+    "title": "Wallet Top-up 500",
+    "kind": "currency",
+    "productUrl": "https://store.playstation.com/",
+    "coverUrl": null,
+    "releaseDate": null,
+    "publisher": null,
+    "developer": null,
+    "status": "active",
+    "platforms": ["PSN"],
+    "tags": ["Top-up", "Wallet", "Turkey"],
+    "offers": [
+      {
+        "region": "Turkey",
+        "currency": "TRY",
+        "basePriceMinor": 250000,
+        "discountedPriceMinor": 250000,
+        "discountPercent": 0,
+        "saleStartAt": null,
+        "saleEndAt": null,
+        "plusTier": null,
+        "saleName": null,
+        "availability": "active",
+        "sourceUpdatedAt": null
+      }
+    ]
+  }
+]

@@ -1,0 +1,201 @@
+import { useState } from 'react'
+import { Navigate } from 'react-router-dom'
+import { createOrder } from '../lib/catalog-api'
+import { formatMoneyMinor } from '../lib/format'
+import { useCartRecalculation } from '../hooks/use-cart-recalculation'
+import { regionToApi } from '../lib/catalog-pricing'
+import { useAppState } from '../store/use-app-state'
+import type { OrderRecord } from '../types'
+
+function formatTryMinor(value: number | null) {
+  if (value === null) {
+    return null
+  }
+
+  return new Intl.NumberFormat('ru-RU', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(value / 100)
+}
+
+export function CheckoutPage() {
+  const { cart, region, clearCart } = useAppState()
+  const { result, loading } = useCartRecalculation()
+  const [email, setEmail] = useState('')
+  const [telegram, setTelegram] = useState('')
+  const [comment, setComment] = useState('')
+  const [acceptedOffer, setAcceptedOffer] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [order, setOrder] = useState<OrderRecord | null>(null)
+
+  if (!loading && cart.length === 0 && !order) {
+    return <Navigate to="/cart" replace />
+  }
+
+  if (order) {
+    return (
+      <div className="page-shell section-space">
+        <div className="satin-panel rounded-[36px] border border-white/10 px-6 py-16 text-center">
+          <div className="font-display text-4xl text-sheen">Заказ создан</div>
+          <p className="mt-4 text-sm text-white/56">
+            Заказ #{order.id} сохранён со статусом <span className="text-white">{order.status}</span>.
+          </p>
+          <p className="mt-3 text-sm text-white/56">
+            На email <span className="text-white">{order.email}</span> будет отправлена дальнейшая информация по оплате и выдаче.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="page-shell section-space">
+      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+        <form
+          className="satin-panel rounded-[32px] border border-white/10 p-6"
+          onSubmit={async (event) => {
+            event.preventDefault()
+            setSubmitting(true)
+            setError(null)
+
+            try {
+              const created = await createOrder({
+                email,
+                region: regionToApi(region),
+                acceptedOffer: true,
+                comment: [telegram ? `Telegram: ${telegram}` : null, comment || null].filter(Boolean).join('\n'),
+                items: cart,
+              })
+              clearCart()
+              setOrder(created)
+            } catch {
+              setError('Не удалось создать заказ. Повторите попытку.')
+            } finally {
+              setSubmitting(false)
+            }
+          }}
+        >
+          <div className="font-display text-3xl text-sheen">Оформление заказа</div>
+          <p className="mt-3 text-sm leading-6 text-white/56">
+            Для Турции заказ будет автоматически пересчитан в коды пополнения нужного номинала.
+          </p>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <label className="text-sm text-white/58">
+              Email
+              <input
+                required
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-white/22"
+                placeholder="name@email.com"
+              />
+            </label>
+            <label className="text-sm text-white/58">
+              Telegram
+              <input
+                type="text"
+                value={telegram}
+                onChange={(event) => setTelegram(event.target.value)}
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-white/22"
+                placeholder="@username"
+              />
+            </label>
+            <label className="text-sm text-white/58 sm:col-span-2">
+              Комментарий к заказу
+              <textarea
+                rows={5}
+                value={comment}
+                onChange={(event) => setComment(event.target.value)}
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-white/22"
+                placeholder="Укажите пожелания по выдаче или аккаунту"
+              />
+            </label>
+          </div>
+
+          <label className="mt-6 flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-white/68">
+            <input
+              checked={acceptedOffer}
+              onChange={(event) => setAcceptedOffer(event.target.checked)}
+              type="checkbox"
+              className="mt-1 h-4 w-4 accent-[#0070CC]"
+            />
+            <span>Подтверждаю согласие с офертой и понимаю, что покупаю коды пополнения для турецкого аккаунта PS Store.</span>
+          </label>
+
+          {result.supported === false ? (
+            <div className="mt-4 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-4 text-sm text-amber-100">
+              {result.message}
+            </div>
+          ) : null}
+
+          {error ? (
+            <div className="mt-4 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-4 text-sm text-red-100">
+              {error}
+            </div>
+          ) : null}
+
+          <button
+            type="submit"
+            disabled={!acceptedOffer || submitting || loading || result.supported === false}
+            className="mt-6 inline-flex cursor-pointer rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/92 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {submitting ? 'Создание заказа...' : 'Перейти к оплате'}
+          </button>
+        </form>
+
+        <aside className="satin-panel h-fit rounded-[30px] border border-white/10 p-6">
+          <div className="font-display text-3xl text-sheen">Ваш заказ</div>
+          <div className="mt-5 space-y-4">
+            {loading
+              ? Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className="h-14 animate-pulse rounded-2xl bg-white/[0.04]" />
+                ))
+              : result.sourceItems.map((item) => (
+                  <div key={item.productId} className="flex items-start justify-between gap-4 text-sm text-white/62">
+                    <div>
+                      <div className="text-white">{item.product.title}</div>
+                      <div className="mt-1">Количество: {item.quantity}</div>
+                    </div>
+                    <div>{formatMoneyMinor(item.linePriceRubMinor, 'RUB') ?? '—'}</div>
+                  </div>
+                ))}
+          </div>
+
+          {result.autoCodeItems.length > 0 ? (
+            <div className="mt-6 border-t border-white/10 pt-6">
+              <div className="text-sm uppercase tracking-[0.18em] text-white/48">Коды пополнения</div>
+              <div className="mt-4 space-y-3 text-sm text-white/62">
+                {result.autoCodeItems.map((item) => (
+                  <div key={item.code} className="flex items-start justify-between gap-4">
+                    <div>{item.nominalTry} TRY</div>
+                    <div>{formatMoneyMinor(item.priceRubMinor, 'RUB')}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          <div className="mt-6 border-t border-white/10 pt-6 text-white">
+            <div className="flex items-center justify-between text-sm text-white/56">
+              <span>Сумма игр</span>
+              <span>{formatTryMinor(result.pricing.sourceTotalTryMinor)} TRY</span>
+            </div>
+            {result.pricing.theoreticalRemainderTryMinor !== null ? (
+              <div className="mt-3 flex items-center justify-between text-sm text-white/56">
+                <span>Остаток на аккаунте</span>
+                <span>{formatTryMinor(result.pricing.theoreticalRemainderTryMinor)} TRY</span>
+              </div>
+            ) : null}
+            <div className="mt-4 flex items-center justify-between text-lg text-white">
+              <span>К оплате</span>
+              <span>{formatMoneyMinor(result.pricing.payableRubMinor, 'RUB') ?? '—'}</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  )
+}

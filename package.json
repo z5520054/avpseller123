@@ -1,0 +1,47 @@
+{
+  "name": "pixel-silk-console-boutique",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "server:dev": "tsx watch server/index.ts",
+    "server:start": "tsx server/index.ts",
+    "server:check": "tsc -p tsconfig.server.json --noEmit",
+    "catalog:sync:sample": "tsx server/cli.ts sync --provider sample-json --mode full",
+    "catalog:sync:prices": "tsx server/cli.ts sync --provider sample-json --mode prices",
+    "catalog:sync:playstation": "tsx server/cli.ts sync --provider playstation-store --mode full",
+    "catalog:sync:playstation:prices": "tsx server/cli.ts sync --provider playstation-store --mode prices",
+    "catalog:details:playstation": "tsx server/cli.ts details --provider playstation-store"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.2.0",
+    "fastify": "^5.8.5",
+    "lucide-react": "^1.14.0",
+    "node-cron": "^4.2.1",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-router-dom": "^7.14.2",
+    "zod": "^4.4.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@tailwindcss/vite": "^4.2.4",
+    "@types/node": "^24.12.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "eslint": "^10.2.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.5.0",
+    "tailwindcss": "^4.2.4",
+    "tsx": "^4.21.0",
+    "typescript": "~6.0.2",
+    "typescript-eslint": "^8.58.2",
+    "vite": "^8.0.10"
+  }
+}
