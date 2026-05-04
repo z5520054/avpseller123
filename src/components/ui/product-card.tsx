@@ -113,7 +113,7 @@ export function ProductCard({
           {isInCart ? (
             <Link
               to="/cart"
-              className={`inline-flex cursor-pointer items-center gap-2 rounded-full border border-emerald-300/60 bg-emerald-400 text-sm font-medium text-black shadow-[0_0_28px_rgba(52,211,153,0.45)] transition hover:bg-emerald-300 ${
+              className={`inline-flex cursor-pointer items-center gap-2 rounded-full border border-emerald-300/60 bg-emerald-400 text-sm font-medium text-black transition hover:bg-emerald-300 ${
                 featured ? 'px-5 py-3' : 'px-4 py-2'
               }`}
             >

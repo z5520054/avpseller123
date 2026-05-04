@@ -166,7 +166,7 @@ function SubscriptionChooser() {
             {isInCart ? (
               <Link
                 to="/cart"
-                className="mt-6 inline-flex w-full items-center justify-center rounded-full border border-emerald-300/60 bg-emerald-400 px-5 py-3 text-sm font-medium text-black shadow-[0_0_32px_rgba(52,211,153,0.48)] transition hover:bg-emerald-300"
+                className="mt-6 inline-flex w-full items-center justify-center rounded-full border border-emerald-300/60 bg-emerald-400 px-5 py-3 text-sm font-medium text-black transition hover:bg-emerald-300"
               >
                 Перейти в корзину
               </Link>

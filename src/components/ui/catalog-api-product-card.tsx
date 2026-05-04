@@ -110,7 +110,7 @@ export function CatalogApiProductCard({ product }: { product: CatalogApiProduct 
           {isInCart ? (
             <Link
               to="/cart"
-              className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-emerald-300/60 bg-emerald-400 px-4 py-2 text-sm font-medium text-black shadow-[0_0_28px_rgba(52,211,153,0.45)] transition hover:bg-emerald-300"
+              className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-emerald-300/60 bg-emerald-400 px-4 py-2 text-sm font-medium text-black transition hover:bg-emerald-300"
             >
               <ShoppingBag size={16} />
               Перейти в корзину
