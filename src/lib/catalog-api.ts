@@ -43,6 +43,7 @@ export function getCatalogList(params: {
   genre?: string
   kind?: string
   tag?: string
+  excludeTag?: string | string[]
   limit?: number
   offset?: number
   sort?: 'updated' | 'price_asc' | 'price_desc' | 'discount' | 'sony' | 'release_desc' | 'release_asc'
@@ -55,6 +56,12 @@ export function getCatalogList(params: {
   if (params.genre) search.set('genre', params.genre)
   if (params.kind) search.set('kind', params.kind)
   if (params.tag) search.set('tag', params.tag)
+  if (params.excludeTag) {
+    const excludeTags = Array.isArray(params.excludeTag) ? params.excludeTag : [params.excludeTag]
+    for (const tag of excludeTags) {
+      search.append('excludeTag', tag)
+    }
+  }
   if (params.limit) search.set('limit', String(params.limit))
   if (params.offset) search.set('offset', String(params.offset))
   if (params.sort) search.set('sort', params.sort)

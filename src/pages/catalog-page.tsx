@@ -86,9 +86,9 @@ function regionToApi(region: Region) {
 function mapCategoryToApi(category: string) {
   switch (category) {
     case 'games':
-      return { tag: 'section:games' }
+      return { tag: 'section:games', excludeTag: 'section:preorders' }
     case 'deals':
-      return { tag: 'section:deals' }
+      return { tag: 'section:deals', excludeTag: 'section:preorders' }
     case 'preorders':
       return { tag: 'section:preorders' }
     default:
@@ -268,6 +268,7 @@ export function CatalogPage() {
       language: language === 'ru_subtitles' || language === 'ru_full' ? language : undefined,
       genre: genre || undefined,
       tag: mapped.tag,
+      excludeTag: mapped.excludeTag,
       limit: PAGE_SIZE,
       offset: (page - 1) * PAGE_SIZE,
       sort,

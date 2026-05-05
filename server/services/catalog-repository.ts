@@ -313,6 +313,7 @@ export class CatalogRepository {
     genre?: string
     kind?: string
     tag?: string
+    excludeTag?: string | string[]
     limit: number
     offset: number
     sort: 'updated' | 'price_asc' | 'price_desc' | 'discount' | 'sony' | 'release_desc' | 'release_asc'
@@ -398,6 +399,11 @@ export class CatalogRepository {
     if (filters.tag) {
       clauses.push('EXISTS (SELECT 1 FROM product_tags pt WHERE pt.product_id = p.id AND pt.tag = ?)')
       params.push(filters.tag)
+    }
+    const excludeTags = Array.isArray(filters.excludeTag) ? filters.excludeTag : filters.excludeTag ? [filters.excludeTag] : []
+    for (const tag of excludeTags) {
+      clauses.push('NOT EXISTS (SELECT 1 FROM product_tags pt_excluded WHERE pt_excluded.product_id = p.id AND pt_excluded.tag = ?)')
+      params.push(tag)
     }
 
     const bestPriceSql = filters.region
