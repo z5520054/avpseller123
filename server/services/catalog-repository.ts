@@ -528,7 +528,8 @@ export class CatalogRepository {
       return null
     }
 
-    const title = `PS Plus ${tier} ${durationMonths} mo.`
+    const monthLabel = durationMonths === 1 ? 'месяц' : durationMonths === 3 ? 'месяца' : 'месяцев'
+    const title = `PS Plus ${tier} ${durationMonths} ${monthLabel}`
     const offer = toCommercialOffer({
       region,
       currency: 'RUB',

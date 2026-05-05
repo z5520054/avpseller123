@@ -5,6 +5,7 @@ import type {
   CartRecalculationResponse,
   OrderRecord,
   HomeBanner,
+  HomeBannerSettings,
   PsPlusPrice,
 } from '../types'
 
@@ -76,7 +77,7 @@ export function getPsPlusPrices(region: 'turkey' | 'india') {
 }
 
 export function getHomeBanners() {
-  return fetchJson<{ items: HomeBanner[] }>('/api/banners')
+  return fetchJson<{ items: HomeBanner[]; settings: HomeBannerSettings }>('/api/banners')
 }
 
 export function getAdminPsPlusPrices(region: 'turkey' | 'india', token: string) {
@@ -104,7 +105,7 @@ export function updateAdminPsPlusPrices(
 }
 
 export function getAdminBanners(token: string) {
-  return fetchJson<{ items: HomeBanner[] }>('/api/admin/banners', {
+  return fetchJson<{ items: HomeBanner[]; settings: HomeBannerSettings }>('/api/admin/banners', {
     headers: {
       'x-admin-token': token,
     },
@@ -126,9 +127,10 @@ export function updateAdminBanners(
       sortOrder: number
       isActive: boolean
     }>
+    settings?: Pick<HomeBannerSettings, 'autoplayMs' | 'animation'>
   },
 ) {
-  return fetchJson<{ items: HomeBanner[] }>('/api/admin/banners', {
+  return fetchJson<{ items: HomeBanner[]; settings: HomeBannerSettings }>('/api/admin/banners', {
     method: 'PUT',
     headers: {
       'x-admin-token': token,

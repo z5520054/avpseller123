@@ -168,6 +168,13 @@ CREATE TABLE IF NOT EXISTS home_banners (
   updated_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS home_banner_settings (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  autoplay_ms INTEGER NOT NULL DEFAULT 6000,
+  animation TEXT NOT NULL DEFAULT 'slide',
+  updated_at TEXT NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_products_title ON products(title_normalized);
 CREATE INDEX IF NOT EXISTS idx_offers_region ON offers(region);
 CREATE INDEX IF NOT EXISTS idx_product_source_ranks_lookup ON product_source_ranks(tag, region, rank);

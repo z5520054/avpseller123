@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AppStateProvider } from './store/app-state'
 import { AdminPsPlusPage } from './pages/admin-ps-plus-page'
 import { RootLayout } from './components/root-layout'
+import { ScrollToTop } from './components/scroll-to-top'
 import { CartPage } from './pages/cart-page'
 import { CatalogPage } from './pages/catalog-page'
 import { CheckoutPage } from './pages/checkout-page'
@@ -14,6 +15,7 @@ function App() {
   return (
     <BrowserRouter>
       <AppStateProvider>
+        <ScrollToTop />
         <Routes>
           <Route element={<RootLayout />}>
             <Route index element={<HomePage />} />

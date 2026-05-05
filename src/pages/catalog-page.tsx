@@ -1,4 +1,4 @@
-import { SlidersHorizontal, X } from 'lucide-react'
+﻿import { SlidersHorizontal, X } from 'lucide-react'
 import { useDeferredValue, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CatalogApiProductCard } from '../components/ui/catalog-api-product-card'
@@ -13,49 +13,49 @@ import { useAppState } from '../store/use-app-state'
 import type { CatalogApiProduct, PsPlusPrice, Region } from '../types'
 
 const CATEGORY_OPTIONS = [
-  { value: 'games', label: 'Игры PS Store' },
-  { value: 'deals', label: 'Распродажа' },
-  { value: 'preorders', label: 'Предзаказы' },
-  { value: 'subscriptions', label: 'Подписки' },
+  { value: 'games', label: 'РРіСЂС‹ PS Store' },
+  { value: 'deals', label: 'Р Р°СЃРїСЂРѕРґР°Р¶Р°' },
+  { value: 'preorders', label: 'РџСЂРµРґР·Р°РєР°Р·С‹' },
+  { value: 'subscriptions', label: 'РџРѕРґРїРёСЃРєРё' },
 ]
 
 const LANGUAGE_OPTIONS = [
-  { value: '', label: 'Любой язык' },
-  { value: 'ru_subtitles', label: 'Русские субтитры' },
-  { value: 'ru_full', label: 'Полностью на русском' },
+  { value: '', label: 'Р›СЋР±РѕР№ СЏР·С‹Рє' },
+  { value: 'ru_subtitles', label: 'Р СѓСЃСЃРєРёРµ СЃСѓР±С‚РёС‚СЂС‹' },
+  { value: 'ru_full', label: 'РџРѕР»РЅРѕСЃС‚СЊСЋ РЅР° СЂСѓСЃСЃРєРѕРј' },
 ] as const
 
 const SORT_OPTIONS = [
-  { value: 'sony', label: 'По умолчанию' },
-  { value: 'price_asc', label: 'Сначала дешевле' },
-  { value: 'price_desc', label: 'Сначала дороже' },
-  { value: 'release_desc', label: 'Сначала новинки' },
-  { value: 'release_asc', label: 'Сначала старые' },
+  { value: 'sony', label: 'РџРѕ СѓРјРѕР»С‡Р°РЅРёСЋ' },
+  { value: 'price_asc', label: 'РЎРЅР°С‡Р°Р»Р° РґРµС€РµРІР»Рµ' },
+  { value: 'price_desc', label: 'РЎРЅР°С‡Р°Р»Р° РґРѕСЂРѕР¶Рµ' },
+  { value: 'release_desc', label: 'РЎРЅР°С‡Р°Р»Р° РЅРѕРІРёРЅРєРё' },
+  { value: 'release_asc', label: 'РЎРЅР°С‡Р°Р»Р° СЃС‚Р°СЂС‹Рµ' },
 ] as const
 
 type CatalogSort = (typeof SORT_OPTIONS)[number]['value']
 
 const SUBSCRIPTION_DURATIONS = [
-  { value: 1, label: '1 месяц' },
-  { value: 3, label: '3 месяца' },
-  { value: 12, label: '12 месяцев' },
+  { value: 1, label: '1 РјРµСЃСЏС†' },
+  { value: 3, label: '3 РјРµСЃСЏС†Р°' },
+  { value: 12, label: '12 РјРµСЃСЏС†РµРІ' },
 ] as const
 
 const SUBSCRIPTION_PLANS = [
   {
     tier: 'Essential',
-    description: 'Базовый доступ: ежемесячные игры, онлайн-мультиплеер, скидки и облачные сохранения.',
-    benefits: ['Ежемесячные игры', 'Онлайн-мультиплеер', 'Эксклюзивные скидки', 'Облачные сохранения'],
+    description: 'Р‘Р°Р·РѕРІС‹Р№ РґРѕСЃС‚СѓРї: РµР¶РµРјРµСЃСЏС‡РЅС‹Рµ РёРіСЂС‹, РѕРЅР»Р°Р№РЅ-РјСѓР»СЊС‚РёРїР»РµРµСЂ, СЃРєРёРґРєРё Рё РѕР±Р»Р°С‡РЅС‹Рµ СЃРѕС…СЂР°РЅРµРЅРёСЏ.',
+    benefits: ['Р•Р¶РµРјРµСЃСЏС‡РЅС‹Рµ РёРіСЂС‹', 'РћРЅР»Р°Р№РЅ-РјСѓР»СЊС‚РёРїР»РµРµСЂ', 'Р­РєСЃРєР»СЋР·РёРІРЅС‹Рµ СЃРєРёРґРєРё', 'РћР±Р»Р°С‡РЅС‹Рµ СЃРѕС…СЂР°РЅРµРЅРёСЏ'],
   },
   {
     tier: 'Extra',
-    description: 'Все из Essential плюс каталог игр и Ubisoft+ Classics.',
-    benefits: ['Каталог игр', 'Ubisoft+ Classics', 'Ежемесячные игры', 'Онлайн-мультиплеер'],
+    description: 'Р’СЃРµ РёР· Essential РїР»СЋСЃ РєР°С‚Р°Р»РѕРі РёРіСЂ Рё Ubisoft+ Classics.',
+    benefits: ['РљР°С‚Р°Р»РѕРі РёРіСЂ', 'Ubisoft+ Classics', 'Р•Р¶РµРјРµСЃСЏС‡РЅС‹Рµ РёРіСЂС‹', 'РћРЅР»Р°Р№РЅ-РјСѓР»СЊС‚РёРїР»РµРµСЂ'],
   },
   {
     tier: 'Deluxe',
-    description: 'Максимальный план: каталог игр, Classics Catalogue и пробные версии игр.',
-    benefits: ['Classics Catalogue', 'Пробные версии игр', 'Каталог игр', 'Ubisoft+ Classics'],
+    description: 'РњР°РєСЃРёРјР°Р»СЊРЅС‹Р№ РїР»Р°РЅ: РєР°С‚Р°Р»РѕРі РёРіСЂ, Classics Catalogue Рё РїСЂРѕР±РЅС‹Рµ РІРµСЂСЃРёРё РёРіСЂ.',
+    benefits: ['Classics Catalogue', 'РџСЂРѕР±РЅС‹Рµ РІРµСЂСЃРёРё РёРіСЂ', 'РљР°С‚Р°Р»РѕРі РёРіСЂ', 'Ubisoft+ Classics'],
   },
 ] as const
 
@@ -78,23 +78,31 @@ function mapCategoryToApi(category: string) {
   }
 }
 
-function getTitle(category: string, region: Region) {
-  switch (category) {
-    case 'games':
-      return `Каталог игр PS Store для ${region}`
-    case 'deals':
-      return `Распродажа PS Store для ${region}`
-    case 'preorders':
-      return `Предзаказы PS Store для ${region}`
-    case 'subscriptions':
-      return 'Подписки PS Plus'
-    default:
-      return `Каталог PlayStation Store для ${region}`
-  }
-}
 
 function normalizeSort(value: string | null): CatalogSort {
   return SORT_OPTIONS.some((item) => item.value === value) ? (value as CatalogSort) : 'sony'
+}
+
+function getCatalogHeading(category: string) {
+  switch (category) {
+    case 'deals':
+      return 'Р Р°СЃРїСЂРѕРґР°Р¶Р°'
+    case 'preorders':
+      return 'РџСЂРµРґР·Р°РєР°Р·С‹'
+    case 'subscriptions':
+      return 'РџРѕРґРїРёСЃРєРё PS Plus'
+    case 'games':
+    default:
+      return 'РљР°С‚Р°Р»РѕРі РёРіСЂ'
+  }
+}
+
+function getCatalogDescription(category: string, total: number) {
+  if (category === 'subscriptions') {
+    return 'Р’С‹Р±РµСЂРёС‚Рµ СѓСЂРѕРІРµРЅСЊ РїРѕРґРїРёСЃРєРё Рё СЃСЂРѕРє: Essential, Extra РёР»Рё Deluxe РЅР° 1, 3 РёР»Рё 12 РјРµСЃСЏС†РµРІ.'
+  }
+
+  return `РќР°Р№РґРµРЅРѕ ${total.toLocaleString('ru-RU')} РїРѕР·РёС†РёР№`
 }
 
 function SubscriptionChooser() {
@@ -149,12 +157,12 @@ function SubscriptionChooser() {
             <div className="text-xs uppercase tracking-[0.22em] text-white/42">PlayStation Plus</div>
             <h3 className="mt-3 font-display text-3xl text-sheen">{plan.tier}</h3>
             <p className="mt-3 min-h-20 text-sm leading-6 text-white/56">{plan.description}</p>
-            <div className="mt-5 text-sm text-white/46">Срок: {duration} мес.</div>
+            <div className="mt-5 text-sm text-white/46">РЎСЂРѕРє: {duration} РјРµСЃ.</div>
             <div className="mt-4 text-2xl font-semibold text-white">
               {formatMoneyMinor(
                 price?.priceRubMinor,
                 'RUB',
-              ) ?? 'Цена не задана'}
+              ) ?? 'Р¦РµРЅР° РЅРµ Р·Р°РґР°РЅР°'}
             </div>
             <div className="mt-5 space-y-2">
               {plan.benefits.map((benefit) => (
@@ -168,7 +176,7 @@ function SubscriptionChooser() {
                 to="/cart"
                 className="mt-6 inline-flex w-full items-center justify-center rounded-full border border-emerald-300/60 bg-emerald-400 px-5 py-3 text-sm font-medium text-black transition hover:bg-emerald-300"
               >
-                Перейти в корзину
+                РџРµСЂРµР№С‚Рё РІ РєРѕСЂР·РёРЅСѓ
               </Link>
             ) : (
               <button
@@ -177,7 +185,7 @@ function SubscriptionChooser() {
                 onClick={() => addToCart(productId)}
                 className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-medium text-black transition hover:bg-white/92 disabled:cursor-not-allowed disabled:opacity-40"
               >
-              Выбрать
+              Р’С‹Р±СЂР°С‚СЊ
               </button>
             )}
           </article>
@@ -295,19 +303,15 @@ export function CatalogPage() {
   return (
     <div className="page-shell section-space">
       <SectionHeading
-        eyebrow="Каталог"
-        title={getTitle(category, region)}
-        description={
-          isSubscriptions
-            ? 'Выберите уровень подписки и срок: Essential, Extra или Deluxe на 1, 3 или 12 месяцев.'
-            : `Сейчас в выдаче ${total.toLocaleString('ru-RU')} позиций. Free-товары исключены из каталога.`
-        }
+        eyebrow="РљР°С‚Р°Р»РѕРі"
+        title={getCatalogHeading(category)}
+        description={getCatalogDescription(category, total)}
       />
 
       <div className="mb-6 flex flex-wrap gap-3">
         <CategoryPills
           values={CATEGORY_OPTIONS.map((item) => item.label)}
-          activeValue={CATEGORY_OPTIONS.find((item) => item.value === category)?.label ?? 'Игры PS Store'}
+          activeValue={CATEGORY_OPTIONS.find((item) => item.value === category)?.label ?? 'РРіСЂС‹ PS Store'}
           onChange={(nextLabel) => setCategory(CATEGORY_OPTIONS.find((item) => item.label === nextLabel)?.value ?? 'games')}
         />
       </div>
@@ -318,7 +322,7 @@ export function CatalogPage() {
         <>
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-4">
             <label className="flex min-w-[260px] items-center gap-3 text-sm text-white/60">
-              <span className="text-white/42">Сортировка</span>
+              <span className="text-white/42">РЎРѕСЂС‚РёСЂРѕРІРєР°</span>
               <select
                 value={sort}
                 onChange={(event) => updateFilter('sort', event.target.value)}
@@ -333,7 +337,7 @@ export function CatalogPage() {
             </label>
             <button type="button" onClick={() => setFiltersOpen(true)} className="quiet-button">
               <SlidersHorizontal size={16} />
-              Фильтр{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
+              Р¤РёР»СЊС‚СЂ{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
             </button>
           </div>
 
@@ -345,8 +349,8 @@ export function CatalogPage() {
             </div>
           ) : error ? (
             <div className="satin-panel rounded-[32px] border border-white/10 px-6 py-12 text-center">
-              <div className="font-display text-3xl text-white">Каталог временно недоступен</div>
-              <p className="mt-3 text-sm text-white/56">API не вернул товары. Повторите запрос чуть позже.</p>
+              <div className="font-display text-3xl text-white">РљР°С‚Р°Р»РѕРі РІСЂРµРјРµРЅРЅРѕ РЅРµРґРѕСЃС‚СѓРїРµРЅ</div>
+              <p className="mt-3 text-sm text-white/56">API РЅРµ РІРµСЂРЅСѓР» С‚РѕРІР°СЂС‹. РџРѕРІС‚РѕСЂРёС‚Рµ Р·Р°РїСЂРѕСЃ С‡СѓС‚СЊ РїРѕР·Р¶Рµ.</p>
             </div>
           ) : items.length > 0 ? (
             <>
@@ -372,7 +376,7 @@ export function CatalogPage() {
                   }}
                   className="rounded-full border border-white/10 px-5 py-3 text-sm text-white transition hover:border-white/18 hover:bg-white/[0.04] disabled:cursor-not-allowed disabled:opacity-35"
                 >
-                  Назад
+                  РќР°Р·Р°Рґ
                 </button>
                 <button
                   type="button"
@@ -384,16 +388,16 @@ export function CatalogPage() {
                   }}
                   className="rounded-full border border-white/10 px-5 py-3 text-sm text-white transition hover:border-white/18 hover:bg-white/[0.04] disabled:cursor-not-allowed disabled:opacity-35"
                 >
-                  Вперед
+                  Р’РїРµСЂРµРґ
                 </button>
               </div>
             </>
           ) : (
             <div className="satin-panel rounded-[32px] border border-white/10 px-6 py-12 text-center">
-              <div className="font-display text-3xl text-white">Ничего не найдено</div>
-              <p className="mt-3 text-sm text-white/56">Попробуйте другой запрос, регион или раздел каталога.</p>
+              <div className="font-display text-3xl text-white">РќРёС‡РµРіРѕ РЅРµ РЅР°Р№РґРµРЅРѕ</div>
+              <p className="mt-3 text-sm text-white/56">РџРѕРїСЂРѕР±СѓР№С‚Рµ РґСЂСѓРіРѕР№ Р·Р°РїСЂРѕСЃ, СЂРµРіРёРѕРЅ РёР»Рё СЂР°Р·РґРµР» РєР°С‚Р°Р»РѕРіР°.</p>
               <button type="button" onClick={() => setCategory('games')} className="mt-6 quiet-button">
-                Сбросить фильтры
+                РЎР±СЂРѕСЃРёС‚СЊ С„РёР»СЊС‚СЂС‹
               </button>
             </div>
           )}
@@ -404,7 +408,7 @@ export function CatalogPage() {
         <div className="fixed inset-0 z-[80] bg-black/70 px-4 py-6 backdrop-blur-sm" role="dialog" aria-modal="true">
           <div className="mx-auto max-w-xl rounded-[28px] border border-white/10 bg-[#090909] p-5 shadow-2xl">
             <div className="flex items-center justify-between gap-4">
-              <div className="font-display text-3xl text-white">Фильтр</div>
+              <div className="font-display text-3xl text-white">Р¤РёР»СЊС‚СЂ</div>
               <button type="button" onClick={() => setFiltersOpen(false)} className="header-icon-button">
                 <X size={18} />
               </button>
@@ -412,10 +416,10 @@ export function CatalogPage() {
 
             <div className="mt-6 space-y-5">
               <div>
-                <div className="mb-3 text-sm uppercase tracking-[0.18em] text-white/42">Платформа</div>
+                <div className="mb-3 text-sm uppercase tracking-[0.18em] text-white/42">РџР»Р°С‚С„РѕСЂРјР°</div>
                 <div className="flex flex-wrap gap-2">
                   <button type="button" onClick={() => updateFilter('platform', '')} className={`rounded-full border px-4 py-2 text-sm ${!platform ? 'border-white/20 bg-white text-black' : 'border-white/10 text-white/68'}`}>
-                    Все
+                    Р’СЃРµ
                   </button>
                   {filters.platforms.map((item) => (
                     <button key={item} type="button" onClick={() => updateFilter('platform', item)} className={`rounded-full border px-4 py-2 text-sm ${platform === item ? 'border-white/20 bg-white text-black' : 'border-white/10 text-white/68'}`}>
@@ -426,7 +430,7 @@ export function CatalogPage() {
               </div>
 
               <div>
-                <div className="mb-3 text-sm uppercase tracking-[0.18em] text-white/42">Язык</div>
+                <div className="mb-3 text-sm uppercase tracking-[0.18em] text-white/42">РЇР·С‹Рє</div>
                 <div className="flex flex-wrap gap-2">
                   {LANGUAGE_OPTIONS.map((item) => (
                     <button key={item.value} type="button" onClick={() => updateFilter('language', item.value)} className={`rounded-full border px-4 py-2 text-sm ${language === item.value ? 'border-white/20 bg-white text-black' : 'border-white/10 text-white/68'}`}>
@@ -437,13 +441,13 @@ export function CatalogPage() {
               </div>
 
               <div>
-                <div className="mb-3 text-sm uppercase tracking-[0.18em] text-white/42">Жанр</div>
+                <div className="mb-3 text-sm uppercase tracking-[0.18em] text-white/42">Р–Р°РЅСЂ</div>
                 <select
                   value={genre}
                   onChange={(event) => updateFilter('genre', event.target.value)}
                   className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm text-white outline-none"
                 >
-                  <option value="">Все жанры</option>
+                  <option value="">Р’СЃРµ Р¶Р°РЅСЂС‹</option>
                   {filters.genres.map((item) => (
                     <option key={item} value={item}>
                       {translateGenre(item)}
@@ -463,10 +467,10 @@ export function CatalogPage() {
                 }}
                 className="rounded-full border border-white/12 px-5 py-3 text-sm text-white transition hover:border-white/20"
               >
-                Сбросить
+                РЎР±СЂРѕСЃРёС‚СЊ
               </button>
               <button type="button" onClick={() => setFiltersOpen(false)} className="rounded-full bg-white px-5 py-3 text-sm font-medium text-black">
-                Применить
+                РџСЂРёРјРµРЅРёС‚СЊ
               </button>
             </div>
           </div>

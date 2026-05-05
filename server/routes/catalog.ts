@@ -116,6 +116,10 @@ const adminBannersBodySchema = z.object({
     sortOrder: z.number().int().min(0).max(100000),
     isActive: z.boolean(),
   })),
+  settings: z.object({
+    autoplayMs: z.coerce.number().int().min(2000).max(30000),
+    animation: z.enum(['slide', 'fade', 'lift']),
+  }).optional(),
 })
 
 function mapAliasRegion(region?: string) {
@@ -178,6 +182,7 @@ export async function registerCatalogRoutes(app: FastifyInstance) {
 
   app.get('/api/banners', async () => ({
     items: homeBanners.list({ activeOnly: true }),
+    settings: homeBanners.getSettings(),
   }))
 
   app.get('/api/subscriptions/ps-plus', async (request) => {
@@ -217,7 +222,7 @@ export async function registerCatalogRoutes(app: FastifyInstance) {
       return { error: 'Unauthorized' }
     }
 
-    return { items: homeBanners.list() }
+    return { items: homeBanners.list(), settings: homeBanners.getSettings() }
   })
 
   app.put('/api/admin/banners', async (request, reply) => {
@@ -226,7 +231,8 @@ export async function registerCatalogRoutes(app: FastifyInstance) {
     }
 
     const body = adminBannersBodySchema.parse(request.body)
-    return { items: homeBanners.replaceMany(body.items) }
+    const settings = body.settings ? homeBanners.updateSettings(body.settings) : homeBanners.getSettings()
+    return { items: homeBanners.replaceMany(body.items), settings }
   })
 
   app.get('/api/catalog/:id', async (request, reply) => {

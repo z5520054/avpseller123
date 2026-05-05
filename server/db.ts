@@ -58,4 +58,13 @@ function ensureMigrations(db: DatabaseSync) {
   if (!bannerColumnNames.has('image_scale')) {
     db.exec('ALTER TABLE home_banners ADD COLUMN image_scale REAL NOT NULL DEFAULT 1;')
   }
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS home_banner_settings (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      autoplay_ms INTEGER NOT NULL DEFAULT 6000,
+      animation TEXT NOT NULL DEFAULT 'slide',
+      updated_at TEXT NOT NULL
+    );
+  `)
 }

@@ -1,4 +1,4 @@
-import { Heart, LifeBuoy, Search, ShoppingBag, User } from 'lucide-react'
+import { Heart, LifeBuoy, Search, ShoppingBag, User, X } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 import avpIconUrl from '../assets/avp-icon.png'
 import { useAppState } from '../store/use-app-state'
@@ -7,7 +7,6 @@ import { RegionSwitch } from './ui/region-switch'
 const navigation = [
   { label: 'Каталог', to: '/catalog' },
   { label: 'Подписки', to: '/catalog?category=subscriptions' },
-  { label: 'Регионы', to: '/catalog' },
   { label: 'Поддержка', to: '/support' },
 ]
 
@@ -24,11 +23,11 @@ export function RootLayout() {
                 <img src={avpIconUrl} alt="AVP Seller" className="h-8 w-8 object-contain" />
               </div>
               <div>
-                <div className="font-display text-xl leading-none tracking-[0.26em] text-sheen">
+                <div className="font-display text-xl leading-none tracking-[0.16em] text-sheen">
                   AVP SELLER
                 </div>
-                <div className="mt-1 text-[11px] uppercase tracking-[0.32em] text-white/42">
-                  Console Boutique
+                <div className="mt-1 text-[11px] uppercase tracking-[0.2em] text-white/42">
+                  Game market
                 </div>
               </div>
             </NavLink>
@@ -61,6 +60,16 @@ export function RootLayout() {
                 placeholder="Поиск по товарам и подборкам"
                 className="w-full bg-transparent text-white outline-none placeholder:text-white/35"
               />
+              {searchQuery ? (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-white/45 transition hover:bg-white/8 hover:text-white"
+                  aria-label="Очистить поиск"
+                >
+                  <X size={15} />
+                </button>
+              ) : null}
             </label>
           </div>
 

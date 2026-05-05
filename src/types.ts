@@ -171,6 +171,12 @@ export interface HomeBanner {
   updatedAt: string
 }
 
+export interface HomeBannerSettings {
+  autoplayMs: number
+  animation: 'slide' | 'fade' | 'lift'
+  updatedAt: string
+}
+
 export interface CartSourceLine {
   productId: EntityId
   quantity: number

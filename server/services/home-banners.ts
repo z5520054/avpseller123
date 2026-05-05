@@ -18,6 +18,14 @@ export interface HomeBanner {
   updatedAt: string
 }
 
+export type HomeBannerAnimation = 'slide' | 'fade' | 'lift'
+
+export interface HomeBannerSettings {
+  autoplayMs: number
+  animation: HomeBannerAnimation
+  updatedAt: string
+}
+
 export interface HomeBannerInput {
   id?: number
   title: string
@@ -29,6 +37,11 @@ export interface HomeBannerInput {
   linkUrl: string
   sortOrder: number
   isActive: boolean
+}
+
+export interface HomeBannerSettingsInput {
+  autoplayMs: number
+  animation: HomeBannerAnimation
 }
 
 function nowIso() {
@@ -47,6 +60,15 @@ function mapRow(row: Record<string, unknown>): HomeBanner {
     sortOrder: Number(row.sort_order),
     isActive: Number(row.is_active) === 1,
     createdAt: String(row.created_at),
+    updatedAt: String(row.updated_at),
+  }
+}
+
+function mapSettingsRow(row: Record<string, unknown>): HomeBannerSettings {
+  const animation = String(row.animation)
+  return {
+    autoplayMs: Number(row.autoplay_ms),
+    animation: animation === 'fade' || animation === 'lift' ? animation : 'slide',
     updatedAt: String(row.updated_at),
   }
 }
@@ -91,6 +113,32 @@ export class HomeBannersService {
       )
       .all()
       .map((row) => mapRow(row as Record<string, unknown>))
+  }
+
+  getSettings() {
+    const row = this.db.prepare('SELECT * FROM home_banner_settings WHERE id = 1').get() as
+      | Record<string, unknown>
+      | undefined
+
+    if (row) {
+      return mapSettingsRow(row)
+    }
+
+    const timestamp = nowIso()
+    this.db
+      .prepare(
+        `
+        INSERT INTO home_banner_settings (id, autoplay_ms, animation, updated_at)
+        VALUES (1, 6000, 'slide', ?)
+        `,
+      )
+      .run(timestamp)
+
+    return {
+      autoplayMs: 6000,
+      animation: 'slide' as const,
+      updatedAt: timestamp,
+    }
   }
 
   replaceMany(items: HomeBannerInput[]) {
@@ -148,5 +196,26 @@ export class HomeBannersService {
     }
 
     return this.list()
+  }
+
+  updateSettings(input: HomeBannerSettingsInput) {
+    const autoplayMs = Math.min(30000, Math.max(2000, Math.round(input.autoplayMs)))
+    const animation = input.animation === 'fade' || input.animation === 'lift' ? input.animation : 'slide'
+    const timestamp = nowIso()
+
+    this.db
+      .prepare(
+        `
+        INSERT INTO home_banner_settings (id, autoplay_ms, animation, updated_at)
+        VALUES (1, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+          autoplay_ms = excluded.autoplay_ms,
+          animation = excluded.animation,
+          updated_at = excluded.updated_at
+        `,
+      )
+      .run(autoplayMs, animation, timestamp)
+
+    return this.getSettings()
   }
 }

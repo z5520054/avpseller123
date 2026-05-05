@@ -1,10 +1,14 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { getAdminBanners, getAdminPsPlusPrices, updateAdminBanners, updateAdminPsPlusPrices } from '../lib/catalog-api'
-import type { HomeBanner, PsPlusDuration, PsPlusPrice, PsPlusTier } from '../types'
+import type { HomeBanner, HomeBannerSettings, PsPlusDuration, PsPlusPrice, PsPlusTier } from '../types'
 
 const TIERS: PsPlusTier[] = ['Essential', 'Extra', 'Deluxe']
 const DURATIONS: PsPlusDuration[] = [1, 3, 12]
 const TOKEN_STORAGE_KEY = 'avp-admin-token'
+const DEFAULT_BANNER_SETTINGS: Pick<HomeBannerSettings, 'autoplayMs' | 'animation'> = {
+  autoplayMs: 6000,
+  animation: 'slide',
+}
 
 interface EditableBanner {
   id?: number
@@ -71,7 +75,8 @@ export function AdminPsPlusPage() {
   const [prices, setPrices] = useState<Record<string, string>>({})
   const [active, setActive] = useState<Record<string, boolean>>({})
   const [banners, setBanners] = useState<EditableBanner[]>([])
-  const [status, setStatus] = useState('Введите admin token для входа.')
+  const [bannerSettings, setBannerSettings] = useState(DEFAULT_BANNER_SETTINGS)
+  const [status, setStatus] = useState('Р’РІРµРґРёС‚Рµ admin token РґР»СЏ РІС…РѕРґР°.')
   const [loading, setLoading] = useState(false)
 
   function hydratePrices(nextItems: PsPlusPrice[]) {
@@ -83,12 +88,12 @@ export function AdminPsPlusPage() {
   async function loadAdminData(nextRegion = region) {
     const cleanToken = token.trim()
     if (!cleanToken) {
-      setStatus('Нужен admin token.')
+      setStatus('РќСѓР¶РµРЅ admin token.')
       return
     }
 
     setLoading(true)
-    setStatus('Загружаю админку...')
+    setStatus('Р—Р°РіСЂСѓР¶Р°СЋ Р°РґРјРёРЅРєСѓ...')
     localStorage.setItem(TOKEN_STORAGE_KEY, cleanToken)
 
     try {
@@ -98,11 +103,15 @@ export function AdminPsPlusPage() {
       ])
       hydratePrices(priceResponse.items)
       setBanners(bannerResponse.items.map(bannerToEditable))
+      setBannerSettings({
+        autoplayMs: bannerResponse.settings.autoplayMs,
+        animation: bannerResponse.settings.animation,
+      })
       setAuthenticated(true)
-      setStatus('Данные загружены.')
+      setStatus('Р”Р°РЅРЅС‹Рµ Р·Р°РіСЂСѓР¶РµРЅС‹.')
     } catch {
       setAuthenticated(false)
-      setStatus('Не удалось войти. Проверьте токен.')
+      setStatus('РќРµ СѓРґР°Р»РѕСЃСЊ РІРѕР№С‚Рё. РџСЂРѕРІРµСЂСЊС‚Рµ С‚РѕРєРµРЅ.')
     } finally {
       setLoading(false)
     }
@@ -118,7 +127,7 @@ export function AdminPsPlusPage() {
   async function savePrices() {
     const cleanToken = token.trim()
     setLoading(true)
-    setStatus('Сохраняю цены PS Plus...')
+    setStatus('РЎРѕС…СЂР°РЅСЏСЋ С†РµРЅС‹ PS Plus...')
 
     try {
       const response = await updateAdminPsPlusPrices(cleanToken, {
@@ -133,9 +142,9 @@ export function AdminPsPlusPage() {
         ),
       })
       hydratePrices(response.items)
-      setStatus('Цены PS Plus сохранены.')
+      setStatus('Р¦РµРЅС‹ PS Plus СЃРѕС…СЂР°РЅРµРЅС‹.')
     } catch (error) {
-      setStatus(error instanceof Error ? `Не удалось сохранить цены: ${error.message}` : 'Не удалось сохранить цены.')
+      setStatus(error instanceof Error ? `РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ С†РµРЅС‹: ${error.message}` : 'РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ С†РµРЅС‹.')
     } finally {
       setLoading(false)
     }
@@ -144,14 +153,18 @@ export function AdminPsPlusPage() {
   async function saveBanners() {
     const cleanToken = token.trim()
     setLoading(true)
-    setStatus('Сохраняю баннеры...')
+    setStatus('РЎРѕС…СЂР°РЅСЏСЋ Р±Р°РЅРЅРµСЂС‹...')
 
     try {
-      const response = await updateAdminBanners(cleanToken, { items: banners })
+      const response = await updateAdminBanners(cleanToken, { items: banners, settings: bannerSettings })
       setBanners(response.items.map(bannerToEditable))
-      setStatus('Баннеры сохранены.')
+      setBannerSettings({
+        autoplayMs: response.settings.autoplayMs,
+        animation: response.settings.animation,
+      })
+      setStatus('Р‘Р°РЅРЅРµСЂС‹ СЃРѕС…СЂР°РЅРµРЅС‹.')
     } catch (error) {
-      setStatus(error instanceof Error ? `Не удалось сохранить баннеры: ${error.message}` : 'Не удалось сохранить баннеры.')
+      setStatus(error instanceof Error ? `РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ Р±Р°РЅРЅРµСЂС‹: ${error.message}` : 'РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ Р±Р°РЅРЅРµСЂС‹.')
     } finally {
       setLoading(false)
     }
@@ -164,15 +177,15 @@ export function AdminPsPlusPage() {
           <div className="inline-flex rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5 text-[11px] uppercase tracking-[0.32em] text-white/42">
             Admin
           </div>
-          <h1 className="mt-4 font-display text-4xl text-sheen sm:text-5xl">Админ-панель</h1>
+          <h1 className="mt-4 font-display text-4xl text-sheen sm:text-5xl">РђРґРјРёРЅ-РїР°РЅРµР»СЊ</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-white/56">
-            Управление баннерами главной страницы и ручными ценами PS Plus.
+            РЈРїСЂР°РІР»РµРЅРёРµ Р±Р°РЅРЅРµСЂР°РјРё РіР»Р°РІРЅРѕР№ СЃС‚СЂР°РЅРёС†С‹ Рё СЂСѓС‡РЅС‹РјРё С†РµРЅР°РјРё PS Plus.
           </p>
         </div>
 
         {!authenticated ? (
           <div className="mx-auto mt-8 max-w-xl rounded-[30px] border border-white/10 bg-black/24 p-5">
-            <div className="text-sm uppercase tracking-[0.2em] text-white/42">Закрытый вход</div>
+            <div className="text-sm uppercase tracking-[0.2em] text-white/42">Р—Р°РєСЂС‹С‚С‹Р№ РІС…РѕРґ</div>
             <input
               value={token}
               onChange={(event) => setToken(event.target.value)}
@@ -189,7 +202,7 @@ export function AdminPsPlusPage() {
               disabled={loading}
               className="mt-3 w-full rounded-full bg-white px-5 py-3 text-sm font-medium text-black disabled:opacity-50"
             >
-              Войти
+              Р’РѕР№С‚Рё
             </button>
             <div className="mt-4 rounded-2xl border border-white/8 bg-black/20 px-4 py-3 text-sm text-white/58">{status}</div>
           </div>
@@ -200,10 +213,36 @@ export function AdminPsPlusPage() {
             <section className="rounded-[28px] border border-white/10 bg-black/20 p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h2 className="font-display text-3xl text-sheen">Баннеры главной</h2>
+                  <h2 className="font-display text-3xl text-sheen">Р‘Р°РЅРЅРµСЂС‹ РіР»Р°РІРЅРѕР№</h2>
                   <p className="mt-2 text-sm text-white/50">
-                    Картинка показывается в слайдере. Ссылка может вести на раздел, например /catalog?category=deals, или на игру /product/8.
+                    РљР°СЂС‚РёРЅРєР° РїРѕРєР°Р·С‹РІР°РµС‚СЃСЏ РІ СЃР»Р°Р№РґРµСЂРµ. РЎСЃС‹Р»РєР° РјРѕР¶РµС‚ РІРµСЃС‚Рё РЅР° СЂР°Р·РґРµР», РЅР°РїСЂРёРјРµСЂ /catalog?category=deals, РёР»Рё РЅР° РёРіСЂСѓ /product/8.
                   </p>
+                  <div className="mt-4 grid gap-3 rounded-2xl border border-white/8 bg-black/20 p-3 sm:grid-cols-2">
+                    <label className="text-xs uppercase tracking-[0.18em] text-white/42">
+                      Автопрокрутка, мс
+                      <input
+                        type="number"
+                        min="2000"
+                        max="30000"
+                        step="500"
+                        value={bannerSettings.autoplayMs}
+                        onChange={(event) => setBannerSettings((current) => ({ ...current, autoplayMs: Number(event.target.value) || 6000 }))}
+                        className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none"
+                      />
+                    </label>
+                    <label className="text-xs uppercase tracking-[0.18em] text-white/42">
+                      Анимация
+                      <select
+                        value={bannerSettings.animation}
+                        onChange={(event) => setBannerSettings((current) => ({ ...current, animation: event.target.value as HomeBannerSettings['animation'] }))}
+                        className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none"
+                      >
+                        <option value="slide">Slide</option>
+                        <option value="fade">Fade</option>
+                        <option value="lift">Lift</option>
+                      </select>
+                    </label>
+                  </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button
@@ -211,7 +250,7 @@ export function AdminPsPlusPage() {
                     onClick={() => setBanners((current) => [...current, { title: '', linkUrl: '/catalog', imagePositionX: 50, imagePositionY: 50, imageScale: 1, sortOrder: current.length, isActive: true }])}
                     className="quiet-button"
                   >
-                    Добавить баннер
+                    Р”РѕР±Р°РІРёС‚СЊ Р±Р°РЅРЅРµСЂ
                   </button>
                   <button
                     type="button"
@@ -219,7 +258,7 @@ export function AdminPsPlusPage() {
                     disabled={loading}
                     className="rounded-full bg-white px-5 py-3 text-sm font-medium text-black disabled:opacity-50"
                   >
-                    Сохранить баннеры
+                    РЎРѕС…СЂР°РЅРёС‚СЊ Р±Р°РЅРЅРµСЂС‹
                   </button>
                 </div>
               </div>
@@ -227,7 +266,7 @@ export function AdminPsPlusPage() {
               <div className="mt-5 space-y-4">
                 {banners.length === 0 ? (
                   <div className="rounded-[24px] border border-white/10 bg-white/[0.03] px-5 py-8 text-sm text-white/52">
-                    Баннеров пока нет. Добавьте первый баннер, загрузите изображение и укажите ссылку.
+                    Р‘Р°РЅРЅРµСЂРѕРІ РїРѕРєР° РЅРµС‚. Р”РѕР±Р°РІСЊС‚Рµ РїРµСЂРІС‹Р№ Р±Р°РЅРЅРµСЂ, Р·Р°РіСЂСѓР·РёС‚Рµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ Рё СѓРєР°Р¶РёС‚Рµ СЃСЃС‹Р»РєСѓ.
                   </div>
                 ) : null}
 
@@ -237,7 +276,7 @@ export function AdminPsPlusPage() {
                       {banner.imageDataUrl || banner.imageUrl ? (
                         <img
                           src={banner.imageDataUrl ?? banner.imageUrl ?? ''}
-                          alt={banner.title || 'Баннер'}
+                          alt={banner.title || 'Р‘Р°РЅРЅРµСЂ'}
                           className="h-36 w-full object-cover"
                           style={{
                             objectPosition: `${banner.imagePositionX}% ${banner.imagePositionY}%`,
@@ -245,20 +284,20 @@ export function AdminPsPlusPage() {
                           }}
                         />
                       ) : (
-                        <div className="flex h-36 items-center justify-center px-4 text-center text-xs text-white/36">Нет изображения</div>
+                        <div className="flex h-36 items-center justify-center px-4 text-center text-xs text-white/36">РќРµС‚ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ</div>
                       )}
                     </div>
                     <div className="grid gap-3">
                       <input
                         value={banner.title}
                         onChange={(event) => setBanners((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, title: event.target.value } : item)))}
-                        placeholder="Название баннера"
+                        placeholder="РќР°Р·РІР°РЅРёРµ Р±Р°РЅРЅРµСЂР°"
                         className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35"
                       />
                       <input
                         value={banner.linkUrl}
                         onChange={(event) => setBanners((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, linkUrl: event.target.value } : item)))}
-                        placeholder="/catalog?category=deals или /product/8"
+                        placeholder="/catalog?category=deals РёР»Рё /product/8"
                         className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35"
                       />
                       <div className="grid gap-3 rounded-2xl border border-white/8 bg-black/20 p-3 md:grid-cols-3">
@@ -299,7 +338,7 @@ export function AdminPsPlusPage() {
                       </div>
                       <div className="flex flex-wrap items-center gap-3">
                         <label className="text-xs uppercase tracking-[0.18em] text-white/42">
-                          Порядок
+                          РџРѕСЂСЏРґРѕРє
                           <input
                             type="number"
                             value={banner.sortOrder}
@@ -313,10 +352,10 @@ export function AdminPsPlusPage() {
                             checked={banner.isActive}
                             onChange={(event) => setBanners((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, isActive: event.target.checked } : item)))}
                           />
-                          Активен
+                          РђРєС‚РёРІРµРЅ
                         </label>
                         <label className="inline-flex cursor-pointer rounded-full border border-white/10 px-4 py-2 text-sm text-white/68 hover:text-white">
-                          Загрузить изображение
+                          Р—Р°РіСЂСѓР·РёС‚СЊ РёР·РѕР±СЂР°Р¶РµРЅРёРµ
                           <input
                             type="file"
                             accept="image/png,image/jpeg,image/webp"
@@ -334,7 +373,7 @@ export function AdminPsPlusPage() {
                           onClick={() => setBanners((current) => current.filter((_, itemIndex) => itemIndex !== index))}
                           className="rounded-full border border-white/10 px-4 py-2 text-sm text-white/62 hover:text-white"
                         >
-                          Удалить
+                          РЈРґР°Р»РёС‚СЊ
                         </button>
                       </div>
                     </div>
@@ -345,7 +384,7 @@ export function AdminPsPlusPage() {
 
             <section className="rounded-[28px] border border-white/10 bg-black/20 p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="font-display text-3xl text-sheen">Цены PS Plus</h2>
+                <h2 className="font-display text-3xl text-sheen">Р¦РµРЅС‹ PS Plus</h2>
                 <div className="flex flex-wrap gap-2">
                   {(['turkey', 'india'] as const).map((item) => (
                     <button
@@ -354,7 +393,7 @@ export function AdminPsPlusPage() {
                       onClick={() => void switchRegion(item)}
                       className={`rounded-full border px-4 py-2 text-sm ${region === item ? 'border-white/20 bg-white text-black' : 'border-white/10 text-white/68'}`}
                     >
-                      {item === 'turkey' ? 'Турция' : 'Индия'}
+                      {item === 'turkey' ? 'РўСѓСЂС†РёСЏ' : 'РРЅРґРёСЏ'}
                     </button>
                   ))}
                   <button
@@ -363,7 +402,7 @@ export function AdminPsPlusPage() {
                     disabled={loading}
                     className="rounded-full bg-white px-5 py-3 text-sm font-medium text-black disabled:opacity-50"
                   >
-                    Сохранить цены
+                    РЎРѕС…СЂР°РЅРёС‚СЊ С†РµРЅС‹
                   </button>
                 </div>
               </div>
@@ -372,10 +411,10 @@ export function AdminPsPlusPage() {
                 <table className="w-full min-w-[760px] border-separate border-spacing-y-3 text-left">
                   <thead className="text-xs uppercase tracking-[0.18em] text-white/42">
                     <tr>
-                      <th className="px-3 py-2">Тариф</th>
+                      <th className="px-3 py-2">РўР°СЂРёС„</th>
                       {DURATIONS.map((duration) => (
                         <th key={duration} className="px-3 py-2">
-                          {duration} мес.
+                          {duration} РјРµСЃ.
                         </th>
                       ))}
                     </tr>
@@ -394,7 +433,7 @@ export function AdminPsPlusPage() {
                                   value={prices[fieldKey] ?? ''}
                                   onChange={(event) => setPrices((current) => ({ ...current, [fieldKey]: event.target.value }))}
                                   inputMode="decimal"
-                                  placeholder="₽"
+                                  placeholder="в‚Ѕ"
                                   className="w-32 rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-sm text-white outline-none"
                                 />
                                 <label className="flex items-center gap-2 text-xs text-white/52">
@@ -403,10 +442,10 @@ export function AdminPsPlusPage() {
                                     checked={active[fieldKey] ?? true}
                                     onChange={(event) => setActive((current) => ({ ...current, [fieldKey]: event.target.checked }))}
                                   />
-                                  активно
+                                  Р°РєС‚РёРІРЅРѕ
                                 </label>
                               </div>
-                              {record ? <div className="mt-2 text-xs text-white/34">Обновлено: {new Date(record.updatedAt).toLocaleString('ru-RU')}</div> : null}
+                              {record ? <div className="mt-2 text-xs text-white/34">РћР±РЅРѕРІР»РµРЅРѕ: {new Date(record.updatedAt).toLocaleString('ru-RU')}</div> : null}
                             </td>
                           )
                         })}
