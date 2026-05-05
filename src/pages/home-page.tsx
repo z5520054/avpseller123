@@ -517,9 +517,9 @@ function SubscriptionPreview() {
           const isInCart = cart.some((item) => item.productId === productId)
 
           return (
-            <article key={plan.tier} className={`relative overflow-hidden rounded-[28px] bg-gradient-to-br ${plan.tone} p-5 text-black`}>
+            <article key={plan.tier} className={`relative flex h-full overflow-hidden rounded-[28px] bg-gradient-to-br ${plan.tone} p-5 text-black`}>
               <div className="absolute inset-0 opacity-20 mix-blend-overlay [background:radial-gradient(circle_at_25%_20%,white,transparent_28%),linear-gradient(120deg,transparent_0%,rgba(255,255,255,.6)_45%,transparent_60%)]" />
-              <div className="relative flex min-h-[250px] flex-col">
+              <div className="relative flex min-h-[250px] h-full w-full flex-col">
                 <div className={`text-sm font-semibold tracking-[-0.03em] ${plan.textTone}`}>PS Plus</div>
                 <div className={`mt-8 text-[clamp(2.25rem,4.6vw,4.15rem)] font-extrabold leading-none tracking-[-0.065em] ${plan.textTone}`}>
                   {plan.label}
