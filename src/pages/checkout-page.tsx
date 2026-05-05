@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
-import { createOrder } from '../lib/catalog-api'
-import { formatMoneyMinor } from '../lib/format'
 import { useCartRecalculation } from '../hooks/use-cart-recalculation'
+import { createOrder } from '../lib/catalog-api'
 import { regionToApi } from '../lib/catalog-pricing'
+import { formatMoneyMinor } from '../lib/format'
 import { useAppState } from '../store/use-app-state'
 import type { OrderRecord } from '../types'
 
@@ -24,6 +24,7 @@ export function CheckoutPage() {
   const [email, setEmail] = useState('')
   const [telegram, setTelegram] = useState('')
   const [comment, setComment] = useState('')
+  const [needsNewAccount, setNeedsNewAccount] = useState(false)
   const [acceptedOffer, setAcceptedOffer] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -39,7 +40,7 @@ export function CheckoutPage() {
         <div className="satin-panel rounded-[36px] border border-white/10 px-6 py-16 text-center">
           <div className="font-display text-4xl text-sheen">Заказ создан</div>
           <p className="mt-4 text-sm text-white/56">
-            Заказ #{order.id} сохранён со статусом <span className="text-white">{order.status}</span>.
+            Заказ #{order.id} сохранен со статусом <span className="text-white">{order.status}</span>.
           </p>
           <p className="mt-3 text-sm text-white/56">
             На email <span className="text-white">{order.email}</span> будет отправлена дальнейшая информация по оплате и выдаче.
@@ -49,6 +50,8 @@ export function CheckoutPage() {
     )
   }
 
+  const submitDisabled = !acceptedOffer || submitting || loading || result.supported === false
+
   return (
     <div className="page-shell section-space">
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
@@ -56,6 +59,8 @@ export function CheckoutPage() {
           className="satin-panel rounded-[32px] border border-white/10 p-6"
           onSubmit={async (event) => {
             event.preventDefault()
+            if (submitDisabled) return
+
             setSubmitting(true)
             setError(null)
 
@@ -64,7 +69,11 @@ export function CheckoutPage() {
                 email,
                 region: regionToApi(region),
                 acceptedOffer: true,
-                comment: [telegram ? `Telegram: ${telegram}` : null, comment || null].filter(Boolean).join('\n'),
+                comment: [
+                  telegram ? `Telegram/MAX: ${telegram}` : null,
+                  needsNewAccount ? 'Нужен новый аккаунт турецкого PS Store' : null,
+                  comment || null,
+                ].filter(Boolean).join('\n'),
                 items: cart,
               })
               clearCart()
@@ -78,28 +87,28 @@ export function CheckoutPage() {
         >
           <div className="font-display text-3xl text-sheen">Оформление заказа</div>
           <p className="mt-3 text-sm leading-6 text-white/56">
-            Для Турции заказ будет автоматически пересчитан в коды пополнения нужного номинала.
+            Вы покупаете коды пополнения. Этого хватит для оплаты выбранных товаров в PS Store.
           </p>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <label className="text-sm text-white/58">
-              Email
+              Email для получения чека
               <input
                 required
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-white/22"
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-white/35 focus:border-white/22"
                 placeholder="name@email.com"
               />
             </label>
             <label className="text-sm text-white/58">
-              Telegram
+              Telegram/MAX для связи
               <input
                 type="text"
                 value={telegram}
                 onChange={(event) => setTelegram(event.target.value)}
-                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-white/22"
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-white/35 focus:border-white/22"
                 placeholder="@username"
               />
             </label>
@@ -109,20 +118,31 @@ export function CheckoutPage() {
                 rows={5}
                 value={comment}
                 onChange={(event) => setComment(event.target.value)}
-                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-white/22"
+                className="mt-2 w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-white/35 focus:border-white/22"
                 placeholder="Укажите пожелания по выдаче или аккаунту"
               />
             </label>
           </div>
 
-          <label className="mt-6 flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-white/68">
+          <label className="mt-6 flex cursor-pointer items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-white/68 transition hover:border-white/18 hover:bg-white/[0.045]">
+            <input
+              checked={needsNewAccount}
+              onChange={(event) => setNeedsNewAccount(event.target.checked)}
+              type="checkbox"
+              className="h-4 w-4 accent-white"
+            />
+            <span>Мне нужен новый аккаунт турецкого PS Store</span>
+          </label>
+
+          <label className="mt-4 flex cursor-pointer items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-white/68 transition hover:border-white/18 hover:bg-white/[0.045]">
             <input
               checked={acceptedOffer}
               onChange={(event) => setAcceptedOffer(event.target.checked)}
               type="checkbox"
-              className="mt-1 h-4 w-4 accent-[#0070CC]"
+              required
+              className="h-4 w-4 accent-white"
             />
-            <span>Подтверждаю согласие с офертой и понимаю, что покупаю коды пополнения для турецкого аккаунта PS Store.</span>
+            <span>Согласен с условиями Пользовательского соглашения и Политики конфиденциальности</span>
           </label>
 
           {result.supported === false ? (
@@ -139,8 +159,8 @@ export function CheckoutPage() {
 
           <button
             type="submit"
-            disabled={!acceptedOffer || submitting || loading || result.supported === false}
-            className="mt-6 inline-flex cursor-pointer rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/92 disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={submitDisabled}
+            className="mt-6 inline-flex cursor-pointer rounded-full bg-white px-6 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-white/92 disabled:cursor-not-allowed disabled:bg-white/45 disabled:text-zinc-800"
           >
             {submitting ? 'Создание заказа...' : 'Перейти к оплате'}
           </button>
