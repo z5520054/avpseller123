@@ -22,40 +22,40 @@ const SUBSCRIPTION_PLANS = [
   {
     tier: 'Essential',
     label: 'ESSENTIAL',
-    cardClass: 'border-[#8ab8ff]/90 bg-[radial-gradient(circle_at_75%_4%,rgba(255,255,255,.9),transparent_20%),linear-gradient(138deg,#dce8ff_0%,#7c97c4_43%,#071b42_100%)] text-white shadow-[0_0_0_1px_rgba(255,255,255,.36)_inset,0_0_28px_rgba(45,125,255,.58)]',
-    badgeClass: 'border-[#8ab8ff]/70 bg-white/68 text-[#084aa7]',
-    titleClass: 'text-white drop-shadow-[0_4px_10px_rgba(0,0,0,.36)]',
+    cardClass: 'border-white/28 bg-[radial-gradient(circle_at_74%_5%,rgba(255,255,255,.72),transparent_18%),linear-gradient(138deg,#f4f4f2_0%,#8f939b_42%,#15171b_100%)] text-white shadow-[0_0_0_1px_rgba(255,255,255,.28)_inset,0_0_26px_rgba(255,255,255,.16)]',
+    badgeClass: 'border-white/45 bg-white/72 text-zinc-950',
+    titleClass: 'text-white drop-shadow-[0_4px_12px_rgba(0,0,0,.46)]',
     bodyClass: 'text-white/88',
     priceClass: 'text-white',
-    buttonClass: 'bg-gradient-to-b from-white to-[#dfe8f8] text-black shadow-[0_0_22px_rgba(67,137,255,.55)] hover:brightness-105',
-    symbolClass: 'right-3 top-10 h-32 w-32 rotate-[32deg] border-[#ddecff]/75 shadow-[0_0_28px_rgba(98,160,255,.42)]',
-    waveClass: 'bg-[linear-gradient(145deg,transparent_0%,transparent_45%,rgba(60,143,255,.84)_48%,rgba(8,80,190,.92)_51%,transparent_62%)]',
+    buttonClass: 'bg-gradient-to-b from-white to-[#dedede] text-black shadow-[0_0_20px_rgba(255,255,255,.22)] hover:brightness-105',
+    symbolClass: 'right-3 top-10 h-32 w-32 rotate-[32deg] border-white/55 shadow-[0_0_24px_rgba(255,255,255,.2)]',
+    waveClass: 'bg-[linear-gradient(145deg,transparent_0%,transparent_45%,rgba(255,255,255,.42)_48%,rgba(91,93,98,.72)_51%,transparent_62%)]',
     text: 'Ежемесячные игры, онлайн-мультиплеер, скидки и облачные сохранения.',
   },
   {
     tier: 'Extra',
     label: 'EXTRA',
-    cardClass: 'border-[#f6b928]/90 bg-[radial-gradient(circle_at_78%_10%,rgba(255,209,75,.34),transparent_24%),linear-gradient(138deg,#1b1918_0%,#090d16_44%,#17110a_100%)] text-white shadow-[0_0_0_1px_rgba(255,217,98,.24)_inset,0_0_26px_rgba(255,181,30,.34)]',
+    cardClass: 'border-[#c79a3f]/80 bg-[radial-gradient(circle_at_78%_10%,rgba(216,170,67,.26),transparent_24%),linear-gradient(138deg,#191714_0%,#0c0d10_44%,#16120b_100%)] text-white shadow-[0_0_0_1px_rgba(255,217,98,.16)_inset,0_0_24px_rgba(187,133,35,.24)]',
     badgeClass: 'border-[#e5ad34]/65 bg-black/18 text-[#ffe07a]',
     titleClass: 'bg-gradient-to-b from-[#ffe176] via-[#ffc43a] to-[#a66a15] bg-clip-text text-transparent drop-shadow-[0_4px_16px_rgba(255,175,28,.25)]',
     bodyClass: 'text-white/86',
     priceClass: 'text-[#ffd75d]',
-    buttonClass: 'bg-gradient-to-b from-[#ffe37a] to-[#d99613] text-black shadow-[0_0_20px_rgba(255,186,32,.42)] hover:brightness-110',
-    symbolClass: 'right-6 top-11 h-32 w-32 rotate-[17deg] border-[#ffcf55]/80 shadow-[0_0_28px_rgba(255,190,36,.38)]',
-    waveClass: 'bg-[linear-gradient(145deg,transparent_0%,transparent_47%,rgba(255,184,28,.72)_50%,rgba(143,88,7,.8)_53%,transparent_66%)]',
+    buttonClass: 'bg-gradient-to-b from-[#f1d37a] to-[#b37d1f] text-black shadow-[0_0_18px_rgba(191,140,42,.32)] hover:brightness-110',
+    symbolClass: 'right-6 top-11 h-32 w-32 rotate-[17deg] border-[#d4aa54]/72 shadow-[0_0_22px_rgba(196,145,44,.26)]',
+    waveClass: 'bg-[linear-gradient(145deg,transparent_0%,transparent_47%,rgba(199,146,41,.54)_50%,rgba(96,68,18,.68)_53%,transparent_66%)]',
     text: 'Все из Essential плюс каталог игр и Ubisoft+ Classics.',
   },
   {
     tier: 'Deluxe',
     label: 'DELUXE',
-    cardClass: 'border-[#bc8222]/82 bg-[radial-gradient(circle_at_82%_18%,rgba(255,187,55,.16),transparent_25%),linear-gradient(138deg,#101722_0%,#070b13_48%,#060608_100%)] text-white shadow-[0_0_0_1px_rgba(255,195,68,.14)_inset]',
+    cardClass: 'border-[#8d692e]/78 bg-[radial-gradient(circle_at_82%_18%,rgba(190,143,45,.12),transparent_25%),linear-gradient(138deg,#151516_0%,#090a0c_48%,#050505_100%)] text-white shadow-[0_0_0_1px_rgba(255,195,68,.1)_inset]',
     badgeClass: 'border-[#c58a26]/65 bg-black/18 text-[#ffe07a]',
     titleClass: 'bg-gradient-to-b from-[#ffe176] via-[#d99a25] to-[#8d5a16] bg-clip-text text-transparent',
     bodyClass: 'text-white/82',
     priceClass: 'text-[#d69b2a]',
-    buttonClass: 'border border-[#c9902e]/85 bg-black/18 text-[#ffe176] shadow-[0_0_18px_rgba(201,144,46,.28)] hover:bg-[#d79a23] hover:text-black',
-    symbolClass: 'right-5 top-11 h-28 w-28 rotate-[17deg] border-[#d39b31]/75 shadow-[0_0_20px_rgba(212,151,39,.28)]',
-    waveClass: 'bg-[linear-gradient(145deg,transparent_0%,transparent_51%,rgba(210,145,33,.66)_54%,rgba(91,60,13,.7)_57%,transparent_72%)]',
+    buttonClass: 'border border-[#a8792d]/82 bg-black/18 text-[#e5bd61] shadow-[0_0_14px_rgba(161,114,39,.2)] hover:bg-[#b98225] hover:text-black',
+    symbolClass: 'right-5 top-11 h-28 w-28 rotate-[17deg] border-[#a87a30]/7 shadow-[0_0_18px_rgba(164,117,37,.18)]',
+    waveClass: 'bg-[linear-gradient(145deg,transparent_0%,transparent_51%,rgba(152,106,31,.48)_54%,rgba(75,53,16,.54)_57%,transparent_72%)]',
     text: 'Каталог игр, Classics Catalogue и пробные версии игр.',
   },
 ] as const
@@ -511,12 +511,12 @@ function SubscriptionPreview() {
   }, [region])
 
   return (
-    <section className="relative overflow-hidden rounded-[30px] border border-[#126bff]/42 bg-[#040a16] px-5 py-7 shadow-[0_30px_110px_rgba(0,0,0,.56),0_0_70px_rgba(0,98,255,.14)_inset] sm:px-7 lg:px-9 lg:py-9">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_2%_48%,rgba(16,115,255,.5),transparent_9%),radial-gradient(circle_at_92%_78%,rgba(0,102,255,.32),transparent_24%),linear-gradient(180deg,rgba(17,52,96,.34),transparent_42%)]" />
-      <div className="pointer-events-none absolute left-10 top-28 h-px w-48 bg-gradient-to-r from-transparent via-[#2c9dff] to-transparent shadow-[0_0_18px_#2c9dff]" />
-      <div className="pointer-events-none absolute right-[22%] top-8 h-16 w-16 rotate-45 border-[11px] border-[#0a54ba]/38 shadow-[0_0_28px_rgba(29,122,255,.18)]" />
-      <div className="pointer-events-none absolute right-[34%] top-34 h-13 w-13 rotate-45 before:absolute before:left-1/2 before:top-0 before:h-full before:w-2.5 before:-translate-x-1/2 before:rounded-full before:bg-[#0b61d6]/58 before:shadow-[0_0_20px_rgba(37,132,255,.45)] after:absolute after:left-0 after:top-1/2 after:h-2.5 after:w-full after:-translate-y-1/2 after:rounded-full after:bg-[#0b61d6]/58 after:shadow-[0_0_20px_rgba(37,132,255,.45)]" />
-      <div className="pointer-events-none absolute -bottom-24 right-0 h-56 w-[38rem] rounded-[100%] border-t-[18px] border-[#0a75ff]/70 shadow-[0_-18px_34px_rgba(0,110,255,.35)]" />
+    <section className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[#0b0b0c] px-5 py-7 shadow-[0_30px_110px_rgba(0,0,0,.56),0_0_70px_rgba(255,255,255,.045)_inset] sm:px-7 lg:px-9 lg:py-9">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_2%_48%,rgba(255,255,255,.09),transparent_10%),radial-gradient(circle_at_92%_78%,rgba(180,132,43,.12),transparent_24%),linear-gradient(180deg,rgba(255,255,255,.045),transparent_42%)]" />
+      <div className="pointer-events-none absolute left-10 top-28 h-px w-48 bg-gradient-to-r from-transparent via-white/42 to-transparent shadow-[0_0_14px_rgba(255,255,255,.2)]" />
+      <div className="pointer-events-none absolute right-[22%] top-8 h-16 w-16 rotate-45 border-[11px] border-white/8 shadow-[0_0_22px_rgba(255,255,255,.08)]" />
+      <div className="pointer-events-none absolute right-[34%] top-34 h-13 w-13 rotate-45 before:absolute before:left-1/2 before:top-0 before:h-full before:w-2.5 before:-translate-x-1/2 before:rounded-full before:bg-white/10 before:shadow-[0_0_14px_rgba(255,255,255,.12)] after:absolute after:left-0 after:top-1/2 after:h-2.5 after:w-full after:-translate-y-1/2 after:rounded-full after:bg-white/10 after:shadow-[0_0_14px_rgba(255,255,255,.12)]" />
+      <div className="pointer-events-none absolute -bottom-24 right-0 h-56 w-[38rem] rounded-[100%] border-t-[18px] border-white/10 shadow-[0_-18px_34px_rgba(255,255,255,.06)]" />
 
       <div className="relative flex flex-wrap items-center justify-between gap-5">
         <h2 className="max-w-4xl text-[clamp(2.1rem,4vw,4rem)] font-black uppercase leading-none tracking-[-0.055em] text-[#eef5ff] drop-shadow-[0_6px_0_rgba(255,255,255,.08)]">
@@ -524,7 +524,7 @@ function SubscriptionPreview() {
         </h2>
         <Link
           to={buildCatalogHref('subscriptions')}
-          className="inline-flex cursor-pointer items-center gap-3 rounded-full border border-[#3291ff]/72 bg-black/16 px-6 py-3 text-sm font-semibold text-white shadow-[0_0_22px_rgba(31,133,255,.34)_inset,0_0_18px_rgba(31,133,255,.22)] transition hover:border-[#68b7ff] hover:bg-[#0d2c58]"
+          className="inline-flex cursor-pointer items-center gap-3 rounded-full border border-white/18 bg-white/[0.04] px-6 py-3 text-sm font-semibold text-white shadow-[0_0_18px_rgba(255,255,255,.06)_inset] transition hover:border-white/30 hover:bg-white/[0.08]"
         >
           Смотреть все
           <ArrowRight size={18} />
@@ -539,8 +539,8 @@ function SubscriptionPreview() {
             onClick={() => setActiveDuration(duration)}
             className={`min-w-36 cursor-pointer rounded-full border px-6 py-3 text-base font-semibold transition duration-300 ${
               activeDuration.months === duration.months
-                ? 'border-[#2ea7ff] bg-[#0d2a63]/82 text-white shadow-[0_0_0_1px_rgba(255,255,255,.12)_inset,0_0_24px_rgba(20,132,255,.72)]'
-                : 'border-[#26334b] bg-white/[0.035] text-white/68 hover:border-[#2b72c7] hover:text-white'
+                ? 'border-white/35 bg-white text-black shadow-[0_0_0_1px_rgba(255,255,255,.18)_inset,0_0_18px_rgba(255,255,255,.18)]'
+                : 'border-white/10 bg-white/[0.035] text-white/58 hover:border-white/18 hover:text-white'
             }`}
           >
             {duration.label}
@@ -592,9 +592,9 @@ function SubscriptionPreview() {
         })}
       </div>
       <div className="relative mt-8 flex justify-center gap-5">
-        <span className="h-1.5 w-12 rounded-full bg-[#158cff] shadow-[0_0_14px_rgba(21,140,255,.8)]" />
-        <span className="h-1.5 w-12 rounded-full bg-[#58677f]/65" />
-        <span className="h-1.5 w-12 rounded-full bg-[#58677f]/65" />
+        <span className="h-1.5 w-12 rounded-full bg-white shadow-[0_0_14px_rgba(255,255,255,.28)]" />
+        <span className="h-1.5 w-12 rounded-full bg-white/18" />
+        <span className="h-1.5 w-12 rounded-full bg-white/18" />
       </div>
     </section>
   )
