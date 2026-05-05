@@ -663,7 +663,7 @@ export function HomePage() {
       {error ? (
         <div className="rounded-[30px] border border-white/10 bg-white/[0.03] px-6 py-12 text-center">
           <div className="font-display text-3xl text-white">Главная временно не получила данные каталога</div>
-          <Link to="/catalog" className="mt-6 inline-flex rounded-full bg-white px-7 py-3 text-sm font-semibold text-zinc-950 shadow-[0_10px_28px_rgba(255,255,255,.10)] transition hover:bg-zinc-100">
+          <Link to="/catalog" className="mt-6 inline-flex rounded-full bg-white px-7 py-3 text-sm font-semibold !text-black shadow-[0_10px_28px_rgba(255,255,255,.10)] transition hover:bg-zinc-100">
             Открыть каталог
           </Link>
         </div>
