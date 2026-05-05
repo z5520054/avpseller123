@@ -20,6 +20,12 @@ export function SupportPage() {
             <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">Регионы: Turkey и India</div>
             <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">Среднее время ответа: до 10 минут</div>
           </div>
+          <a
+            href="tg://resolve?domain=avpsellersupport"
+            className="mt-8 inline-flex cursor-pointer rounded-full bg-white px-7 py-3 text-sm font-semibold !text-black shadow-[0_10px_28px_rgba(255,255,255,.10)] transition hover:bg-zinc-100"
+          >
+            Связаться с поддержкой
+          </a>
         </section>
 
         <section className="satin-panel rounded-[32px] border border-white/10 p-6 lg:p-8">
