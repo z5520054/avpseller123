@@ -153,7 +153,7 @@ export function CartPage() {
           </div>
           <Link
             to="/checkout"
-            className="mt-6 inline-flex w-full cursor-pointer items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/92 disabled:opacity-40"
+            className="mt-6 inline-flex w-full cursor-pointer items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-zinc-950 shadow-[0_0_18px_rgba(255,255,255,.12)] transition hover:bg-white/92"
           >
             Оформить заказ
           </Link>
