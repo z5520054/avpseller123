@@ -95,13 +95,13 @@ function regionToApi(region: Region) {
 function mapCategoryToApi(category: string) {
   switch (category) {
     case 'games':
-      return { tag: 'section:games', excludeTag: 'section:preorders' }
+      return { tag: 'section:games', excludeTag: 'section:preorders', discountedOnly: false }
     case 'deals':
-      return { tag: 'section:deals', excludeTag: 'section:preorders' }
+      return { tag: 'section:deals', excludeTag: 'section:preorders', discountedOnly: true }
     case 'preorders':
-      return { tag: 'section:preorders' }
+      return { tag: 'section:preorders', discountedOnly: false }
     default:
-      return {}
+      return { discountedOnly: false }
   }
 }
 
@@ -299,6 +299,7 @@ export function CatalogPage() {
       genre: genre || undefined,
       tag: mapped.tag,
       excludeTag: mapped.excludeTag,
+      discountedOnly: mapped.discountedOnly,
       limit: PAGE_SIZE,
       offset: (page - 1) * PAGE_SIZE,
       sort,

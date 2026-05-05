@@ -620,7 +620,7 @@ export function HomePage() {
     const targetRegion = regionToApi(region)
 
     Promise.all([
-      getCatalogList({ region: targetRegion, tag: 'section:deals', limit: 6, sort: 'sony' }),
+      getCatalogList({ region: targetRegion, tag: 'section:deals', discountedOnly: true, limit: 6, sort: 'sony' }),
       getCatalogList({ region: targetRegion, tag: 'section:games', limit: 6, sort: 'sony' }),
       getCatalogList({ region: targetRegion, tag: 'section:preorders', limit: 4, sort: 'sony' }),
     ])

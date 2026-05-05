@@ -314,6 +314,7 @@ export class CatalogRepository {
     kind?: string
     tag?: string
     excludeTag?: string | string[]
+    discountedOnly?: boolean
     limit: number
     offset: number
     sort: 'updated' | 'price_asc' | 'price_desc' | 'discount' | 'sony' | 'release_desc' | 'release_asc'
@@ -399,6 +400,23 @@ export class CatalogRepository {
     if (filters.tag) {
       clauses.push('EXISTS (SELECT 1 FROM product_tags pt WHERE pt.product_id = p.id AND pt.tag = ?)')
       params.push(filters.tag)
+    }
+    if (filters.discountedOnly) {
+      clauses.push(`
+        EXISTS (
+          SELECT 1
+          FROM offers o_discount
+          WHERE o_discount.product_id = p.id
+            ${filters.region ? 'AND o_discount.region = ?' : ''}
+            AND o_discount.discounted_price_minor IS NOT NULL
+            AND o_discount.base_price_minor IS NOT NULL
+            AND o_discount.base_price_minor > o_discount.discounted_price_minor
+            AND COALESCE(o_discount.discount_percent, 0) > 0
+        )
+      `)
+      if (filters.region) {
+        params.push(filters.region)
+      }
     }
     const excludeTags = Array.isArray(filters.excludeTag) ? filters.excludeTag : filters.excludeTag ? [filters.excludeTag] : []
     for (const tag of excludeTags) {
