@@ -118,7 +118,7 @@ const adminBannersBodySchema = z.object({
     isActive: z.boolean(),
   })),
   settings: z.object({
-    autoplayMs: z.coerce.number().int().min(2000).max(30000),
+    autoplayMs: z.coerce.number().int().min(500).max(60000),
     animation: z.enum(['slide', 'fade', 'lift']),
   }).optional(),
 })

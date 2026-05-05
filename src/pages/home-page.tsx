@@ -123,7 +123,7 @@ function BannerSlider() {
   }, [])
 
   useEffect(() => {
-    if (banners.length <= 3) return
+    if (banners.length <= 1) return
 
     const timer = window.setInterval(() => {
       setActiveIndex((current) => (current + 1) % banners.length)
@@ -141,9 +141,10 @@ function BannerSlider() {
     )
   }
 
-  const visibleBanners = banners.length <= 3
-    ? banners
-    : Array.from({ length: 3 }, (_, index) => banners[(activeIndex + index) % banners.length])
+  const visibleBanners = Array.from(
+    { length: Math.min(3, banners.length) },
+    (_, index) => banners[(activeIndex + index) % banners.length],
+  )
   const animationClass =
     settings.animation === 'fade'
       ? 'animate-[fade-in_520ms_ease-out]'
@@ -175,7 +176,7 @@ function BannerSlider() {
         ))}
       </div>
 
-      {banners.length > 3 ? (
+      {banners.length > 1 ? (
         <div className="flex gap-2 px-5 py-4">
           {banners.map((banner, index) => (
             <button

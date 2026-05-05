@@ -222,8 +222,8 @@ export function AdminPsPlusPage() {
                       Автопрокрутка, мс
                       <input
                         type="number"
-                        min="2000"
-                        max="30000"
+                        min="500"
+                        max="60000"
                         step="500"
                         value={bannerSettings.autoplayMs}
                         onChange={(event) => setBannerSettings((current) => ({ ...current, autoplayMs: Number(event.target.value) || 6000 }))}

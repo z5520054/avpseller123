@@ -199,7 +199,7 @@ export class HomeBannersService {
   }
 
   updateSettings(input: HomeBannerSettingsInput) {
-    const autoplayMs = Math.min(30000, Math.max(2000, Math.round(input.autoplayMs)))
+    const autoplayMs = Math.min(60000, Math.max(500, Math.round(input.autoplayMs)))
     const animation = input.animation === 'fade' || input.animation === 'lift' ? input.animation : 'slide'
     const timestamp = nowIso()
 
