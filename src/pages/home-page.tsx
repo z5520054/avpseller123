@@ -142,7 +142,7 @@ function BannerSlider() {
   }
 
   const visibleBanners = Array.from(
-    { length: Math.min(3, banners.length) },
+    { length: Math.min(4, banners.length) },
     (_, index) => banners[(activeIndex + index) % banners.length],
   )
   const animationClass =
@@ -154,12 +154,12 @@ function BannerSlider() {
 
   return (
     <section className="overflow-hidden rounded-[34px] border border-white/10 bg-black/30 p-3 shadow-[0_32px_90px_rgba(0,0,0,0.42)]">
-      <div key={`${activeIndex}-${settings.animation}`} className={`grid gap-3 md:grid-cols-3 ${animationClass}`}>
+      <div key={`${activeIndex}-${settings.animation}`} className={`grid gap-3 sm:grid-cols-2 xl:grid-cols-4 ${animationClass}`}>
         {visibleBanners.map((banner) => (
           <Link
             key={banner.id}
             to={banner.linkUrl}
-            className="group relative block h-[180px] overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.03] sm:h-[240px] lg:h-[320px]"
+            className="group relative block aspect-[3/4] overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.03]"
             aria-label={banner.title}
           >
             <img
