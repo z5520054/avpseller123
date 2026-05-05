@@ -22,22 +22,40 @@ const SUBSCRIPTION_PLANS = [
   {
     tier: 'Essential',
     label: 'ESSENTIAL',
-    tone: 'from-zinc-100 via-white to-zinc-300',
-    textTone: 'text-black',
+    cardClass: 'border-[#8ab8ff]/90 bg-[radial-gradient(circle_at_75%_4%,rgba(255,255,255,.9),transparent_20%),linear-gradient(138deg,#dce8ff_0%,#7c97c4_43%,#071b42_100%)] text-white shadow-[0_0_0_1px_rgba(255,255,255,.36)_inset,0_0_28px_rgba(45,125,255,.58)]',
+    badgeClass: 'border-[#8ab8ff]/70 bg-white/68 text-[#084aa7]',
+    titleClass: 'text-white drop-shadow-[0_4px_10px_rgba(0,0,0,.36)]',
+    bodyClass: 'text-white/88',
+    priceClass: 'text-white',
+    buttonClass: 'bg-gradient-to-b from-white to-[#dfe8f8] text-black shadow-[0_0_22px_rgba(67,137,255,.55)] hover:brightness-105',
+    symbolClass: 'right-3 top-10 h-32 w-32 rotate-[32deg] border-[#ddecff]/75 shadow-[0_0_28px_rgba(98,160,255,.42)]',
+    waveClass: 'bg-[linear-gradient(145deg,transparent_0%,transparent_45%,rgba(60,143,255,.84)_48%,rgba(8,80,190,.92)_51%,transparent_62%)]',
     text: 'Ежемесячные игры, онлайн-мультиплеер, скидки и облачные сохранения.',
   },
   {
     tier: 'Extra',
     label: 'EXTRA',
-    tone: 'from-[#ffb000] via-[#ffc531] to-[#f39400]',
-    textTone: 'text-black',
+    cardClass: 'border-[#f6b928]/90 bg-[radial-gradient(circle_at_78%_10%,rgba(255,209,75,.34),transparent_24%),linear-gradient(138deg,#1b1918_0%,#090d16_44%,#17110a_100%)] text-white shadow-[0_0_0_1px_rgba(255,217,98,.24)_inset,0_0_26px_rgba(255,181,30,.34)]',
+    badgeClass: 'border-[#e5ad34]/65 bg-black/18 text-[#ffe07a]',
+    titleClass: 'bg-gradient-to-b from-[#ffe176] via-[#ffc43a] to-[#a66a15] bg-clip-text text-transparent drop-shadow-[0_4px_16px_rgba(255,175,28,.25)]',
+    bodyClass: 'text-white/86',
+    priceClass: 'text-[#ffd75d]',
+    buttonClass: 'bg-gradient-to-b from-[#ffe37a] to-[#d99613] text-black shadow-[0_0_20px_rgba(255,186,32,.42)] hover:brightness-110',
+    symbolClass: 'right-6 top-11 h-32 w-32 rotate-[17deg] border-[#ffcf55]/80 shadow-[0_0_28px_rgba(255,190,36,.38)]',
+    waveClass: 'bg-[linear-gradient(145deg,transparent_0%,transparent_47%,rgba(255,184,28,.72)_50%,rgba(143,88,7,.8)_53%,transparent_66%)]',
     text: 'Все из Essential плюс каталог игр и Ubisoft+ Classics.',
   },
   {
     tier: 'Deluxe',
     label: 'DELUXE',
-    tone: 'from-[#222] via-[#353535] to-[#111]',
-    textTone: 'text-[#ffb000]',
+    cardClass: 'border-[#bc8222]/82 bg-[radial-gradient(circle_at_82%_18%,rgba(255,187,55,.16),transparent_25%),linear-gradient(138deg,#101722_0%,#070b13_48%,#060608_100%)] text-white shadow-[0_0_0_1px_rgba(255,195,68,.14)_inset]',
+    badgeClass: 'border-[#c58a26]/65 bg-black/18 text-[#ffe07a]',
+    titleClass: 'bg-gradient-to-b from-[#ffe176] via-[#d99a25] to-[#8d5a16] bg-clip-text text-transparent',
+    bodyClass: 'text-white/82',
+    priceClass: 'text-[#d69b2a]',
+    buttonClass: 'border border-[#c9902e]/85 bg-black/18 text-[#ffe176] shadow-[0_0_18px_rgba(201,144,46,.28)] hover:bg-[#d79a23] hover:text-black',
+    symbolClass: 'right-5 top-11 h-28 w-28 rotate-[17deg] border-[#d39b31]/75 shadow-[0_0_20px_rgba(212,151,39,.28)]',
+    waveClass: 'bg-[linear-gradient(145deg,transparent_0%,transparent_51%,rgba(210,145,33,.66)_54%,rgba(91,60,13,.7)_57%,transparent_72%)]',
     text: 'Каталог игр, Classics Catalogue и пробные версии игр.',
   },
 ] as const
@@ -493,23 +511,44 @@ function SubscriptionPreview() {
   }, [region])
 
   return (
-    <section className="rounded-[32px] border border-white/10 bg-white/[0.03] p-5 sm:p-6">
-      <ShelfHeading title="Подписки PS Plus" href={buildCatalogHref('subscriptions')} />
-      <div className="flex flex-wrap gap-2">
+    <section className="relative overflow-hidden rounded-[34px] border border-[#126bff]/42 bg-[#040a16] px-5 py-8 shadow-[0_30px_110px_rgba(0,0,0,.56),0_0_70px_rgba(0,98,255,.14)_inset] sm:px-8 lg:px-12 lg:py-12">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_2%_48%,rgba(16,115,255,.5),transparent_9%),radial-gradient(circle_at_92%_78%,rgba(0,102,255,.32),transparent_24%),linear-gradient(180deg,rgba(17,52,96,.34),transparent_42%)]" />
+      <div className="pointer-events-none absolute left-10 top-28 h-px w-48 bg-gradient-to-r from-transparent via-[#2c9dff] to-transparent shadow-[0_0_18px_#2c9dff]" />
+      <div className="pointer-events-none absolute right-[22%] top-8 h-20 w-20 rotate-45 border-[14px] border-[#0a54ba]/38 shadow-[0_0_28px_rgba(29,122,255,.18)]" />
+      <div className="pointer-events-none absolute right-[34%] top-40 h-16 w-16 rotate-45 before:absolute before:left-1/2 before:top-0 before:h-full before:w-3 before:-translate-x-1/2 before:rounded-full before:bg-[#0b61d6]/58 before:shadow-[0_0_20px_rgba(37,132,255,.45)] after:absolute after:left-0 after:top-1/2 after:h-3 after:w-full after:-translate-y-1/2 after:rounded-full after:bg-[#0b61d6]/58 after:shadow-[0_0_20px_rgba(37,132,255,.45)]" />
+      <div className="pointer-events-none absolute -bottom-24 right-0 h-56 w-[38rem] rounded-[100%] border-t-[18px] border-[#0a75ff]/70 shadow-[0_-18px_34px_rgba(0,110,255,.35)]" />
+
+      <div className="relative flex flex-wrap items-center justify-between gap-5">
+        <h2 className="max-w-4xl text-[clamp(2.75rem,5.2vw,5.2rem)] font-black uppercase leading-none tracking-[-0.055em] text-[#eef5ff] drop-shadow-[0_8px_0_rgba(255,255,255,.08)]">
+          Подписки PS Plus
+        </h2>
+        <Link
+          to={buildCatalogHref('subscriptions')}
+          className="inline-flex cursor-pointer items-center gap-3 rounded-full border border-[#3291ff]/72 bg-black/16 px-7 py-4 text-base font-semibold text-white shadow-[0_0_22px_rgba(31,133,255,.34)_inset,0_0_18px_rgba(31,133,255,.22)] transition hover:border-[#68b7ff] hover:bg-[#0d2c58]"
+        >
+          Смотреть все
+          <ArrowRight size={21} />
+        </Link>
+      </div>
+
+      <div className="relative mt-9 flex flex-wrap gap-5">
         {SUBSCRIPTION_DURATIONS.map((duration) => (
           <button
             key={duration.months}
             type="button"
             onClick={() => setActiveDuration(duration)}
-            className={`rounded-full border px-4 py-2 text-sm transition ${
-              activeDuration.months === duration.months ? 'border-white/20 bg-white text-black' : 'border-white/10 text-white/68 hover:text-white'
+            className={`min-w-44 cursor-pointer rounded-full border px-8 py-4 text-lg font-semibold transition duration-300 ${
+              activeDuration.months === duration.months
+                ? 'border-[#2ea7ff] bg-[#0d2a63]/82 text-white shadow-[0_0_0_1px_rgba(255,255,255,.12)_inset,0_0_24px_rgba(20,132,255,.72)]'
+                : 'border-[#26334b] bg-white/[0.035] text-white/68 hover:border-[#2b72c7] hover:text-white'
             }`}
           >
             {duration.label}
           </button>
         ))}
       </div>
-      <div className="mt-5 grid gap-4 lg:grid-cols-3">
+
+      <div className="relative mt-9 grid gap-6 lg:grid-cols-3">
         {SUBSCRIPTION_PLANS.map((plan) => {
           const price = prices.find((item) => item.tier === plan.tier && item.durationMonths === activeDuration.months)
           const canBuy = Boolean(price?.isActive && price.priceRubMinor !== null)
@@ -517,21 +556,23 @@ function SubscriptionPreview() {
           const isInCart = cart.some((item) => item.productId === productId)
 
           return (
-            <article key={plan.tier} className={`relative flex h-full overflow-hidden rounded-[28px] bg-gradient-to-br ${plan.tone} p-5 text-black`}>
-              <div className="absolute inset-0 opacity-20 mix-blend-overlay [background:radial-gradient(circle_at_25%_20%,white,transparent_28%),linear-gradient(120deg,transparent_0%,rgba(255,255,255,.6)_45%,transparent_60%)]" />
-              <div className="relative flex min-h-[250px] h-full w-full flex-col">
-                <div className={`text-sm font-semibold tracking-[-0.03em] ${plan.textTone}`}>PS Plus</div>
-                <div className={`mt-8 text-[clamp(2.25rem,4.6vw,4.15rem)] font-extrabold leading-none tracking-[-0.065em] ${plan.textTone}`}>
+            <article key={plan.tier} className={`relative flex min-h-[425px] overflow-hidden rounded-[24px] border p-6 transition duration-300 hover:-translate-y-1 ${plan.cardClass}`}>
+              <div className={`pointer-events-none absolute inset-0 opacity-90 ${plan.waveClass}`} />
+              <div className={`pointer-events-none absolute rounded-[10px] border-[9px] opacity-80 ${plan.symbolClass}`} />
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_0%,rgba(255,255,255,.18),transparent_18%),linear-gradient(180deg,rgba(255,255,255,.06),transparent_35%)]" />
+              <div className="relative flex h-full min-h-[377px] w-full flex-col">
+                <div className={`inline-flex w-fit rounded-lg border px-4 py-2 text-lg font-semibold ${plan.badgeClass}`}>PS Plus</div>
+                <div className={`mt-16 text-[clamp(3.25rem,5vw,4.9rem)] font-black uppercase leading-none tracking-[-0.075em] ${plan.titleClass}`}>
                   {plan.label}
                 </div>
-                <p className={`mt-5 max-w-sm text-sm font-medium leading-6 ${plan.textTone} opacity-70`}>{plan.text}</p>
-                <div className={`mt-auto pt-6 text-2xl font-extrabold ${plan.textTone}`}>
+                <p className={`mt-5 max-w-sm text-xl font-medium leading-8 ${plan.bodyClass}`}>{plan.text}</p>
+                <div className={`mt-auto pt-12 text-[clamp(2rem,3vw,2.65rem)] font-black tracking-[-0.06em] ${plan.priceClass}`}>
                   {formatMoneyMinor(price?.priceRubMinor, 'RUB') ?? 'Цена не задана'}
                 </div>
                 {isInCart ? (
                   <Link
                     to="/cart"
-                    className="mt-5 inline-flex w-full cursor-pointer justify-center rounded-full border border-emerald-500/60 bg-emerald-400 px-5 py-3 text-sm font-semibold text-black transition hover:bg-emerald-300"
+                    className="mt-6 inline-flex w-full cursor-pointer justify-center rounded-full bg-emerald-400 px-5 py-4 text-lg font-semibold text-black transition hover:bg-emerald-300"
                   >
                     Перейти в корзину
                   </Link>
@@ -540,7 +581,7 @@ function SubscriptionPreview() {
                     type="button"
                     disabled={!canBuy}
                     onClick={() => addToCart(productId)}
-                    className="mt-5 inline-flex w-full cursor-pointer justify-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-black/82 disabled:cursor-not-allowed disabled:opacity-40"
+                    className={`mt-6 inline-flex w-full cursor-pointer justify-center rounded-full px-5 py-4 text-lg font-semibold transition duration-300 disabled:cursor-not-allowed disabled:opacity-40 ${plan.buttonClass}`}
                   >
                     Выбрать
                   </button>
@@ -549,6 +590,11 @@ function SubscriptionPreview() {
             </article>
           )
         })}
+      </div>
+      <div className="relative mt-12 flex justify-center gap-6">
+        <span className="h-1.5 w-16 rounded-full bg-[#158cff] shadow-[0_0_14px_rgba(21,140,255,.8)]" />
+        <span className="h-1.5 w-16 rounded-full bg-[#58677f]/65" />
+        <span className="h-1.5 w-16 rounded-full bg-[#58677f]/65" />
       </div>
     </section>
   )
