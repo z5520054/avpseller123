@@ -519,13 +519,13 @@ function SubscriptionPreview() {
           return (
             <article key={plan.tier} className={`relative overflow-hidden rounded-[28px] bg-gradient-to-br ${plan.tone} p-5 text-black`}>
               <div className="absolute inset-0 opacity-20 mix-blend-overlay [background:radial-gradient(circle_at_25%_20%,white,transparent_28%),linear-gradient(120deg,transparent_0%,rgba(255,255,255,.6)_45%,transparent_60%)]" />
-              <div className="relative min-h-[250px]">
+              <div className="relative flex min-h-[250px] flex-col">
                 <div className={`text-sm font-semibold tracking-[-0.03em] ${plan.textTone}`}>PS Plus</div>
                 <div className={`mt-8 text-[clamp(2.25rem,4.6vw,4.15rem)] font-extrabold leading-none tracking-[-0.065em] ${plan.textTone}`}>
                   {plan.label}
                 </div>
                 <p className={`mt-5 max-w-sm text-sm font-medium leading-6 ${plan.textTone} opacity-70`}>{plan.text}</p>
-                <div className={`mt-6 text-2xl font-extrabold ${plan.textTone}`}>
+                <div className={`mt-auto pt-6 text-2xl font-extrabold ${plan.textTone}`}>
                   {formatMoneyMinor(price?.priceRubMinor, 'RUB') ?? 'Цена не задана'}
                 </div>
                 {isInCart ? (
