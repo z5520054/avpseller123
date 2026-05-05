@@ -511,33 +511,33 @@ function SubscriptionPreview() {
   }, [region])
 
   return (
-    <section className="relative overflow-hidden rounded-[34px] border border-[#126bff]/42 bg-[#040a16] px-5 py-8 shadow-[0_30px_110px_rgba(0,0,0,.56),0_0_70px_rgba(0,98,255,.14)_inset] sm:px-8 lg:px-12 lg:py-12">
+    <section className="relative overflow-hidden rounded-[30px] border border-[#126bff]/42 bg-[#040a16] px-5 py-7 shadow-[0_30px_110px_rgba(0,0,0,.56),0_0_70px_rgba(0,98,255,.14)_inset] sm:px-7 lg:px-9 lg:py-9">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_2%_48%,rgba(16,115,255,.5),transparent_9%),radial-gradient(circle_at_92%_78%,rgba(0,102,255,.32),transparent_24%),linear-gradient(180deg,rgba(17,52,96,.34),transparent_42%)]" />
       <div className="pointer-events-none absolute left-10 top-28 h-px w-48 bg-gradient-to-r from-transparent via-[#2c9dff] to-transparent shadow-[0_0_18px_#2c9dff]" />
-      <div className="pointer-events-none absolute right-[22%] top-8 h-20 w-20 rotate-45 border-[14px] border-[#0a54ba]/38 shadow-[0_0_28px_rgba(29,122,255,.18)]" />
-      <div className="pointer-events-none absolute right-[34%] top-40 h-16 w-16 rotate-45 before:absolute before:left-1/2 before:top-0 before:h-full before:w-3 before:-translate-x-1/2 before:rounded-full before:bg-[#0b61d6]/58 before:shadow-[0_0_20px_rgba(37,132,255,.45)] after:absolute after:left-0 after:top-1/2 after:h-3 after:w-full after:-translate-y-1/2 after:rounded-full after:bg-[#0b61d6]/58 after:shadow-[0_0_20px_rgba(37,132,255,.45)]" />
+      <div className="pointer-events-none absolute right-[22%] top-8 h-16 w-16 rotate-45 border-[11px] border-[#0a54ba]/38 shadow-[0_0_28px_rgba(29,122,255,.18)]" />
+      <div className="pointer-events-none absolute right-[34%] top-34 h-13 w-13 rotate-45 before:absolute before:left-1/2 before:top-0 before:h-full before:w-2.5 before:-translate-x-1/2 before:rounded-full before:bg-[#0b61d6]/58 before:shadow-[0_0_20px_rgba(37,132,255,.45)] after:absolute after:left-0 after:top-1/2 after:h-2.5 after:w-full after:-translate-y-1/2 after:rounded-full after:bg-[#0b61d6]/58 after:shadow-[0_0_20px_rgba(37,132,255,.45)]" />
       <div className="pointer-events-none absolute -bottom-24 right-0 h-56 w-[38rem] rounded-[100%] border-t-[18px] border-[#0a75ff]/70 shadow-[0_-18px_34px_rgba(0,110,255,.35)]" />
 
       <div className="relative flex flex-wrap items-center justify-between gap-5">
-        <h2 className="max-w-4xl text-[clamp(2.75rem,5.2vw,5.2rem)] font-black uppercase leading-none tracking-[-0.055em] text-[#eef5ff] drop-shadow-[0_8px_0_rgba(255,255,255,.08)]">
+        <h2 className="max-w-4xl text-[clamp(2.1rem,4vw,4rem)] font-black uppercase leading-none tracking-[-0.055em] text-[#eef5ff] drop-shadow-[0_6px_0_rgba(255,255,255,.08)]">
           Подписки PS Plus
         </h2>
         <Link
           to={buildCatalogHref('subscriptions')}
-          className="inline-flex cursor-pointer items-center gap-3 rounded-full border border-[#3291ff]/72 bg-black/16 px-7 py-4 text-base font-semibold text-white shadow-[0_0_22px_rgba(31,133,255,.34)_inset,0_0_18px_rgba(31,133,255,.22)] transition hover:border-[#68b7ff] hover:bg-[#0d2c58]"
+          className="inline-flex cursor-pointer items-center gap-3 rounded-full border border-[#3291ff]/72 bg-black/16 px-6 py-3 text-sm font-semibold text-white shadow-[0_0_22px_rgba(31,133,255,.34)_inset,0_0_18px_rgba(31,133,255,.22)] transition hover:border-[#68b7ff] hover:bg-[#0d2c58]"
         >
           Смотреть все
-          <ArrowRight size={21} />
+          <ArrowRight size={18} />
         </Link>
       </div>
 
-      <div className="relative mt-9 flex flex-wrap gap-5">
+      <div className="relative mt-7 flex flex-wrap gap-4">
         {SUBSCRIPTION_DURATIONS.map((duration) => (
           <button
             key={duration.months}
             type="button"
             onClick={() => setActiveDuration(duration)}
-            className={`min-w-44 cursor-pointer rounded-full border px-8 py-4 text-lg font-semibold transition duration-300 ${
+            className={`min-w-36 cursor-pointer rounded-full border px-6 py-3 text-base font-semibold transition duration-300 ${
               activeDuration.months === duration.months
                 ? 'border-[#2ea7ff] bg-[#0d2a63]/82 text-white shadow-[0_0_0_1px_rgba(255,255,255,.12)_inset,0_0_24px_rgba(20,132,255,.72)]'
                 : 'border-[#26334b] bg-white/[0.035] text-white/68 hover:border-[#2b72c7] hover:text-white'
@@ -548,7 +548,7 @@ function SubscriptionPreview() {
         ))}
       </div>
 
-      <div className="relative mt-9 grid gap-6 lg:grid-cols-3">
+      <div className="relative mt-7 grid gap-5 lg:grid-cols-3">
         {SUBSCRIPTION_PLANS.map((plan) => {
           const price = prices.find((item) => item.tier === plan.tier && item.durationMonths === activeDuration.months)
           const canBuy = Boolean(price?.isActive && price.priceRubMinor !== null)
@@ -556,23 +556,23 @@ function SubscriptionPreview() {
           const isInCart = cart.some((item) => item.productId === productId)
 
           return (
-            <article key={plan.tier} className={`relative flex min-h-[425px] overflow-hidden rounded-[24px] border p-6 transition duration-300 hover:-translate-y-1 ${plan.cardClass}`}>
+            <article key={plan.tier} className={`relative flex min-h-[330px] overflow-hidden rounded-[22px] border p-5 transition duration-300 hover:-translate-y-1 ${plan.cardClass}`}>
               <div className={`pointer-events-none absolute inset-0 opacity-90 ${plan.waveClass}`} />
-              <div className={`pointer-events-none absolute rounded-[10px] border-[9px] opacity-80 ${plan.symbolClass}`} />
+              <div className={`pointer-events-none absolute scale-75 rounded-[10px] border-[9px] opacity-80 ${plan.symbolClass}`} />
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_0%,rgba(255,255,255,.18),transparent_18%),linear-gradient(180deg,rgba(255,255,255,.06),transparent_35%)]" />
-              <div className="relative flex h-full min-h-[377px] w-full flex-col">
-                <div className={`inline-flex w-fit rounded-lg border px-4 py-2 text-lg font-semibold ${plan.badgeClass}`}>PS Plus</div>
-                <div className={`mt-16 text-[clamp(3.25rem,5vw,4.9rem)] font-black uppercase leading-none tracking-[-0.075em] ${plan.titleClass}`}>
+              <div className="relative flex h-full min-h-[288px] w-full flex-col">
+                <div className={`inline-flex w-fit rounded-lg border px-3.5 py-1.5 text-base font-semibold ${plan.badgeClass}`}>PS Plus</div>
+                <div className={`mt-11 text-[clamp(2.55rem,4vw,3.7rem)] font-black uppercase leading-none tracking-[-0.075em] ${plan.titleClass}`}>
                   {plan.label}
                 </div>
-                <p className={`mt-5 max-w-sm text-xl font-medium leading-8 ${plan.bodyClass}`}>{plan.text}</p>
-                <div className={`mt-auto pt-12 text-[clamp(2rem,3vw,2.65rem)] font-black tracking-[-0.06em] ${plan.priceClass}`}>
+                <p className={`mt-4 max-w-sm text-base font-medium leading-6 ${plan.bodyClass}`}>{plan.text}</p>
+                <div className={`mt-auto pt-8 text-[clamp(1.65rem,2.4vw,2.15rem)] font-black tracking-[-0.06em] ${plan.priceClass}`}>
                   {formatMoneyMinor(price?.priceRubMinor, 'RUB') ?? 'Цена не задана'}
                 </div>
                 {isInCart ? (
                   <Link
                     to="/cart"
-                    className="mt-6 inline-flex w-full cursor-pointer justify-center rounded-full bg-emerald-400 px-5 py-4 text-lg font-semibold text-black transition hover:bg-emerald-300"
+                    className="mt-5 inline-flex w-full cursor-pointer justify-center rounded-full bg-emerald-400 px-5 py-3.5 text-base font-semibold text-black transition hover:bg-emerald-300"
                   >
                     Перейти в корзину
                   </Link>
@@ -581,7 +581,7 @@ function SubscriptionPreview() {
                     type="button"
                     disabled={!canBuy}
                     onClick={() => addToCart(productId)}
-                    className={`mt-6 inline-flex w-full cursor-pointer justify-center rounded-full px-5 py-4 text-lg font-semibold transition duration-300 disabled:cursor-not-allowed disabled:opacity-40 ${plan.buttonClass}`}
+                    className={`mt-5 inline-flex w-full cursor-pointer justify-center rounded-full px-5 py-3.5 text-base font-semibold transition duration-300 disabled:cursor-not-allowed disabled:opacity-40 ${plan.buttonClass}`}
                   >
                     Выбрать
                   </button>
@@ -591,10 +591,10 @@ function SubscriptionPreview() {
           )
         })}
       </div>
-      <div className="relative mt-12 flex justify-center gap-6">
-        <span className="h-1.5 w-16 rounded-full bg-[#158cff] shadow-[0_0_14px_rgba(21,140,255,.8)]" />
-        <span className="h-1.5 w-16 rounded-full bg-[#58677f]/65" />
-        <span className="h-1.5 w-16 rounded-full bg-[#58677f]/65" />
+      <div className="relative mt-8 flex justify-center gap-5">
+        <span className="h-1.5 w-12 rounded-full bg-[#158cff] shadow-[0_0_14px_rgba(21,140,255,.8)]" />
+        <span className="h-1.5 w-12 rounded-full bg-[#58677f]/65" />
+        <span className="h-1.5 w-12 rounded-full bg-[#58677f]/65" />
       </div>
     </section>
   )
