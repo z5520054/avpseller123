@@ -1,17 +1,31 @@
 import { Heart, LifeBuoy, Search, ShoppingBag, User, X } from 'lucide-react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import avpIconUrl from '../assets/avp-icon.png'
 import { useAppState } from '../store/use-app-state'
 import { RegionSwitch } from './ui/region-switch'
 
 const navigation = [
-  { label: 'Каталог', to: '/catalog' },
-  { label: 'Подписки', to: '/catalog?category=subscriptions' },
-  { label: 'Поддержка', to: '/support' },
+  { label: 'Каталог', to: '/catalog', active: 'catalog' },
+  { label: 'Подписки', to: '/catalog?category=subscriptions', active: 'subscriptions' },
+  { label: 'Поддержка', to: '/support', active: 'support' },
 ]
 
 export function RootLayout() {
   const { cartCount, favoritesCount, searchQuery, setSearchQuery } = useAppState()
+  const location = useLocation()
+  const category = new URLSearchParams(location.search).get('category')
+
+  function isNavigationActive(active: string) {
+    if (active === 'subscriptions') {
+      return location.pathname === '/catalog' && category === 'subscriptions'
+    }
+
+    if (active === 'catalog') {
+      return location.pathname === '/catalog' && category !== 'subscriptions'
+    }
+
+    return location.pathname === '/support'
+  }
 
   return (
     <div className="min-h-screen pb-10 text-silver-300">
@@ -42,9 +56,7 @@ export function RootLayout() {
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  className={({ isActive }) =>
-                    `header-nav-pill ${isActive ? 'header-nav-pill-active' : ''}`
-                  }
+                  className={`header-nav-pill ${isNavigationActive(item.active) ? 'header-nav-pill-active' : ''}`}
                 >
                   {item.label}
                 </NavLink>
