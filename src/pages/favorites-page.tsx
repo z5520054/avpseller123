@@ -33,7 +33,7 @@ export function FavoritesPage() {
           </p>
           <Link
             to="/catalog"
-            className="mt-6 inline-flex cursor-pointer rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/92"
+            className="mt-6 inline-flex cursor-pointer rounded-full bg-white px-7 py-3 text-sm font-semibold text-zinc-950 shadow-[0_10px_28px_rgba(255,255,255,.10)] transition hover:bg-zinc-100"
           >
             Открыть каталог
           </Link>

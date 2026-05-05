@@ -27,7 +27,7 @@ export function CartPage() {
           <p className="mt-4 text-sm text-white/56">Добавьте игры, подписки или предзаказы из каталога.</p>
           <Link
             to="/catalog"
-            className="mt-6 inline-flex cursor-pointer rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/92"
+            className="mt-6 inline-flex cursor-pointer rounded-full bg-white px-7 py-3 text-sm font-semibold text-zinc-950 shadow-[0_10px_28px_rgba(255,255,255,.10)] transition hover:bg-zinc-100"
           >
             Перейти в каталог
           </Link>
@@ -153,7 +153,7 @@ export function CartPage() {
           </div>
           <Link
             to="/checkout"
-            className="mt-6 inline-flex w-full cursor-pointer items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-zinc-950 shadow-[0_0_18px_rgba(255,255,255,.12)] transition hover:bg-white/92"
+            className="mt-6 inline-flex w-full cursor-pointer items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-bold text-zinc-950 shadow-[0_10px_28px_rgba(255,255,255,.10)] transition hover:bg-zinc-100"
           >
             Оформить заказ
           </Link>

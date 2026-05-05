@@ -160,7 +160,7 @@ export function CheckoutPage() {
           <button
             type="submit"
             disabled={submitDisabled}
-            className="mt-6 inline-flex cursor-pointer rounded-full bg-white px-6 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-white/92 disabled:cursor-not-allowed disabled:bg-white/45 disabled:text-zinc-800"
+            className="mt-6 inline-flex cursor-pointer rounded-full bg-white px-7 py-3 text-sm font-bold text-zinc-950 shadow-[0_10px_28px_rgba(255,255,255,.10)] transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-900 disabled:shadow-none"
           >
             {submitting ? 'Создание заказа...' : 'Перейти к оплате'}
           </button>
