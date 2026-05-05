@@ -282,7 +282,7 @@ export function AdminPsPlusPage() {
                 <div>
                   <h2 className="font-display text-3xl text-sheen">Баннеры главной</h2>
                   <p className="mt-2 text-sm text-white/50">
-                    Картинка показывается в слайдере. Ссылка может вести на раздел, например /catalog?category=deals, или на игру /product/8.
+                    Картинка показывается в слайдере главной в вертикальном формате 3:4. На desktop одновременно видно 4 баннера. Ссылка может вести на раздел, например /catalog?category=deals, или на игру /product/8.
                   </p>
                   <div className="mt-4 grid gap-3 rounded-2xl border border-white/8 bg-black/20 p-3 sm:grid-cols-2">
                     <label className="text-xs uppercase tracking-[0.18em] text-white/42">
@@ -338,21 +338,30 @@ export function AdminPsPlusPage() {
                 ) : null}
 
                 {banners.map((banner, index) => (
-                  <div key={banner.id ?? `new-${index}`} className="grid gap-4 rounded-[24px] border border-white/10 bg-white/[0.03] p-4 lg:grid-cols-[220px_1fr]">
-                    <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/30">
+                  <div key={banner.id ?? `new-${index}`} className="grid gap-4 rounded-[24px] border border-white/10 bg-white/[0.03] p-4 lg:grid-cols-[260px_1fr]">
+                    <div>
+                      <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-[0.16em] text-white/38">
+                        <span>Preview 3:4</span>
+                        <span>Desktop 4 in row</span>
+                      </div>
+                      <div className="aspect-[3/4] overflow-hidden rounded-2xl border border-white/10 bg-black/30">
                       {banner.imageDataUrl || banner.imageUrl ? (
                         <img
                           src={banner.imageDataUrl ?? banner.imageUrl ?? ''}
                           alt={banner.title || 'Баннер'}
-                          className="h-36 w-full object-cover"
+                          className="h-full w-full object-cover"
                           style={{
                             objectPosition: `${banner.imagePositionX}% ${banner.imagePositionY}%`,
                             transform: `scale(${banner.imageScale})`,
                           }}
                         />
                       ) : (
-                        <div className="flex h-36 items-center justify-center px-4 text-center text-xs text-white/36">Нет изображения</div>
+                        <div className="flex h-full items-center justify-center px-4 text-center text-xs text-white/36">Нет изображения 3:4</div>
                       )}
+                      </div>
+                      <p className="mt-2 text-xs leading-5 text-white/42">
+                        Рекомендуемый размер: 900x1200 или 1200x1600. Если картинка широкая, настройте X/Y и Scale.
+                      </p>
                     </div>
                     <div className="grid gap-3">
                       <input
