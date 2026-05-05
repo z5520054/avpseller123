@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { getAdminBanners, getAdminPsPlusPrices, updateAdminBanners, updateAdminPsPlusPrices } from '../lib/catalog-api'
+import { getAdminBanners, getAdminPsPlusPrices, refreshAdminProduct, updateAdminBanners, updateAdminPsPlusPrices } from '../lib/catalog-api'
 import type { HomeBanner, HomeBannerSettings, PsPlusDuration, PsPlusPrice, PsPlusTier } from '../types'
 
 const TIERS: PsPlusTier[] = ['Essential', 'Extra', 'Deluxe']
@@ -76,6 +76,8 @@ export function AdminPsPlusPage() {
   const [active, setActive] = useState<Record<string, boolean>>({})
   const [banners, setBanners] = useState<EditableBanner[]>([])
   const [bannerSettings, setBannerSettings] = useState(DEFAULT_BANNER_SETTINGS)
+  const [refreshProductValue, setRefreshProductValue] = useState('')
+  const [refreshLocale, setRefreshLocale] = useState<'auto' | 'en-tr' | 'en-in'>('auto')
   const [status, setStatus] = useState('Введите admin token для входа.')
   const [loading, setLoading] = useState(false)
 
@@ -170,6 +172,35 @@ export function AdminPsPlusPage() {
     }
   }
 
+  async function refreshProduct() {
+    const cleanToken = token.trim()
+    const value = refreshProductValue.trim()
+    if (!value) {
+      setStatus('Введите ID товара или source key PS Store.')
+      return
+    }
+
+    const productId = /^\d+$/.test(value) ? Number(value) : undefined
+    const sourceKey = productId ? undefined : value
+    setLoading(true)
+    setStatus('Обновляю товар из PS Store...')
+
+    try {
+      const result = await refreshAdminProduct(cleanToken, {
+        productId,
+        sourceKey,
+        locale: refreshLocale === 'auto' ? undefined : refreshLocale,
+      })
+      setStatus(
+        `Товар обновлен: #${result.productId}, locale ${result.locale}, изданий ${result.editions}, карточек версий ${result.editionProducts}, цен версий ${result.editionOffers}.`,
+      )
+    } catch (error) {
+      setStatus(error instanceof Error ? `Не удалось обновить товар: ${error.message}` : 'Не удалось обновить товар.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="page-shell section-space">
       <section className="satin-panel rounded-[34px] border border-white/10 p-5 sm:p-6">
@@ -209,6 +240,42 @@ export function AdminPsPlusPage() {
         ) : (
           <div className="mt-6 space-y-8">
             <div className="rounded-2xl border border-white/8 bg-black/20 px-4 py-3 text-sm text-white/58">{status}</div>
+
+            <section className="rounded-[28px] border border-white/10 bg-black/20 p-5">
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <h2 className="font-display text-3xl text-sheen">Обновить товар вручную</h2>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">
+                    Введите ID товара на сайте, например 4505, или source key PS Store. Обновляются описание, языки, изображения, версии/издания и цены версий.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void refreshProduct()}
+                  disabled={loading}
+                  className="rounded-full bg-white px-5 py-3 text-sm font-medium text-black disabled:opacity-50"
+                >
+                  Обновить
+                </button>
+              </div>
+              <div className="mt-5 grid gap-3 lg:grid-cols-[1fr_180px]">
+                <input
+                  value={refreshProductValue}
+                  onChange={(event) => setRefreshProductValue(event.target.value)}
+                  placeholder="ID товара или source key, например 4505"
+                  className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-white/35"
+                />
+                <select
+                  value={refreshLocale}
+                  onChange={(event) => setRefreshLocale(event.target.value as 'auto' | 'en-tr' | 'en-in')}
+                  className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none"
+                >
+                  <option value="auto">Auto region</option>
+                  <option value="en-tr">Turkey</option>
+                  <option value="en-in">India</option>
+                </select>
+              </div>
+            </section>
 
             <section className="rounded-[28px] border border-white/10 bg-black/20 p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">

@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { config } from '../config'
 import { hashText, translateToRussian } from '../lib/translate'
+import { getProvider } from '../providers'
 import { CatalogRepository } from '../services/catalog-repository'
 import { HomeBannersService } from '../services/home-banners'
 import { PsPlusPricesService, psPlusTiers } from '../services/ps-plus-prices'
@@ -125,6 +126,14 @@ const adminBannersBodySchema = z.object({
   }).optional(),
 })
 
+const adminRefreshProductBodySchema = z.object({
+  productId: z.coerce.number().int().positive().optional(),
+  sourceKey: z.string().trim().min(1).optional(),
+  locale: z.enum(['en-tr', 'en-in']).optional(),
+}).refine((value) => value.productId || value.sourceKey, {
+  message: 'productId or sourceKey is required',
+})
+
 function mapAliasRegion(region?: string) {
   if (!region) {
     return undefined
@@ -236,6 +245,56 @@ export async function registerCatalogRoutes(app: FastifyInstance) {
     const body = adminBannersBodySchema.parse(request.body)
     const settings = body.settings ? homeBanners.updateSettings(body.settings) : homeBanners.getSettings()
     return { items: homeBanners.replaceMany(body.items), settings }
+  })
+
+  app.post('/api/admin/products/refresh', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    const body = adminRefreshProductBodySchema.parse(request.body)
+    const product = body.productId
+      ? repository.getProduct(body.productId)
+      : repository.getProductBySourceKey(body.sourceKey ?? '')
+
+    if (!product) {
+      reply.code(404)
+      return { error: 'Product not found' }
+    }
+
+    const provider = getProvider(config.defaultProvider)
+    if (!provider.fetchProductDetail) {
+      reply.code(400)
+      return { error: `Provider ${provider.name} does not support product detail refresh` }
+    }
+
+    const locale = body.locale
+      ?? (product.offers.some((offer) => offer.region === 'turkey') ? 'en-tr' : 'en-in')
+    const productId = Number(product.id)
+
+    try {
+      const detail = await provider.fetchProductDetail(product.sourceKey, locale)
+      repository.upsertProductDetail(productId, detail)
+      const editionStats = repository.upsertEditionProductsFromDetail(productId, detail)
+
+      return {
+        productId,
+        sourceKey: product.sourceKey,
+        locale: detail.locale,
+        editions: detail.editions.length,
+        editionProducts: editionStats.products,
+        editionOffers: editionStats.offers,
+        product: repository.getProduct(productId),
+        detail: repository.getProductDetail(productId),
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      reply.code(message.includes('403 Forbidden') ? 429 : 502)
+      return {
+        error: 'Product refresh failed',
+        message,
+      }
+    }
   })
 
   app.get('/api/catalog/:id', async (request, reply) => {

@@ -528,6 +528,11 @@ export class CatalogRepository {
     return row ? this.getCatalogItemFromRow(row) : null
   }
 
+  getProductBySourceKey(sourceKey: string) {
+    const row = this.db.prepare('SELECT * FROM products WHERE source_key = ?').get(sourceKey) as Record<string, unknown> | undefined
+    return row ? this.getCatalogItemFromRow(row) : null
+  }
+
   getProductsByIds(ids: number[]) {
     return ids
       .map((id) => this.getProduct(id))

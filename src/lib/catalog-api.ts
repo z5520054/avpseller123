@@ -21,7 +21,15 @@ async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   })
 
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`)
+    const text = await response.text().catch(() => '')
+    let message = text
+    try {
+      const parsed = JSON.parse(text) as { error?: string; message?: string }
+      message = parsed.message || parsed.error || text
+    } catch {
+      // Keep raw text when the API does not return JSON.
+    }
+    throw new Error(message ? `API request failed: ${response.status}. ${message}` : `API request failed: ${response.status}`)
   }
 
   return (await response.json()) as T
@@ -141,6 +149,30 @@ export function updateAdminBanners(
 ) {
   return fetchJson<{ items: HomeBanner[]; settings: HomeBannerSettings }>('/api/admin/banners', {
     method: 'PUT',
+    headers: {
+      'x-admin-token': token,
+    },
+    body: JSON.stringify(input),
+  })
+}
+
+export function refreshAdminProduct(
+  token: string,
+  input: {
+    productId?: number
+    sourceKey?: string
+    locale?: 'en-tr' | 'en-in'
+  },
+) {
+  return fetchJson<{
+    productId: number
+    sourceKey: string
+    locale: string
+    editions: number
+    editionProducts: number
+    editionOffers: number
+  }>('/api/admin/products/refresh', {
+    method: 'POST',
     headers: {
       'x-admin-token': token,
     },
