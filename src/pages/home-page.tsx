@@ -520,7 +520,7 @@ function SubscriptionPreview() {
       <div className="pointer-events-none absolute -bottom-24 right-0 h-56 w-[38rem] rounded-[100%] border-t-[18px] border-white/10 shadow-[0_-18px_34px_rgba(255,255,255,.06)]" />
 
       <div className="relative flex flex-wrap items-center justify-between gap-5">
-        <h2 className="max-w-4xl text-[clamp(2.1rem,4vw,4rem)] font-black uppercase leading-none tracking-[-0.055em] text-[#eef5ff] drop-shadow-[0_6px_0_rgba(255,255,255,.08)]">
+        <h2 className="max-w-4xl text-[clamp(1.8rem,3.2vw,3.15rem)] font-black uppercase leading-none tracking-[-0.05em] text-[#eef5ff] drop-shadow-[0_5px_0_rgba(255,255,255,.07)]">
           Подписки PS Plus
         </h2>
         <Link
@@ -563,7 +563,7 @@ function SubscriptionPreview() {
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_0%,rgba(255,255,255,.18),transparent_18%),linear-gradient(180deg,rgba(255,255,255,.06),transparent_35%)]" />
               <div className="relative flex h-full min-h-[288px] w-full flex-col">
                 <div className={`inline-flex w-fit rounded-lg border px-3.5 py-1.5 text-base font-semibold ${plan.badgeClass}`}>PS Plus</div>
-                <div className={`mt-11 text-[clamp(2.55rem,4vw,3.7rem)] font-black uppercase leading-none tracking-[-0.075em] ${plan.titleClass}`}>
+                <div className={`mt-11 text-[clamp(2.1rem,3.15vw,3rem)] font-black uppercase leading-none tracking-[-0.07em] ${plan.titleClass}`}>
                   {plan.label}
                 </div>
                 <p className={`mt-4 max-w-sm text-base font-medium leading-6 ${plan.bodyClass}`}>{plan.text}</p>

@@ -353,7 +353,7 @@ export function CatalogPage() {
   }
 
   return (
-    <div className="page-shell section-space">
+    <div className="page-shell pb-8 sm:pb-10 lg:pb-12">
       <SectionHeading
         eyebrow="Каталог"
         title={getCatalogHeading(category)}
