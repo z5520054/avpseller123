@@ -1,4 +1,4 @@
-import { SlidersHorizontal, X } from 'lucide-react'
+import { Cloud, Crown, Disc3, Gamepad2, Globe2, ShieldCheck, SlidersHorizontal, Timer, X } from 'lucide-react'
 import { useDeferredValue, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CatalogApiProductCard } from '../components/ui/catalog-api-product-card'
@@ -44,34 +44,43 @@ const SUBSCRIPTION_DURATIONS = [
 const SUBSCRIPTION_PLANS = [
   {
     tier: 'Essential',
-    cardClass: 'bg-gradient-to-br from-zinc-100 via-white to-zinc-300 text-black',
-    eyebrowClass: 'text-black/72',
-    titleClass: 'text-black',
-    bodyClass: 'text-black/64',
-    chipClass: 'border-black/10 bg-black/[0.04] text-black/68',
-    buttonClass: 'bg-black text-white hover:bg-black/82',
+    cardClass: 'border-[#73a7ff]/70 bg-[radial-gradient(circle_at_18%_0%,rgba(255,255,255,.98),rgba(215,221,238,.92)_28%,rgba(70,78,103,.9)_100%)] text-white shadow-[0_0_0_1px_rgba(255,255,255,.22)_inset,0_0_32px_rgba(75,132,255,.46)]',
+    eyebrowClass: 'text-slate-950/72',
+    titleClass: 'text-white drop-shadow-[0_2px_8px_rgba(0,0,0,.42)]',
+    bodyClass: 'text-white/92 drop-shadow-[0_1px_3px_rgba(0,0,0,.55)]',
+    chipClass: 'border-white/16 bg-white/12 text-white shadow-[0_1px_0_rgba(255,255,255,.12)_inset]',
+    iconClass: 'bg-white/88 text-slate-700',
+    buttonClass: 'border border-white/70 bg-white text-slate-950 shadow-[0_0_22px_rgba(91,142,255,.55)] hover:bg-white/90',
+    railClass: 'bg-[linear-gradient(135deg,transparent_0%,rgba(255,255,255,.14)_48%,rgba(255,255,255,.36)_50%,transparent_66%)]',
+    glyphClass: 'border-white/22 text-white/22',
     description: 'Базовый доступ: ежемесячные игры, онлайн-мультиплеер, скидки и облачные сохранения.',
     benefits: ['Ежемесячные игры', 'Онлайн-мультиплеер', 'Эксклюзивные скидки', 'Облачные сохранения'],
   },
   {
     tier: 'Extra',
-    cardClass: 'bg-gradient-to-br from-[#ffb000] via-[#ffc531] to-[#f39400] text-black',
-    eyebrowClass: 'text-black/72',
-    titleClass: 'text-black',
-    bodyClass: 'text-black/70',
-    chipClass: 'border-black/10 bg-black/[0.05] text-black/72',
-    buttonClass: 'bg-black text-white hover:bg-black/82',
+    cardClass: 'border-[#ffc83d]/80 bg-[radial-gradient(circle_at_60%_-10%,rgba(255,218,98,.55),transparent_32%),linear-gradient(135deg,#231c0b_0%,#11100c_38%,#181510_100%)] text-white shadow-[0_0_0_1px_rgba(255,230,140,.2)_inset,0_0_34px_rgba(255,185,35,.44)]',
+    eyebrowClass: 'text-[#ffd15a]',
+    titleClass: 'text-[#ffc533] drop-shadow-[0_0_14px_rgba(255,191,45,.18)]',
+    bodyClass: 'text-white/88',
+    chipClass: 'border-[#ffc533]/16 bg-black/28 text-white shadow-[0_1px_0_rgba(255,255,255,.08)_inset]',
+    iconClass: 'bg-[#ffc533] text-black shadow-[0_0_18px_rgba(255,197,51,.36)]',
+    buttonClass: 'bg-gradient-to-b from-[#ffe278] to-[#f5ad18] text-black shadow-[0_0_24px_rgba(255,199,45,.48)] hover:brightness-110',
+    railClass: 'bg-[radial-gradient(circle_at_62%_12%,rgba(255,216,82,.42),transparent_24%),linear-gradient(135deg,transparent_0%,transparent_48%,rgba(255,192,38,.78)_50%,transparent_67%)]',
+    glyphClass: 'border-[#ffd05a]/34 text-[#ffd05a]/28',
     description: 'Все из Essential плюс каталог игр и Ubisoft+ Classics.',
     benefits: ['Каталог игр', 'Ubisoft+ Classics', 'Ежемесячные игры', 'Онлайн-мультиплеер'],
   },
   {
     tier: 'Deluxe',
-    cardClass: 'bg-gradient-to-br from-[#353535] via-[#252525] to-[#111] text-white',
+    cardClass: 'border-[#c79628]/48 bg-[linear-gradient(135deg,#17181d_0%,#090a0e_50%,#07070a_100%)] text-white shadow-[0_0_0_1px_rgba(255,202,82,.11)_inset]',
     eyebrowClass: 'text-[#ffb000]',
     titleClass: 'text-[#ffb000]',
-    bodyClass: 'text-[#ffb000]/76',
-    chipClass: 'border-white/10 bg-black/18 text-white/70',
-    buttonClass: 'bg-white text-black hover:bg-white/92',
+    bodyClass: 'text-white/86',
+    chipClass: 'border-white/10 bg-white/[0.035] text-white/76',
+    iconClass: 'bg-[#ffb000] text-black shadow-[0_0_16px_rgba(255,176,0,.32)]',
+    buttonClass: 'border border-[#ffbd32]/78 bg-black text-white shadow-[0_0_18px_rgba(255,180,28,.22)] hover:bg-[#ffb000] hover:text-black',
+    railClass: 'bg-[linear-gradient(135deg,transparent_0%,transparent_54%,rgba(255,181,39,.62)_56%,transparent_75%)]',
+    glyphClass: 'border-[#ffb000]/18 text-[#ffb000]/16',
     description: 'Максимальный план: каталог игр, Classics Catalogue и пробные версии игр.',
     benefits: ['Classics Catalogue', 'Пробные версии игр', 'Каталог игр', 'Ubisoft+ Classics'],
   },
@@ -123,6 +132,16 @@ function getCatalogDescription(category: string, total: number) {
   return `Найдено ${total.toLocaleString('ru-RU')} позиций`
 }
 
+function getSubscriptionBenefitIcon(benefit: string) {
+  if (benefit.includes('Classics')) return Crown
+  if (benefit.includes('Ubisoft')) return Disc3
+  if (benefit.includes('Онлайн')) return Globe2
+  if (benefit.includes('скид')) return ShieldCheck
+  if (benefit.includes('Облач')) return Cloud
+  if (benefit.includes('Проб')) return Timer
+  return Gamepad2
+}
+
 function SubscriptionChooser() {
   const { addToCart, cart, region } = useAppState()
   const [duration, setDuration] = useState<(typeof SUBSCRIPTION_DURATIONS)[number]['value']>(1)
@@ -145,17 +164,18 @@ function SubscriptionChooser() {
   }, [region])
 
   return (
-    <div className="satin-panel rounded-[32px] border border-white/10 p-5 sm:p-6">
-      <div className="flex flex-wrap gap-2">
+    <div className="relative overflow-hidden rounded-[28px] border border-white/8 bg-[#070b14] p-4 shadow-[0_18px_70px_rgba(0,0,0,.42)] sm:p-5">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(61,112,255,.12),transparent_28%),radial-gradient(circle_at_70%_10%,rgba(255,184,41,.1),transparent_26%)]" />
+      <div className="relative flex flex-wrap gap-3">
         {SUBSCRIPTION_DURATIONS.map((item) => (
           <button
             key={item.value}
             type="button"
             onClick={() => setDuration(item.value)}
-            className={`rounded-full border px-5 py-3 text-sm transition ${
+            className={`cursor-pointer rounded-full border px-6 py-3 text-sm font-medium transition duration-300 ${
               duration === item.value
-                ? 'border-white/20 bg-white text-black'
-                : 'border-white/10 bg-white/[0.04] text-white/68 hover:border-white/18 hover:text-white'
+                ? 'border-[#6ea0ff]/80 bg-[#10182a] text-white shadow-[0_0_0_1px_rgba(255,255,255,.14)_inset,0_0_24px_rgba(69,122,255,.72)]'
+                : 'border-white/8 bg-white/[0.045] text-white/44 hover:border-white/14 hover:bg-white/[0.07] hover:text-white/72'
             }`}
           >
             {item.label}
@@ -163,7 +183,7 @@ function SubscriptionChooser() {
         ))}
       </div>
 
-      <div className="mt-6 grid gap-5 lg:grid-cols-3">
+      <div className="relative mt-5 grid gap-5 lg:grid-cols-3">
         {SUBSCRIPTION_PLANS.map((plan) => {
           const price = prices.find((item) => item.tier === plan.tier && item.durationMonths === duration)
           const canBuy = Boolean(price?.isActive && price.priceRubMinor !== null)
@@ -171,30 +191,40 @@ function SubscriptionChooser() {
           const isInCart = cart.some((item) => item.productId === productId)
 
           return (
-            <article key={plan.tier} className={`relative flex min-h-[420px] overflow-hidden rounded-[28px] border border-white/10 p-5 ${plan.cardClass}`}>
-              <div className="absolute inset-0 opacity-20 mix-blend-overlay [background:radial-gradient(circle_at_22%_18%,white,transparent_30%),linear-gradient(125deg,transparent_0%,rgba(255,255,255,.6)_45%,transparent_62%)]" />
+            <article key={plan.tier} className={`relative flex min-h-[575px] overflow-hidden rounded-[18px] border p-5 transition duration-300 hover:-translate-y-1 ${plan.cardClass}`}>
+              <div className={`pointer-events-none absolute inset-0 opacity-80 ${plan.railClass}`} />
+              <div className="pointer-events-none absolute -right-8 top-6 h-28 w-28 rounded-full border opacity-80" />
+              <div className={`pointer-events-none absolute right-10 top-8 h-12 w-12 rotate-45 border ${plan.glyphClass}`} />
+              <div className={`pointer-events-none absolute right-4 top-20 h-16 w-16 rounded-full border ${plan.glyphClass}`} />
               <div className="relative flex h-full w-full flex-col">
-                <div className={`text-xs font-semibold uppercase tracking-[0.22em] ${plan.eyebrowClass}`}>PlayStation Plus</div>
-                <h3 className={`mt-5 font-display text-[clamp(2.35rem,4vw,4rem)] leading-none tracking-[-0.055em] ${plan.titleClass}`}>{plan.tier}</h3>
+                <div className={`text-xs font-semibold uppercase tracking-[0.24em] ${plan.eyebrowClass}`}>PlayStation Plus</div>
+                <h3 className={`mt-7 text-[clamp(3rem,5vw,4.15rem)] font-semibold leading-none tracking-[-0.06em] ${plan.titleClass}`}>{plan.tier}</h3>
                 <p className={`mt-5 min-h-20 text-sm font-medium leading-6 ${plan.bodyClass}`}>{plan.description}</p>
-                <div className={`mt-auto pt-6 text-sm font-medium ${plan.bodyClass}`}>Срок: {duration} мес.</div>
-                <div className={`mt-3 text-2xl font-extrabold ${plan.titleClass}`}>
+                <div className={`mt-auto pt-9 text-sm font-medium ${plan.bodyClass}`}>Срок: {duration} мес.</div>
+                <div className={`mt-2 text-3xl font-extrabold tracking-[-0.04em] ${plan.titleClass}`}>
                   {formatMoneyMinor(
                     price?.priceRubMinor,
                     'RUB',
                   ) ?? 'Цена не задана'}
                 </div>
-                <div className="mt-5 space-y-2">
-                  {plan.benefits.map((benefit) => (
-                    <div key={benefit} className={`rounded-2xl border px-3 py-2 text-sm ${plan.chipClass}`}>
-                      {benefit}
-                    </div>
-                  ))}
+                <div className="mt-5 space-y-2.5">
+                  {plan.benefits.map((benefit) => {
+                    const Icon = getSubscriptionBenefitIcon(benefit)
+
+                    return (
+                      <div key={benefit} className={`flex items-center gap-3 rounded-full border px-3 py-2.5 text-sm ${plan.chipClass}`}>
+                        <span className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${plan.iconClass}`}>
+                          <Icon size={17} strokeWidth={2.1} />
+                        </span>
+                        <span>{benefit}</span>
+                      </div>
+                    )
+                  })}
                 </div>
                 {isInCart ? (
                   <Link
                     to="/cart"
-                    className="mt-6 inline-flex w-full items-center justify-center rounded-full border border-emerald-300/60 bg-emerald-400 px-5 py-3 text-sm font-medium text-black transition hover:bg-emerald-300"
+                    className="mt-6 inline-flex w-full cursor-pointer items-center justify-center rounded-full border border-emerald-300/60 bg-emerald-400 px-5 py-4 text-sm font-semibold text-black transition hover:bg-emerald-300"
                   >
                     Перейти в корзину
                   </Link>
@@ -203,7 +233,7 @@ function SubscriptionChooser() {
                     type="button"
                     disabled={!canBuy}
                     onClick={() => addToCart(productId)}
-                    className={`mt-6 inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40 ${plan.buttonClass}`}
+                    className={`mt-6 inline-flex w-full cursor-pointer items-center justify-center rounded-full px-5 py-4 text-sm font-semibold transition duration-300 disabled:cursor-not-allowed disabled:opacity-40 ${plan.buttonClass}`}
                   >
                     Выбрать
                   </button>
