@@ -183,6 +183,7 @@ export function AuthModal({
               .then((tokenData: unknown) => enrichVkProfile(VKID, tokenData))
               .then((profileData: unknown) => {
                 window.localStorage.setItem('avp-vkid-profile', JSON.stringify(profileData))
+                window.dispatchEvent(new Event('avp-auth-changed'))
                 onAuthenticated(profileData)
                 setStatus('success')
                 window.setTimeout(onClose, 700)

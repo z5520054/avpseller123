@@ -243,6 +243,12 @@ export function AccountPage() {
   const avatar = getAvatar(profile)
 
   useEffect(() => {
+    if (!profile) {
+      navigate('/', { replace: true })
+    }
+  }, [navigate, profile])
+
+  useEffect(() => {
     window.localStorage.setItem(ACCOUNT_EMAIL_KEY, email)
   }, [email])
 
@@ -268,8 +274,13 @@ export function AccountPage() {
 
   function handleLogout() {
     window.localStorage.removeItem('avp-vkid-profile')
+    window.dispatchEvent(new Event('avp-auth-changed'))
     setProfile(null)
     navigate('/')
+  }
+
+  if (!profile) {
+    return null
   }
 
   function handleSubscriptionSelect(id: ActiveSubscription) {

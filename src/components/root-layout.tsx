@@ -1,5 +1,5 @@
 import { Heart, LifeBuoy, Search, ShoppingBag, User, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import avpIconUrl from '../assets/avp-icon.png'
 import { useAppState } from '../store/use-app-state'
@@ -25,6 +25,21 @@ export function RootLayout() {
 
     return Boolean(window.localStorage.getItem('avp-vkid-profile'))
   })
+
+  useEffect(() => {
+    const syncAuthState = () => {
+      setIsAuthenticated(Boolean(window.localStorage.getItem('avp-vkid-profile')))
+    }
+
+    syncAuthState()
+    window.addEventListener('storage', syncAuthState)
+    window.addEventListener('avp-auth-changed', syncAuthState)
+
+    return () => {
+      window.removeEventListener('storage', syncAuthState)
+      window.removeEventListener('avp-auth-changed', syncAuthState)
+    }
+  }, [location.pathname])
 
   function isNavigationActive(active: string) {
     if (active === 'subscriptions') {
