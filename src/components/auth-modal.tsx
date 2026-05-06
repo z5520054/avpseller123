@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 
 const VK_ID_APP_ID = 54580545
-const VK_ID_REDIRECT_URL = 'https://avpseller.ru/'
+const VK_ID_REDIRECT_URL = import.meta.env.VITE_VK_ID_REDIRECT_URL || 'https://avpseller.ru/'
 const VK_ID_SDK_URL = 'https://unpkg.com/@vkid/sdk@2/dist-sdk/umd/index.js'
 
 interface VkIdWidget {
