@@ -1,8 +1,7 @@
-import { CreditCard, Database, Gamepad2, Gift, LogOut, Mail, Plus, ShieldCheck, UserRound } from 'lucide-react'
+import { Database, Gamepad2, Gift, LogOut, Mail, Plus, ShieldCheck, UserRound } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { useCatalogProductsByIds } from '../hooks/use-catalog-products-by-ids'
 import { useAppState } from '../store/use-app-state'
 
 type ConsoleType = 'ps5' | 'ps4'
@@ -218,8 +217,6 @@ export function AccountPage() {
 
     return window.localStorage.getItem(ACCOUNT_SUBSCRIPTION_END_KEY) ?? ''
   })
-  const { products: cartProducts } = useCatalogProductsByIds(cart.map((item) => item.productId))
-  const { products: favoriteProducts } = useCatalogProductsByIds(favorites.slice(0, 3))
   const avatar = getAvatar(profile)
 
   useEffect(() => {
@@ -418,95 +415,6 @@ export function AccountPage() {
               </div>
             </section>
 
-            {cart.length < 0 ? (
-            <section className="grid gap-4 xl:grid-cols-2">
-              <div className="rounded-[30px] border border-white/10 bg-white/[0.045] p-5 sm:p-7">
-                <div className="flex items-center justify-between gap-4">
-                  <h2 className="text-xl font-semibold text-white">История покупок</h2>
-                  <CreditCard size={18} className="text-white/38" />
-                </div>
-                <div className="mt-5 rounded-[22px] border border-white/10 bg-black/18 p-4">
-                  <div className="text-white">Заказов пока нет</div>
-                  <p className="mt-2 text-sm leading-6 text-white/46">
-                    После оплаты здесь появятся номер заказа, статус и купленные коды.
-                  </p>
-                </div>
-              </div>
-
-              <div className="rounded-[30px] border border-white/10 bg-white/[0.045] p-5 sm:p-7">
-                <div className="flex items-center justify-between gap-4">
-                  <h2 className="text-xl font-semibold text-white">Активная подписка</h2>
-                  <Gift size={18} className="text-white/38" />
-                </div>
-                <div className="mt-5 rounded-[22px] border border-white/10 bg-black/18 p-4">
-                  <div className="text-white">Подписка не выбрана</div>
-                  <p className="mt-2 text-sm leading-6 text-white/46">
-                    Когда пользователь купит PS Plus, здесь можно показывать тариф и срок.
-                  </p>
-                </div>
-              </div>
-            </section>
-            ) : null}
-
-            <section className="grid gap-4 xl:grid-cols-2">
-              <div className="rounded-[30px] border border-white/10 bg-white/[0.045] p-5 sm:p-7">
-                <h2 className="text-xl font-semibold text-white">Сохранённая корзина</h2>
-                <div className="mt-5 space-y-3">
-                  {cartProducts.length > 0 ? (
-                    cartProducts.slice(0, 3).map((product) => (
-                      <Link
-                        key={product.id}
-                        to={`/product/${product.id}`}
-                        className="flex items-center gap-3 rounded-[20px] border border-white/10 bg-black/18 p-3 transition hover:bg-white/[0.06]"
-                      >
-                        {product.coverUrl ? (
-                          <img src={product.coverUrl} alt="" className="h-13 w-13 rounded-2xl object-cover" />
-                        ) : (
-                          <div className="h-13 w-13 rounded-2xl bg-white/8" />
-                        )}
-                        <div className="min-w-0">
-                          <div className="line-clamp-1 text-sm text-white">{product.title}</div>
-                          <div className="mt-1 text-xs text-white/38">{product.platforms.join(' / ') || product.storeType}</div>
-                        </div>
-                      </Link>
-                    ))
-                  ) : (
-                    <div className="rounded-[20px] border border-white/10 bg-black/18 p-4 text-sm text-white/48">
-                      Корзина пока пустая.
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="rounded-[30px] border border-white/10 bg-white/[0.045] p-5 sm:p-7">
-                <h2 className="text-xl font-semibold text-white">Избранное</h2>
-                <div className="mt-5 space-y-3">
-                  {favoriteProducts.length > 0 ? (
-                    favoriteProducts.map((product) => (
-                      <Link
-                        key={product.id}
-                        to={`/product/${product.id}`}
-                        className="flex items-center gap-3 rounded-[20px] border border-white/10 bg-black/18 p-3 transition hover:bg-white/[0.06]"
-                      >
-                        {product.coverUrl ? (
-                          <img src={product.coverUrl} alt="" className="h-13 w-13 rounded-2xl object-cover" />
-                        ) : (
-                          <div className="h-13 w-13 rounded-2xl bg-white/8" />
-                        )}
-                        <div className="min-w-0">
-                          <div className="line-clamp-1 text-sm text-white">{product.title}</div>
-                          <div className="mt-1 text-xs text-white/38">Быстрый доступ</div>
-                        </div>
-                      </Link>
-                    ))
-                  ) : (
-                    <div className="rounded-[20px] border border-white/10 bg-black/18 p-4 text-sm text-white/48">
-                      Избранное пока пустое.
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
               </>
             ) : null}
 
