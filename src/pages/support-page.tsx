@@ -25,10 +25,10 @@ export function SupportPage() {
   return (
     <div className="page-shell section-space">
       <div className="grid gap-5 lg:grid-cols-[0.78fr_0.95fr]">
-        <section className="satin-panel min-h-[620px] rounded-[30px] border border-white/10 p-6 sm:p-8">
+        <section className="satin-panel rounded-[26px] border border-white/10 p-5 sm:rounded-[30px] sm:p-8 lg:min-h-[620px]">
           <div className="text-xs uppercase tracking-[0.28em] text-white/36">Support</div>
-          <h1 className="mt-5 font-display text-5xl leading-none text-sheen sm:text-6xl">Поддержка</h1>
-          <p className="mt-6 max-w-xl text-base leading-8 text-white/58">
+          <h1 className="mt-5 font-display text-4xl leading-none text-sheen sm:text-6xl">Поддержка</h1>
+          <p className="mt-5 max-w-xl text-sm leading-7 text-white/58 sm:mt-6 sm:text-base sm:leading-8">
             Помогаем с регионами Turkey и India, активацией товаров, подбором подписок и вопросами по заказам.
           </p>
           <div className="mt-9 space-y-3 text-sm font-medium text-white/64">
@@ -42,7 +42,7 @@ export function SupportPage() {
           </div>
         </section>
 
-        <section className="satin-panel rounded-[30px] border border-white/10 p-5 sm:p-8">
+        <section className="satin-panel rounded-[26px] border border-white/10 p-4 sm:rounded-[30px] sm:p-8">
           <div className="text-xs uppercase tracking-[0.28em] text-white/36">FAQ</div>
           <div className="mt-6 space-y-4 sm:mt-7">
             {faq.map((item) => (

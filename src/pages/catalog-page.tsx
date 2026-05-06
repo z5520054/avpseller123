@@ -191,30 +191,30 @@ function SubscriptionChooser() {
           const isInCart = cart.some((item) => item.productId === productId)
 
           return (
-            <article key={plan.tier} className={`relative flex min-h-[480px] overflow-hidden rounded-[18px] border p-4 transition duration-300 hover:-translate-y-1 sm:min-h-[575px] sm:p-5 ${plan.cardClass}`}>
+            <article key={plan.tier} className={`relative flex min-h-[390px] overflow-hidden rounded-[18px] border p-4 transition duration-300 hover:-translate-y-1 sm:min-h-[535px] sm:p-5 ${plan.cardClass}`}>
               <div className={`pointer-events-none absolute inset-0 opacity-80 ${plan.railClass}`} />
               <div className="pointer-events-none absolute -right-8 top-6 h-28 w-28 rounded-full border opacity-80" />
               <div className={`pointer-events-none absolute right-10 top-8 h-12 w-12 rotate-45 border ${plan.glyphClass}`} />
               <div className={`pointer-events-none absolute right-4 top-20 h-16 w-16 rounded-full border ${plan.glyphClass}`} />
               <div className="relative flex h-full w-full flex-col">
                 <div className={`text-xs font-semibold uppercase tracking-[0.24em] ${plan.eyebrowClass}`}>PlayStation Plus</div>
-                <h3 className={`mt-6 text-[clamp(2.45rem,14vw,3.5rem)] font-semibold leading-none tracking-[-0.06em] sm:mt-7 sm:text-[clamp(3rem,5vw,4.15rem)] ${plan.titleClass}`}>{plan.tier}</h3>
-                <p className={`mt-5 min-h-20 text-sm font-medium leading-6 ${plan.bodyClass}`}>{plan.description}</p>
-                <div className={`mt-auto pt-9 text-sm font-medium ${plan.bodyClass}`}>Срок: {duration} мес.</div>
+                <h3 className={`mt-5 text-[clamp(2.1rem,11vw,3rem)] font-semibold leading-none tracking-[-0.06em] sm:mt-7 sm:text-[clamp(2.85rem,5vw,4rem)] ${plan.titleClass}`}>{plan.tier}</h3>
+                <p className={`mt-4 min-h-0 text-sm font-medium leading-6 sm:mt-5 sm:min-h-20 ${plan.bodyClass}`}>{plan.description}</p>
+                <div className={`mt-auto pt-6 text-sm font-medium sm:pt-9 ${plan.bodyClass}`}>Срок: {duration} мес.</div>
                 <div className={`mt-2 text-3xl font-extrabold tracking-[-0.04em] ${plan.titleClass}`}>
                   {formatMoneyMinor(
                     price?.priceRubMinor,
                     'RUB',
                   ) ?? 'Цена не задана'}
                 </div>
-                <div className="mt-5 space-y-2.5">
+                <div className="mt-4 space-y-2 sm:mt-5 sm:space-y-2.5">
                   {plan.benefits.map((benefit) => {
                     const Icon = getSubscriptionBenefitIcon(benefit)
 
                     return (
-                      <div key={benefit} className={`flex items-center gap-3 rounded-full border px-3 py-2.5 text-sm ${plan.chipClass}`}>
-                        <span className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${plan.iconClass}`}>
-                          <Icon size={17} strokeWidth={2.1} />
+                      <div key={benefit} className={`flex items-center gap-2.5 rounded-full border px-2.5 py-2 text-xs sm:gap-3 sm:px-3 sm:py-2.5 sm:text-sm ${plan.chipClass}`}>
+                        <span className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full sm:h-8 sm:w-8 ${plan.iconClass}`}>
+                          <Icon size={16} strokeWidth={2.1} />
                         </span>
                         <span>{benefit}</span>
                       </div>

@@ -1,4 +1,4 @@
-import { Heart, LifeBuoy, Search, ShoppingBag, User, X } from 'lucide-react'
+import { Grid2X2, Heart, LifeBuoy, Search, ShoppingBag, Sparkles, User, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import avpIconUrl from '../assets/avp-icon.png'
@@ -63,7 +63,7 @@ export function RootLayout() {
   }
 
   return (
-    <div className="min-h-screen pb-24 text-silver-300 lg:pb-10">
+    <div className="min-h-screen pb-[calc(env(safe-area-inset-bottom)+6.5rem)] text-silver-300 lg:pb-10">
       <header className="page-shell sticky top-0 z-50 pt-2 sm:pt-4">
         <div className="header-shell grid gap-3 rounded-[24px] border border-white/10 px-3 py-3 sm:rounded-[30px] sm:px-6 sm:py-4 lg:grid-cols-[auto_1fr_auto] lg:items-center">
           <div className="flex items-center justify-between gap-4">
@@ -176,18 +176,25 @@ export function RootLayout() {
         onClose={() => setIsAuthOpen(false)}
       />
 
-      <nav className="fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 rounded-[24px] border border-white/10 bg-[#171719]/95 px-2 py-2 shadow-[0_18px_50px_rgba(0,0,0,.55)] backdrop-blur-2xl lg:hidden">
-        {navigation.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={`flex min-h-12 flex-col items-center justify-center rounded-[18px] px-1 text-[10px] font-medium transition ${
-              isNavigationActive(item.active) ? 'bg-white text-black' : 'text-white/64'
-            }`}
-          >
-            {item.label}
-          </NavLink>
-        ))}
+      <nav className="fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 rounded-[24px] border border-white/10 bg-[#171719]/95 px-2 py-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] shadow-[0_18px_50px_rgba(0,0,0,.55)] backdrop-blur-2xl lg:hidden">
+        <NavLink
+          to="/catalog"
+          className={`flex min-h-12 flex-col items-center justify-center rounded-[18px] px-1 text-[10px] font-medium transition ${
+            isNavigationActive('catalog') ? 'bg-white text-black' : 'text-white/64'
+          }`}
+        >
+          <Grid2X2 size={18} />
+          <span>Каталог</span>
+        </NavLink>
+        <NavLink
+          to="/catalog?category=subscriptions"
+          className={`flex min-h-12 flex-col items-center justify-center rounded-[18px] px-1 text-[10px] font-medium transition ${
+            isNavigationActive('subscriptions') ? 'bg-white text-black' : 'text-white/64'
+          }`}
+        >
+          <Sparkles size={18} />
+          <span>Подписки</span>
+        </NavLink>
         <NavLink
           to="/favorites"
           className={({ isActive }) => `relative flex min-h-12 flex-col items-center justify-center rounded-[18px] px-1 text-[10px] font-medium transition ${isActive ? 'bg-white text-black' : 'text-white/64'}`}
@@ -212,6 +219,20 @@ export function RootLayout() {
             </span>
           ) : null}
         </NavLink>
+        <button
+          type="button"
+          onClick={handleProfileClick}
+          className={`relative flex min-h-12 flex-col items-center justify-center rounded-[18px] px-1 text-[10px] font-medium transition ${
+            location.pathname === '/account' && isAuthenticated ? 'bg-white text-black' : 'text-white/64'
+          }`}
+          aria-label="Профиль"
+        >
+          <User size={18} />
+          <span>Профиль</span>
+          {isAuthenticated ? (
+            <span className="absolute right-3 top-2 h-2.5 w-2.5 rounded-full border border-[#171719] bg-emerald-300" />
+          ) : null}
+        </button>
       </nav>
     </div>
   )

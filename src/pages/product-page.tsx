@@ -285,7 +285,7 @@ export function ProductPage() {
                           <div className="text-lg font-medium text-white">{edition.editionName || edition.title}</div>
                           <div className="mt-1 text-sm text-white/45">{edition.title}</div>
                         </div>
-                        <div className="text-left text-lg font-semibold text-white sm:text-right">{price ?? '???? ??????????'}</div>
+                        <div className="text-left text-lg font-semibold text-white sm:text-right">{price ?? 'Цена уточняется'}</div>
                       </div>
                       {edition.price.discountPercent ? (
                         <div className="mt-2 inline-flex rounded-full border border-emerald-400/30 bg-emerald-500/12 px-3 py-1 text-xs text-emerald-300">

@@ -36,13 +36,17 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
+  color-scheme: dark;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow-x: clip;
+  overscroll-behavior-x: none;
+  -webkit-tap-highlight-color: transparent;
   background:
     radial-gradient(circle at top, rgba(255, 255, 255, 0.08), transparent 22%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.03), transparent 30%),
@@ -81,6 +85,27 @@ textarea {
 
 #root {
   min-height: 100vh;
+  overflow-x: clip;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.72) !important;
+  outline-offset: 3px;
 }
 
 .satin-panel {
@@ -240,10 +265,15 @@ textarea {
 }
 
 .section-space {
-  @apply py-5 sm:py-10 lg:py-12;
+  @apply py-4 sm:py-10 lg:py-12;
 }
 
 @media (max-width: 640px) {
+  .page-shell {
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+  }
+
   .header-nav-pill {
     @apply whitespace-nowrap px-3 py-2 text-xs;
   }
