@@ -1,7 +1,7 @@
 import { Database, Gamepad2, Gift, LogOut, Mail, Plus, ShieldCheck, UserRound } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAppState } from '../store/use-app-state'
 
 type ConsoleType = 'ps5' | 'ps4'
@@ -187,6 +187,7 @@ function AccountMenuButton({
 
 export function AccountPage() {
   const { cart, favorites } = useAppState()
+  const navigate = useNavigate()
   const [profile, setProfile] = useState<Record<string, unknown> | null>(() => readVkProfile())
   const [activeSection, setActiveSection] = useState<AccountSection>('account')
   const [email, setEmail] = useState(() => {
@@ -238,6 +239,7 @@ export function AccountPage() {
   function handleLogout() {
     window.localStorage.removeItem('avp-vkid-profile')
     setProfile(null)
+    navigate('/')
   }
 
   return (
