@@ -1,6 +1,6 @@
 import { Heart, LifeBuoy, Search, ShoppingBag, User, X } from 'lucide-react'
 import { useState } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import avpIconUrl from '../assets/avp-icon.png'
 import { useAppState } from '../store/use-app-state'
 import { AuthModal } from './auth-modal'
@@ -15,6 +15,7 @@ const navigation = [
 export function RootLayout() {
   const { cartCount, favoritesCount, searchQuery, setSearchQuery } = useAppState()
   const location = useLocation()
+  const navigate = useNavigate()
   const category = new URLSearchParams(location.search).get('category')
   const [isAuthOpen, setIsAuthOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -35,6 +36,15 @@ export function RootLayout() {
     }
 
     return location.pathname === '/support'
+  }
+
+  function handleProfileClick() {
+    if (isAuthenticated) {
+      navigate('/account')
+      return
+    }
+
+    setIsAuthOpen(true)
   }
 
   return (
@@ -117,7 +127,7 @@ export function RootLayout() {
             </NavLink>
             <button
               type="button"
-              onClick={() => setIsAuthOpen(true)}
+              onClick={handleProfileClick}
               className={`header-icon-button ${isAuthenticated ? 'border-emerald-300/45 bg-emerald-300/14 text-emerald-100' : ''}`}
               aria-label="Профиль"
             >
@@ -144,7 +154,10 @@ export function RootLayout() {
       <AuthModal
         isOpen={isAuthOpen}
         isAuthenticated={isAuthenticated}
-        onAuthenticated={() => setIsAuthenticated(true)}
+        onAuthenticated={() => {
+          setIsAuthenticated(true)
+          navigate('/account')
+        }}
         onClose={() => setIsAuthOpen(false)}
       />
 

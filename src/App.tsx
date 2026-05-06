@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AppStateProvider } from './store/app-state'
+import { AccountPage } from './pages/account-page'
 import { AdminPsPlusPage } from './pages/admin-ps-plus-page'
 import { RootLayout } from './components/root-layout'
 import { ScrollToTop } from './components/scroll-to-top'
@@ -23,6 +24,7 @@ function App() {
             <Route path="/product/:productId" element={<ProductPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/account" element={<AccountPage />} />
             <Route path="/support" element={<SupportPage />} />
             <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/admin" element={<AdminPsPlusPage />} />
