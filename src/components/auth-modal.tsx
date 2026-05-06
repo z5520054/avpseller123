@@ -161,32 +161,33 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
 
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/72 px-4 backdrop-blur-xl">
-      <div className="relative w-full max-w-[430px] rounded-[28px] border border-white/12 bg-[#f6f6f2] p-6 text-[#151515] shadow-[0_26px_90px_rgba(0,0,0,.62)] sm:p-8">
+      <div className="relative w-full max-w-[430px] overflow-hidden rounded-[28px] border border-white/12 bg-[linear-gradient(145deg,#262628_0%,#111113_48%,#080809_100%)] p-6 text-white shadow-[0_26px_90px_rgba(0,0,0,.72)] sm:p-8">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(255,255,255,0.18),transparent_34%),radial-gradient(circle_at_100%_100%,rgba(255,255,255,0.08),transparent_34%)]" />
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-[14px] bg-[#ebeef3] text-[#6f7680] transition hover:bg-[#e0e5ec] hover:text-[#20242a]"
+          className="absolute right-4 top-4 z-10 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-[14px] border border-white/10 bg-white/8 text-white/58 transition hover:bg-white/12 hover:text-white"
           aria-label="Закрыть авторизацию"
         >
           <X size={20} />
         </button>
 
-        <div className="pr-12">
-          <h2 className="text-3xl font-semibold tracking-[-0.04em] text-[#1b1b1b]">Авторизация</h2>
-          <p className="mt-4 text-sm leading-6 text-[#7a7f86]">
+        <div className="relative z-10 pr-12">
+          <h2 className="font-display text-3xl tracking-[-0.04em] text-white">Авторизация</h2>
+          <p className="mt-4 text-sm leading-6 text-white/58">
             Войдите через VK ID, чтобы сохранять покупки, избранное и получать персональные предложения.
           </p>
         </div>
 
-        <div className="mt-7 min-h-[126px]" ref={widgetRef} />
+        <div className="relative z-10 mt-7 min-h-[126px] rounded-[20px] border border-white/10 bg-black/20 p-3" ref={widgetRef} />
 
         {status === 'loading' ? (
-          <div className="mt-4 rounded-[16px] bg-black/5 px-4 py-3 text-sm text-[#6f7680]">Загружаем VK ID...</div>
+          <div className="relative z-10 mt-4 rounded-[16px] bg-white/8 px-4 py-3 text-sm text-white/60">Загружаем VK ID...</div>
         ) : null}
         {message ? (
           <div
-            className={`mt-4 rounded-[16px] px-4 py-3 text-sm ${
-              status === 'success' ? 'bg-emerald-500/12 text-emerald-700' : 'bg-red-500/10 text-red-700'
+            className={`relative z-10 mt-4 rounded-[16px] px-4 py-3 text-sm ${
+              status === 'success' ? 'bg-emerald-400/12 text-emerald-200' : 'bg-red-400/10 text-red-200'
             }`}
           >
             {message}
