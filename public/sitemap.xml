@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://avpseller.ru/</loc>
+  </url>
+  <url>
+    <loc>https://avpseller.ru/catalog</loc>
+  </url>
+  <url>
+    <loc>https://avpseller.ru/catalog?category=deals</loc>
+  </url>
+  <url>
+    <loc>https://avpseller.ru/catalog?category=preorders</loc>
+  </url>
+  <url>
+    <loc>https://avpseller.ru/catalog?category=subscriptions</loc>
+  </url>
+  <url>
+    <loc>https://avpseller.ru/support</loc>
+  </url>
+</urlset>

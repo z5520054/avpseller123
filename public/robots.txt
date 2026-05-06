@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://avpseller.ru/sitemap.xml

@@ -103,6 +103,7 @@ function BannerSlider() {
     updatedAt: new Date(0).toISOString(),
   })
   const [activeIndex, setActiveIndex] = useState(0)
+  const [visibleSlots, setVisibleSlots] = useState(4)
 
   useEffect(() => {
     let active = true
@@ -132,6 +133,27 @@ function BannerSlider() {
     return () => window.clearInterval(timer)
   }, [banners.length, settings.autoplayMs])
 
+  useEffect(() => {
+    const updateVisibleSlots = () => {
+      if (window.matchMedia('(min-width: 1280px)').matches) {
+        setVisibleSlots(4)
+        return
+      }
+
+      if (window.matchMedia('(min-width: 640px)').matches) {
+        setVisibleSlots(2)
+        return
+      }
+
+      setVisibleSlots(1)
+    }
+
+    updateVisibleSlots()
+    window.addEventListener('resize', updateVisibleSlots)
+
+    return () => window.removeEventListener('resize', updateVisibleSlots)
+  }, [])
+
   if (banners.length === 0) {
     return (
       <section className="rounded-[34px] border border-white/10 bg-white/[0.03] px-6 py-16 text-center">
@@ -142,7 +164,7 @@ function BannerSlider() {
   }
 
   const visibleBanners = Array.from(
-    { length: Math.min(4, banners.length) },
+    { length: Math.min(visibleSlots, banners.length) },
     (_, index) => banners[(activeIndex + index) % banners.length],
   )
   const animationClass =
@@ -155,7 +177,7 @@ function BannerSlider() {
   return (
     <section className="overflow-hidden rounded-[26px] border border-white/10 bg-black/30 p-2 shadow-[0_32px_90px_rgba(0,0,0,0.42)] sm:rounded-[34px] sm:p-3">
       <div key={`${activeIndex}-${settings.animation}`} className={`flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-4 [&::-webkit-scrollbar]:hidden ${animationClass}`}>
-        {visibleBanners.map((banner) => (
+        {visibleBanners.map((banner, index) => (
           <Link
             key={banner.id}
             to={banner.linkUrl}
@@ -165,6 +187,9 @@ function BannerSlider() {
             <img
               src={banner.imageUrl}
               alt={banner.title}
+              loading={index === 0 ? 'eager' : 'lazy'}
+              decoding="async"
+              fetchPriority={index === 0 ? 'high' : 'low'}
               className="h-full w-full object-cover transition duration-700"
               style={{
                 objectPosition: `${banner.imagePositionX}% ${banner.imagePositionY}%`,
