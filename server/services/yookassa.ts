@@ -31,6 +31,19 @@ export class YooKassaService {
   ) {}
 
   async createSbpPayment(order: OrderRecord) {
+    try {
+      return await this.createPayment(order, 'sbp')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      if (!message.toLowerCase().includes('payment method is not available')) {
+        throw error
+      }
+
+      return this.createPayment(order, null)
+    }
+  }
+
+  private async createPayment(order: OrderRecord, paymentMethod: 'sbp' | null) {
     ensureConfigured()
 
     const amountRub = (order.cartSnapshot.pricing.payableRubMinor / 100).toFixed(2)
@@ -47,9 +60,7 @@ export class YooKassaService {
           currency: 'RUB',
         },
         capture: true,
-        payment_method_data: {
-          type: 'sbp',
-        },
+        ...(paymentMethod ? { payment_method_data: { type: paymentMethod } } : {}),
         confirmation: {
           type: 'redirect',
           return_url: `${config.publicSiteUrl}/orders/${order.id}`,
