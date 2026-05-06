@@ -43,8 +43,8 @@ export function CatalogApiProductCard({ product }: { product: CatalogApiProduct 
   const meta = shortMeta(product, formatDate(offer?.saleEndAt) ?? null)
 
   return (
-    <article className="satin-panel shine-border card-hover group overflow-hidden rounded-[24px] border border-white/10 sm:rounded-[28px]">
-      <div className="relative h-44 overflow-hidden bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_32%),linear-gradient(180deg,#191919_0%,#0a0a0a_100%)] sm:h-56">
+    <article className="satin-panel card-hover group overflow-hidden rounded-[24px] border border-white/10 bg-[#111113] sm:rounded-[28px]">
+      <div className="relative h-70 overflow-hidden bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_32%),linear-gradient(180deg,#191919_0%,#0a0a0a_100%)]">
         {product.coverUrl ? (
           <img
             src={product.coverUrl}
@@ -55,11 +55,6 @@ export function CatalogApiProductCard({ product }: { product: CatalogApiProduct 
         ) : null}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_18%),linear-gradient(180deg,transparent_25%,rgba(0,0,0,0.85)_100%)]" />
         <div className="absolute left-3 top-3 flex max-w-[calc(100%-4.25rem)] flex-wrap gap-1.5 sm:left-4 sm:top-4 sm:gap-2">
-          {offer?.discountPercent ? (
-            <span className="rounded-full border border-emerald-400/30 bg-emerald-500/12 px-2.5 py-1 text-[11px] text-emerald-300 sm:px-3 sm:text-xs">
-              -{offer.discountPercent}%
-            </span>
-          ) : null}
           <span className="rounded-full border border-white/16 bg-black/45 px-2.5 py-1 text-[11px] text-white/70 sm:px-3 sm:text-xs">
             {region}
           </span>
@@ -83,7 +78,7 @@ export function CatalogApiProductCard({ product }: { product: CatalogApiProduct 
         </button>
       </div>
 
-      <div className="space-y-3.5 p-4 sm:space-y-4 sm:p-5">
+      <div className="-mt-px space-y-3.5 bg-[linear-gradient(180deg,#171719_0%,#101011_100%)] p-4 sm:space-y-4 sm:p-5">
         <div className="flex flex-wrap gap-2">
           <span className="rounded-full border border-white/8 px-2.5 py-1 text-xs text-white/55">
             {getStoreTypeLabel(product)}
@@ -104,8 +99,15 @@ export function CatalogApiProductCard({ product }: { product: CatalogApiProduct 
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="text-xl font-semibold text-white">{price ?? 'Цена уточняется'}</div>
-            {oldPrice && price !== oldPrice ? <div className="text-sm text-white/35 line-through">{oldPrice}</div> : null}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="text-xl font-semibold text-white">{price ?? 'Цена уточняется'}</div>
+              {offer?.discountPercent ? (
+                <span className="rounded-full border border-emerald-200/20 bg-[linear-gradient(135deg,rgba(16,185,129,0.18),rgba(255,255,255,0.05))] px-2.5 py-1 text-[11px] font-medium text-emerald-200 shadow-[0_10px_28px_rgba(16,185,129,0.08)]">
+                  -{offer.discountPercent}%
+                </span>
+              ) : null}
+            </div>
+            {oldPrice && price !== oldPrice ? <div className="mt-0.5 text-sm text-white/35 line-through">{oldPrice}</div> : null}
           </div>
           {isInCart ? (
             <Link

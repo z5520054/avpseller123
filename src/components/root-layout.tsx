@@ -1,7 +1,9 @@
 import { Heart, LifeBuoy, Search, ShoppingBag, User, X } from 'lucide-react'
+import { useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import avpIconUrl from '../assets/avp-icon.png'
 import { useAppState } from '../store/use-app-state'
+import { AuthModal } from './auth-modal'
 import { RegionSwitch } from './ui/region-switch'
 
 const navigation = [
@@ -14,6 +16,7 @@ export function RootLayout() {
   const { cartCount, favoritesCount, searchQuery, setSearchQuery } = useAppState()
   const location = useLocation()
   const category = new URLSearchParams(location.search).get('category')
+  const [isAuthOpen, setIsAuthOpen] = useState(false)
 
   function isNavigationActive(active: string) {
     if (active === 'subscriptions') {
@@ -105,7 +108,12 @@ export function RootLayout() {
                 </span>
               ) : null}
             </NavLink>
-            <button type="button" className="header-icon-button" aria-label="Профиль">
+            <button
+              type="button"
+              onClick={() => setIsAuthOpen(true)}
+              className="header-icon-button"
+              aria-label="Профиль"
+            >
               <User size={18} />
             </button>
             <NavLink
@@ -122,6 +130,8 @@ export function RootLayout() {
       <main className="pt-3 sm:pt-6">
         <Outlet />
       </main>
+
+      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
 
       <nav className="fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 rounded-[24px] border border-white/10 bg-[#171719]/95 px-2 py-2 shadow-[0_18px_50px_rgba(0,0,0,.55)] backdrop-blur-2xl lg:hidden">
         {navigation.map((item) => (
