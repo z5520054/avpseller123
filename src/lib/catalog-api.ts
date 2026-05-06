@@ -276,6 +276,20 @@ export function createAdminParseTask(
   })
 }
 
+export function resumeAdminParseTask(token: string, taskId: number) {
+  return fetchJson<{
+    taskId: number
+    status: string
+    totalItems: number
+    resumedFromTaskId: number
+    skippedItems: number
+    remainingItems: number
+  }>(`/api/admin/parse/task/${taskId}/resume`, {
+    method: 'POST',
+    headers: { 'x-admin-token': token },
+  })
+}
+
 export function recalculateCart(region: 'turkey' | 'india', items: CartItem[]) {
   return fetchJson<CartRecalculationResponse>('/api/cart/recalculate', {
     method: 'POST',

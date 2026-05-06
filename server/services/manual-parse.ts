@@ -325,6 +325,37 @@ export class ManualParseService {
     return this.db.prepare('SELECT * FROM parse_tasks WHERE id = ?').get(id)
   }
 
+  resumeTask(id: number) {
+    const task = this.getTask(id) as ParseTaskRow | undefined
+    if (!task) {
+      throw new Error('Task not found')
+    }
+
+    if (task.status === 'pending' || task.status === 'running') {
+      throw new Error('Task is still active. Resume is available only after the task stops.')
+    }
+
+    const processedItems = Math.max(0, Math.min(task.processed_items, task.total_items))
+    const targets = this.getTargets(task)
+    const remainingTargets = targets.slice(processedItems)
+
+    if (remainingTargets.length === 0) {
+      throw new Error('No remaining products to resume')
+    }
+
+    return {
+      ...this.createTask({
+        type: task.type,
+        region: task.region,
+        productIds: remainingTargets.map((target) => target.id),
+        proxyId: task.proxy_id,
+      }),
+      resumedFromTaskId: task.id,
+      skippedItems: processedItems,
+      remainingItems: remainingTargets.length,
+    }
+  }
+
   listParseProducts(input: { region?: string; query?: string; limit: number; offset: number }) {
     const region = input.region && input.region !== 'all' ? normalizeRegion(input.region) : null
     const clauses = ["p.source = 'playstation-store'"]

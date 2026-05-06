@@ -9,6 +9,7 @@ import {
   getAdminProxies,
   getAdminPsPlusPrices,
   refreshAdminProduct,
+  resumeAdminParseTask,
   testAdminProxy,
   toggleAdminProxy,
   updateAdminBanners,
@@ -237,6 +238,20 @@ function ManualParsingPanel({ token }: { token: string }) {
     }
   }
 
+  async function resumeTask(task: AdminParseTask) {
+    setLoadingManual(true)
+    setManualStatus(`Продолжаю задачу #${task.id} с позиции ${task.processed_items}/${task.total_items}...`)
+    try {
+      const response = await resumeAdminParseTask(token.trim(), task.id)
+      setManualStatus(`Создана задача #${response.taskId} на остаток: ${response.remainingItems}. Пропущено уже обработанных: ${response.skippedItems}.`)
+      await loadManualData()
+    } catch (error) {
+      setManualStatus(error instanceof Error ? `Не удалось продолжить задачу: ${error.message}` : 'Не удалось продолжить задачу.')
+    } finally {
+      setLoadingManual(false)
+    }
+  }
+
   const activeProxies = proxies.filter((proxy) => proxy.status === 'active' && (parseRegion === 'all' || proxy.region === parseRegion))
 
   return (
@@ -386,20 +401,47 @@ function ManualParsingPanel({ token }: { token: string }) {
                 <th>Обработано</th>
                 <th>Создана</th>
                 <th>Ошибка</th>
+                <th>Действие</th>
               </tr>
             </thead>
             <tbody className="text-white/64">
-              {tasks.map((task) => (
-                <tr key={task.id} className="border-t border-white/8">
-                  <td className="py-3 text-white">{task.id}</td>
-                  <td>{task.type}</td>
-                  <td>{task.region}</td>
-                  <td>{task.status}</td>
-                  <td>{task.processed_items}/{task.total_items}</td>
-                  <td>{formatTaskDate(task.created_at)}</td>
-                  <td className="max-w-xs truncate text-red-200/70">{task.error_message ?? '—'}</td>
-                </tr>
-              ))}
+              {tasks.map((task) => {
+                const canResume = task.processed_items > 0
+                  && task.processed_items < task.total_items
+                  && task.status !== 'pending'
+                  && task.status !== 'running'
+
+                return (
+                  <tr key={task.id} className="border-t border-white/8">
+                    <td className="py-3 text-white">{task.id}</td>
+                    <td>{task.type}</td>
+                    <td>{task.region}</td>
+                    <td>{task.status}</td>
+                    <td>
+                      <span>{task.processed_items}/{task.total_items}</span>
+                      {task.processed_items < task.total_items ? (
+                        <span className="ml-2 text-xs text-white/38">осталось {task.total_items - task.processed_items}</span>
+                      ) : null}
+                    </td>
+                    <td>{formatTaskDate(task.created_at)}</td>
+                    <td className="max-w-xs truncate text-red-200/70">{task.error_message ?? '—'}</td>
+                    <td>
+                      {canResume ? (
+                        <button
+                          type="button"
+                          onClick={() => void resumeTask(task)}
+                          disabled={loadingManual}
+                          className="rounded-full border border-emerald-300/30 bg-emerald-400/12 px-4 py-2 text-xs font-semibold text-emerald-100 disabled:opacity-45"
+                        >
+                          Продолжить
+                        </button>
+                      ) : (
+                        <span className="text-white/28">—</span>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>

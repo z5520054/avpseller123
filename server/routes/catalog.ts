@@ -433,6 +433,21 @@ export async function registerCatalogRoutes(app: FastifyInstance) {
     return { task }
   })
 
+  app.post('/api/admin/parse/task/:id/resume', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    const id = Number((request.params as { id: string }).id)
+    try {
+      return manualParse.resumeTask(id)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      reply.code(message === 'Task not found' ? 404 : 400)
+      return { error: message }
+    }
+  })
+
   for (const type of ['price', 'editions', 'images'] as const) {
     app.post(`/api/admin/parse/${type}`, async (request, reply) => {
       if (!requireAdminToken(request, reply)) {
