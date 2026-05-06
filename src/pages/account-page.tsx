@@ -1,7 +1,14 @@
-import { Gift, Heart, Link as LinkIcon, ShoppingBag, UserRound } from 'lucide-react'
+import { CreditCard, Database, Gamepad2, Gift, LogOut, Mail, Plus, ShieldCheck, UserRound } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useCatalogProductsByIds } from '../hooks/use-catalog-products-by-ids'
 import { useAppState } from '../store/use-app-state'
+
+type ConsoleType = 'ps5' | 'ps4'
+
+const ACCOUNT_EMAIL_KEY = 'avp-account-email'
+const ACCOUNT_CONSOLE_KEY = 'avp-account-console'
 
 function readVkProfile() {
   if (typeof window === 'undefined') {
@@ -34,151 +41,318 @@ function getAvatar(profile: Record<string, unknown> | null) {
   return typeof user?.avatar === 'string' ? user.avatar : null
 }
 
+function AccountMenuButton({
+  active,
+  icon,
+  label,
+}: {
+  active?: boolean
+  icon: ReactNode
+  label: string
+}) {
+  return (
+    <button
+      type="button"
+      className={`flex w-full cursor-pointer items-center justify-between rounded-[20px] border px-4 py-4 text-left text-sm transition ${
+        active
+          ? 'border-white/26 bg-white text-black shadow-[0_18px_45px_rgba(255,255,255,.08)]'
+          : 'border-white/10 bg-white/[0.04] text-white/70 hover:border-white/18 hover:bg-white/[0.07]'
+      }`}
+    >
+      <span className="flex items-center gap-3">
+        <span
+          className={`inline-flex h-8 w-8 items-center justify-center rounded-xl ${
+            active ? 'bg-black text-white' : 'bg-white/8 text-white/70'
+          }`}
+        >
+          {icon}
+        </span>
+        {label}
+      </span>
+      <span className={active ? 'text-black/45' : 'text-white/30'}>›</span>
+    </button>
+  )
+}
+
 export function AccountPage() {
   const { cart, favorites } = useAppState()
-  const profile = readVkProfile()
-  const avatar = getAvatar(profile)
-  const cartIds = cart.map((item) => item.productId)
-  const { products: cartProducts } = useCatalogProductsByIds(cartIds)
+  const [profile, setProfile] = useState<Record<string, unknown> | null>(() => readVkProfile())
+  const [email, setEmail] = useState(() => {
+    if (typeof window === 'undefined') {
+      return ''
+    }
+
+    return window.localStorage.getItem(ACCOUNT_EMAIL_KEY) ?? ''
+  })
+  const [consoleType, setConsoleType] = useState<ConsoleType>(() => {
+    if (typeof window === 'undefined') {
+      return 'ps5'
+    }
+
+    return (window.localStorage.getItem(ACCOUNT_CONSOLE_KEY) as ConsoleType | null) ?? 'ps5'
+  })
+  const { products: cartProducts } = useCatalogProductsByIds(cart.map((item) => item.productId))
   const { products: favoriteProducts } = useCatalogProductsByIds(favorites.slice(0, 3))
+  const avatar = getAvatar(profile)
+
+  useEffect(() => {
+    window.localStorage.setItem(ACCOUNT_EMAIL_KEY, email)
+  }, [email])
+
+  useEffect(() => {
+    window.localStorage.setItem(ACCOUNT_CONSOLE_KEY, consoleType)
+  }, [consoleType])
+
+  function handleLogout() {
+    window.localStorage.removeItem('avp-vkid-profile')
+    setProfile(null)
+  }
 
   return (
     <div className="page-shell section-space">
-      <section className="satin-panel overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(145deg,#242426_0%,#111113_52%,#080809_100%)] p-6 sm:p-8">
-        <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
-          <div className="flex items-center gap-4">
-            <div className="flex h-18 w-18 items-center justify-center overflow-hidden rounded-[24px] border border-white/12 bg-white/8">
-              {avatar ? (
-                <img src={avatar} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <UserRound className="text-white/70" size={30} />
-              )}
-            </div>
-            <div>
-              <div className="text-xs uppercase tracking-[0.22em] text-white/42">Личный кабинет</div>
-              <h1 className="mt-2 font-display text-4xl text-sheen sm:text-5xl">{getProfileName(profile)}</h1>
-              <p className="mt-3 text-sm leading-6 text-white/58">
-                Базовый профиль подключён. Здесь будут храниться заказы, корзина, избранное и бонусы.
-              </p>
-            </div>
-          </div>
+      <section className="relative overflow-hidden rounded-[36px] border border-white/10 bg-[radial-gradient(circle_at_18%_0%,rgba(255,255,255,0.16),transparent_34%),linear-gradient(145deg,#222224_0%,#101012_54%,#070708_100%)] p-4 shadow-[0_28px_100px_rgba(0,0,0,.48)] sm:p-6 lg:p-8">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,.04),transparent)]" />
 
-          <div className="rounded-[24px] border border-emerald-300/18 bg-emerald-400/10 px-5 py-4 text-sm text-emerald-100">
-            VK ID подключён
-          </div>
-        </div>
-      </section>
-
-      <section className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div className="satin-panel rounded-[28px] border border-white/10 p-5">
-          <ShoppingBag className="text-white/58" size={22} />
-          <div className="mt-5 text-3xl font-semibold text-white">{cart.length}</div>
-          <div className="mt-1 text-sm text-white/50">товаров в корзине</div>
-        </div>
-        <div className="satin-panel rounded-[28px] border border-white/10 p-5">
-          <Heart className="text-white/58" size={22} />
-          <div className="mt-5 text-3xl font-semibold text-white">{favorites.length}</div>
-          <div className="mt-1 text-sm text-white/50">в избранном</div>
-        </div>
-        <div className="satin-panel rounded-[28px] border border-white/10 p-5">
-          <Gift className="text-white/58" size={22} />
-          <div className="mt-5 text-3xl font-semibold text-white">0 ₽</div>
-          <div className="mt-1 text-sm text-white/50">бонусный баланс</div>
-        </div>
-        <div className="satin-panel rounded-[28px] border border-white/10 p-5">
-          <LinkIcon className="text-white/58" size={22} />
-          <div className="mt-5 text-3xl font-semibold text-white">1</div>
-          <div className="mt-1 text-sm text-white/50">привязанный аккаунт</div>
-        </div>
-      </section>
-
-      <section className="mt-5 grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
-        <div className="satin-panel rounded-[30px] border border-white/10 p-5 sm:p-6">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="font-display text-3xl text-sheen">История заказов</h2>
-            <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/45">MVP</span>
-          </div>
-          <div className="mt-6 rounded-[24px] border border-white/10 bg-white/[0.03] p-5">
-            <div className="text-white">Заказов пока нет</div>
-            <p className="mt-2 text-sm leading-6 text-white/52">
-              После оформления покупки здесь появятся номер заказа, статус оплаты и список купленных кодов.
-            </p>
-            <Link
-              to="/catalog"
-              className="mt-5 inline-flex cursor-pointer rounded-full bg-white px-6 py-3 text-sm font-semibold !text-black transition hover:bg-zinc-100"
-            >
-              Перейти в каталог
-            </Link>
-          </div>
-        </div>
-
-        <div className="satin-panel rounded-[30px] border border-white/10 p-5 sm:p-6">
-          <h2 className="font-display text-3xl text-sheen">Сохранённая корзина</h2>
-          <div className="mt-6 space-y-3">
-            {cartProducts.length > 0 ? (
-              cartProducts.slice(0, 4).map((product) => (
-                <Link
-                  key={product.id}
-                  to={`/product/${product.id}`}
-                  className="flex items-center gap-3 rounded-[20px] border border-white/10 bg-white/[0.03] p-3 transition hover:bg-white/[0.06]"
-                >
-                  {product.coverUrl ? (
-                    <img src={product.coverUrl} alt="" className="h-14 w-14 rounded-2xl object-cover" />
+        <div className="relative grid gap-5 lg:grid-cols-[310px_1fr]">
+          <aside className="space-y-3 lg:sticky lg:top-32 lg:self-start">
+            <div className="rounded-[28px] border border-white/10 bg-black/20 p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-[18px] border border-white/12 bg-white/8">
+                  {avatar ? (
+                    <img src={avatar} alt="" className="h-full w-full object-cover" />
                   ) : (
-                    <div className="h-14 w-14 rounded-2xl bg-white/8" />
+                    <UserRound size={24} className="text-white/72" />
                   )}
-                  <div className="min-w-0">
-                    <div className="line-clamp-1 text-sm text-white">{product.title}</div>
-                    <div className="mt-1 text-xs text-white/42">{product.platforms.join(' / ') || product.storeType}</div>
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <div className="rounded-[20px] border border-white/10 bg-white/[0.03] p-4 text-sm text-white/52">
-                Корзина пока пустая.
+                </div>
+                <div className="min-w-0">
+                  <div className="line-clamp-1 text-base font-medium text-white">{getProfileName(profile)}</div>
+                  <div className="mt-1 text-xs text-white/42">{profile ? 'VK ID подключён' : 'Гость'}</div>
+                </div>
               </div>
-            )}
-          </div>
-        </div>
-      </section>
+            </div>
 
-      <section className="mt-5 grid gap-5 lg:grid-cols-2">
-        <div className="satin-panel rounded-[30px] border border-white/10 p-5 sm:p-6">
-          <h2 className="font-display text-3xl text-sheen">Избранное</h2>
-          <div className="mt-6 space-y-3">
-            {favoriteProducts.length > 0 ? (
-              favoriteProducts.map((product) => (
-                <Link
-                  key={product.id}
-                  to={`/product/${product.id}`}
-                  className="flex items-center gap-3 rounded-[20px] border border-white/10 bg-white/[0.03] p-3 transition hover:bg-white/[0.06]"
-                >
-                  {product.coverUrl ? (
-                    <img src={product.coverUrl} alt="" className="h-14 w-14 rounded-2xl object-cover" />
+            <AccountMenuButton active icon={<UserRound size={16} />} label="Ваш аккаунт" />
+            <AccountMenuButton icon={<ShieldCheck size={16} />} label="Активная подписка" />
+            <AccountMenuButton icon={<Database size={16} />} label="История покупок" />
+          </aside>
+
+          <div className="space-y-4">
+            <div className="grid gap-4 xl:grid-cols-3">
+              <div className="rounded-[28px] border border-white/10 bg-white/[0.045] p-5">
+                <div className="text-xs uppercase tracking-[0.2em] text-white/38">Корзина</div>
+                <div className="mt-4 text-3xl font-semibold text-white">{cart.length}</div>
+                <div className="mt-1 text-sm text-white/48">сохранённых позиций</div>
+              </div>
+              <div className="rounded-[28px] border border-white/10 bg-white/[0.045] p-5">
+                <div className="text-xs uppercase tracking-[0.2em] text-white/38">Избранное</div>
+                <div className="mt-4 text-3xl font-semibold text-white">{favorites.length}</div>
+                <div className="mt-1 text-sm text-white/48">товаров в списке</div>
+              </div>
+              <div className="rounded-[28px] border border-white/10 bg-white/[0.045] p-5">
+                <div className="text-xs uppercase tracking-[0.2em] text-white/38">Бонусы</div>
+                <div className="mt-4 text-3xl font-semibold text-white">0 ₽</div>
+                <div className="mt-1 text-sm text-white/48">баланс программы</div>
+              </div>
+            </div>
+
+            <section className="rounded-[30px] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.035))] p-5 sm:p-7">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <h1 className="font-display text-3xl text-sheen sm:text-4xl">Аккаунты для быстрого входа</h1>
+                  <p className="mt-3 max-w-xl text-sm leading-6 text-white/52">
+                    Подключённый аккаунт используется для сохранения корзины, избранного и будущей истории заказов.
+                  </p>
+                </div>
+                {profile ? (
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-white/60 transition hover:border-white/18 hover:text-white"
+                  >
+                    <LogOut size={16} />
+                    Выйти из аккаунта
+                  </button>
+                ) : (
+                  <Link
+                    to="/"
+                    className="inline-flex cursor-pointer rounded-full bg-white px-5 py-2.5 text-sm font-semibold !text-black transition hover:bg-zinc-100"
+                  >
+                    Войти
+                  </Link>
+                )}
+              </div>
+
+              <div className="mt-7 flex flex-wrap items-center gap-3">
+                <div className="inline-flex items-center gap-2 rounded-[16px] border border-white/10 bg-black/24 px-3 py-2 text-sm text-white">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-[#0077ff] text-xs font-bold text-white">
+                    VK
+                  </span>
+                  {getProfileName(profile)}
+                </div>
+              </div>
+
+              <div className="mt-7 border-t border-white/10 pt-7">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold text-white">Добавить ещё</h2>
+                    <p className="mt-2 max-w-md text-sm leading-6 text-white/46">
+                      Позже сюда можно добавить Яндекс ID или Google, чтобы пользователю было проще входить на сайт.
+                    </p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button className="inline-flex h-12 cursor-pointer items-center gap-2 rounded-[16px] border border-white/10 bg-white/[0.04] px-4 text-sm text-white/45 transition hover:bg-white/[0.07]">
+                      <span className="font-bold text-[#ff3d32]">Я</span>
+                      <Plus size={15} />
+                    </button>
+                    <button className="inline-flex h-12 cursor-pointer items-center gap-2 rounded-[16px] border border-white/10 bg-white/[0.04] px-4 text-sm text-white/45 transition hover:bg-white/[0.07]">
+                      <span className="font-bold text-white">G</span>
+                      <Plus size={15} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
+              <div className="rounded-[30px] border border-white/10 bg-white/[0.045] p-5 sm:p-7">
+                <div className="grid gap-5 sm:grid-cols-[1fr_280px] sm:items-center">
+                  <div>
+                    <div className="inline-flex h-11 w-11 items-center justify-center rounded-[16px] border border-white/10 bg-black/20 text-white/62">
+                      <Mail size={18} />
+                    </div>
+                    <h2 className="mt-5 text-xl font-semibold text-white">E-mail для чека</h2>
+                    <p className="mt-2 text-sm leading-6 text-white/48">
+                      Сайт запомнит адрес и будет подставлять его при оформлении заказа.
+                    </p>
+                  </div>
+                  <label className="block">
+                    <span className="sr-only">E-mail для чека</span>
+                    <input
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      type="email"
+                      placeholder="Введите E-mail"
+                      className="w-full rounded-[20px] border border-white/10 bg-black/22 px-5 py-4 text-sm text-white outline-none transition placeholder:text-white/28 focus:border-white/22"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div className="rounded-[30px] border border-white/10 bg-white/[0.045] p-5 sm:p-7">
+                <h2 className="text-xl font-semibold text-white">Моя приставка</h2>
+                <p className="mt-2 text-sm leading-6 text-white/48">
+                  Выбор поможет подбирать игры и издания под вашу PlayStation.
+                </p>
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  {([
+                    ['ps5', 'PlayStation 5'],
+                    ['ps4', 'PlayStation 4'],
+                  ] as const).map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setConsoleType(value)}
+                      className={`cursor-pointer rounded-[22px] border p-4 text-center transition ${
+                        consoleType === value
+                          ? 'border-white/38 bg-white text-black shadow-[0_18px_45px_rgba(255,255,255,.08)]'
+                          : 'border-white/10 bg-black/18 text-white/58 hover:border-white/20'
+                      }`}
+                    >
+                      <Gamepad2 className="mx-auto" size={26} />
+                      <div className="mt-3 text-sm font-medium">{label}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <section className="grid gap-4 xl:grid-cols-2">
+              <div className="rounded-[30px] border border-white/10 bg-white/[0.045] p-5 sm:p-7">
+                <div className="flex items-center justify-between gap-4">
+                  <h2 className="text-xl font-semibold text-white">История покупок</h2>
+                  <CreditCard size={18} className="text-white/38" />
+                </div>
+                <div className="mt-5 rounded-[22px] border border-white/10 bg-black/18 p-4">
+                  <div className="text-white">Заказов пока нет</div>
+                  <p className="mt-2 text-sm leading-6 text-white/46">
+                    После оплаты здесь появятся номер заказа, статус и купленные коды.
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-[30px] border border-white/10 bg-white/[0.045] p-5 sm:p-7">
+                <div className="flex items-center justify-between gap-4">
+                  <h2 className="text-xl font-semibold text-white">Активная подписка</h2>
+                  <Gift size={18} className="text-white/38" />
+                </div>
+                <div className="mt-5 rounded-[22px] border border-white/10 bg-black/18 p-4">
+                  <div className="text-white">Подписка не выбрана</div>
+                  <p className="mt-2 text-sm leading-6 text-white/46">
+                    Когда пользователь купит PS Plus, здесь можно показывать тариф и срок.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section className="grid gap-4 xl:grid-cols-2">
+              <div className="rounded-[30px] border border-white/10 bg-white/[0.045] p-5 sm:p-7">
+                <h2 className="text-xl font-semibold text-white">Сохранённая корзина</h2>
+                <div className="mt-5 space-y-3">
+                  {cartProducts.length > 0 ? (
+                    cartProducts.slice(0, 3).map((product) => (
+                      <Link
+                        key={product.id}
+                        to={`/product/${product.id}`}
+                        className="flex items-center gap-3 rounded-[20px] border border-white/10 bg-black/18 p-3 transition hover:bg-white/[0.06]"
+                      >
+                        {product.coverUrl ? (
+                          <img src={product.coverUrl} alt="" className="h-13 w-13 rounded-2xl object-cover" />
+                        ) : (
+                          <div className="h-13 w-13 rounded-2xl bg-white/8" />
+                        )}
+                        <div className="min-w-0">
+                          <div className="line-clamp-1 text-sm text-white">{product.title}</div>
+                          <div className="mt-1 text-xs text-white/38">{product.platforms.join(' / ') || product.storeType}</div>
+                        </div>
+                      </Link>
+                    ))
                   ) : (
-                    <div className="h-14 w-14 rounded-2xl bg-white/8" />
+                    <div className="rounded-[20px] border border-white/10 bg-black/18 p-4 text-sm text-white/48">
+                      Корзина пока пустая.
+                    </div>
                   )}
-                  <div className="min-w-0">
-                    <div className="line-clamp-1 text-sm text-white">{product.title}</div>
-                    <div className="mt-1 text-xs text-white/42">Быстрый доступ из кабинета</div>
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <div className="rounded-[20px] border border-white/10 bg-white/[0.03] p-4 text-sm text-white/52">
-                Сохраняйте игры в избранное, чтобы вернуться к ним позже.
+                </div>
               </div>
-            )}
-          </div>
-        </div>
 
-        <div className="satin-panel rounded-[30px] border border-white/10 p-5 sm:p-6">
-          <h2 className="font-display text-3xl text-sheen">Бонусы и скидки</h2>
-          <div className="mt-6 rounded-[24px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-5">
-            <div className="text-lg text-white">Персональная программа готовится</div>
-            <p className="mt-2 text-sm leading-6 text-white/52">
-              Позже сюда можно добавить промокоды, кешбэк, персональные скидки и уровни лояльности.
-            </p>
+              <div className="rounded-[30px] border border-white/10 bg-white/[0.045] p-5 sm:p-7">
+                <h2 className="text-xl font-semibold text-white">Избранное</h2>
+                <div className="mt-5 space-y-3">
+                  {favoriteProducts.length > 0 ? (
+                    favoriteProducts.map((product) => (
+                      <Link
+                        key={product.id}
+                        to={`/product/${product.id}`}
+                        className="flex items-center gap-3 rounded-[20px] border border-white/10 bg-black/18 p-3 transition hover:bg-white/[0.06]"
+                      >
+                        {product.coverUrl ? (
+                          <img src={product.coverUrl} alt="" className="h-13 w-13 rounded-2xl object-cover" />
+                        ) : (
+                          <div className="h-13 w-13 rounded-2xl bg-white/8" />
+                        )}
+                        <div className="min-w-0">
+                          <div className="line-clamp-1 text-sm text-white">{product.title}</div>
+                          <div className="mt-1 text-xs text-white/38">Быстрый доступ</div>
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="rounded-[20px] border border-white/10 bg-black/18 p-4 text-sm text-white/48">
+                      Избранное пока пустое.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
           </div>
         </div>
       </section>
