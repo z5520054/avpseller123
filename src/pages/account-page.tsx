@@ -6,12 +6,15 @@ import { useAppState } from '../store/use-app-state'
 
 type ConsoleType = 'ps5' | 'ps4'
 type AccountSection = 'account' | 'subscription' | 'purchases'
-type ActiveSubscription = 'essential' | 'extra' | 'deluxe' | 'ea-play'
+type PsPlusSubscription = 'essential' | 'extra' | 'deluxe'
+type ActiveSubscription = PsPlusSubscription | 'ea-play'
 
 const ACCOUNT_EMAIL_KEY = 'avp-account-email'
 const ACCOUNT_CONSOLE_KEY = 'avp-account-console'
-const ACCOUNT_SUBSCRIPTION_KEY = 'avp-account-subscription'
-const ACCOUNT_SUBSCRIPTION_END_KEY = 'avp-account-subscription-end'
+const ACCOUNT_PS_PLUS_SUBSCRIPTION_KEY = 'avp-account-ps-plus-subscription'
+const ACCOUNT_PS_PLUS_END_KEY = 'avp-account-ps-plus-end'
+const ACCOUNT_EA_PLAY_ENABLED_KEY = 'avp-account-ea-play-enabled'
+const ACCOUNT_EA_PLAY_END_KEY = 'avp-account-ea-play-end'
 
 const subscriptionOptions: Array<{
   id: ActiveSubscription
@@ -44,6 +47,10 @@ const subscriptionOptions: Array<{
     tone: 'from-[#071030] via-[#10205c] to-[#f24a5f] text-white',
   },
 ]
+
+function isPsPlusSubscription(value: ActiveSubscription): value is PsPlusSubscription {
+  return value !== 'ea-play'
+}
 
 function readVkProfile() {
   if (typeof window === 'undefined') {
@@ -204,19 +211,34 @@ export function AccountPage() {
 
     return (window.localStorage.getItem(ACCOUNT_CONSOLE_KEY) as ConsoleType | null) ?? 'ps5'
   })
-  const [activeSubscription, setActiveSubscription] = useState<ActiveSubscription>(() => {
+  const [activePsPlusSubscription, setActivePsPlusSubscription] = useState<PsPlusSubscription>(() => {
     if (typeof window === 'undefined') {
       return 'essential'
     }
 
-    return (window.localStorage.getItem(ACCOUNT_SUBSCRIPTION_KEY) as ActiveSubscription | null) ?? 'essential'
+    const saved = window.localStorage.getItem(ACCOUNT_PS_PLUS_SUBSCRIPTION_KEY) as PsPlusSubscription | null
+    return saved === 'extra' || saved === 'deluxe' || saved === 'essential' ? saved : 'essential'
   })
-  const [subscriptionEndDate, setSubscriptionEndDate] = useState(() => {
+  const [psPlusEndDate, setPsPlusEndDate] = useState(() => {
     if (typeof window === 'undefined') {
       return ''
     }
 
-    return window.localStorage.getItem(ACCOUNT_SUBSCRIPTION_END_KEY) ?? ''
+    return window.localStorage.getItem(ACCOUNT_PS_PLUS_END_KEY) ?? ''
+  })
+  const [isEaPlayEnabled, setIsEaPlayEnabled] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false
+    }
+
+    return window.localStorage.getItem(ACCOUNT_EA_PLAY_ENABLED_KEY) === 'true'
+  })
+  const [eaPlayEndDate, setEaPlayEndDate] = useState(() => {
+    if (typeof window === 'undefined') {
+      return ''
+    }
+
+    return window.localStorage.getItem(ACCOUNT_EA_PLAY_END_KEY) ?? ''
   })
   const avatar = getAvatar(profile)
 
@@ -229,17 +251,34 @@ export function AccountPage() {
   }, [consoleType])
 
   useEffect(() => {
-    window.localStorage.setItem(ACCOUNT_SUBSCRIPTION_KEY, activeSubscription)
-  }, [activeSubscription])
+    window.localStorage.setItem(ACCOUNT_PS_PLUS_SUBSCRIPTION_KEY, activePsPlusSubscription)
+  }, [activePsPlusSubscription])
 
   useEffect(() => {
-    window.localStorage.setItem(ACCOUNT_SUBSCRIPTION_END_KEY, subscriptionEndDate)
-  }, [subscriptionEndDate])
+    window.localStorage.setItem(ACCOUNT_PS_PLUS_END_KEY, psPlusEndDate)
+  }, [psPlusEndDate])
+
+  useEffect(() => {
+    window.localStorage.setItem(ACCOUNT_EA_PLAY_ENABLED_KEY, String(isEaPlayEnabled))
+  }, [isEaPlayEnabled])
+
+  useEffect(() => {
+    window.localStorage.setItem(ACCOUNT_EA_PLAY_END_KEY, eaPlayEndDate)
+  }, [eaPlayEndDate])
 
   function handleLogout() {
     window.localStorage.removeItem('avp-vkid-profile')
     setProfile(null)
     navigate('/')
+  }
+
+  function handleSubscriptionSelect(id: ActiveSubscription) {
+    if (isPsPlusSubscription(id)) {
+      setActivePsPlusSubscription(id)
+      return
+    }
+
+    setIsEaPlayEnabled((current) => !current)
   }
 
   return (
@@ -289,16 +328,22 @@ export function AccountPage() {
             {activeSection === 'account' ? (
               <>
             <div className="grid gap-4 xl:grid-cols-3">
-              <div className="rounded-[28px] border border-white/10 bg-white/[0.045] p-5">
+              <Link
+                to="/cart"
+                className="block rounded-[28px] border border-white/10 bg-white/[0.045] p-5 transition hover:border-white/20 hover:bg-white/[0.07]"
+              >
                 <div className="text-xs uppercase tracking-[0.2em] text-white/38">Корзина</div>
                 <div className="mt-4 text-3xl font-semibold text-white">{cart.length}</div>
                 <div className="mt-1 text-sm text-white/48">сохранённых позиций</div>
-              </div>
-              <div className="rounded-[28px] border border-white/10 bg-white/[0.045] p-5">
+              </Link>
+              <Link
+                to="/favorites"
+                className="block rounded-[28px] border border-white/10 bg-white/[0.045] p-5 transition hover:border-white/20 hover:bg-white/[0.07]"
+              >
                 <div className="text-xs uppercase tracking-[0.2em] text-white/38">Избранное</div>
                 <div className="mt-4 text-3xl font-semibold text-white">{favorites.length}</div>
                 <div className="mt-1 text-sm text-white/48">товаров в списке</div>
-              </div>
+              </Link>
               <div className="rounded-[28px] border border-white/10 bg-white/[0.045] p-5">
                 <div className="text-xs uppercase tracking-[0.2em] text-white/38">Бонусы</div>
                 <div className="mt-4 text-3xl font-semibold text-white">0 ₽</div>
@@ -438,9 +483,9 @@ export function AccountPage() {
                     <button
                       key={item.id}
                       type="button"
-                      onClick={() => setActiveSubscription(item.id)}
+                      onClick={() => handleSubscriptionSelect(item.id)}
                       className={`group cursor-pointer rounded-[26px] border p-3 text-left transition ${
-                        activeSubscription === item.id
+                        (isPsPlusSubscription(item.id) && activePsPlusSubscription === item.id) || (item.id === 'ea-play' && isEaPlayEnabled)
                           ? 'border-white/42 bg-white/[0.08] shadow-[0_18px_55px_rgba(255,255,255,.08)]'
                           : 'border-white/10 bg-black/16 hover:border-white/22 hover:bg-white/[0.05]'
                       }`}
@@ -461,11 +506,12 @@ export function AccountPage() {
                   <div className="rounded-[24px] border border-white/10 bg-black/18 p-5">
                     <div className="text-sm uppercase tracking-[0.18em] text-white/38">Текущий выбор</div>
                     <div className="mt-3 text-2xl font-semibold text-white">
-                      {subscriptionOptions.find((item) => item.id === activeSubscription)?.eyebrow}{' '}
-                      {subscriptionOptions.find((item) => item.id === activeSubscription)?.title}
+                      {subscriptionOptions.find((item) => item.id === activePsPlusSubscription)?.eyebrow}{' '}
+                      {subscriptionOptions.find((item) => item.id === activePsPlusSubscription)?.title}
                     </div>
+                    {isEaPlayEnabled ? <div className="mt-2 text-base font-medium text-white/78">+ EA Play</div> : null}
                     <p className="mt-2 text-sm leading-6 text-white/48">
-                      Эта информация хранится в личном кабинете и помогает фильтровать предложения под вашу подписку.
+                      Essential, Extra и Deluxe взаимоисключаются. EA Play можно добавить отдельно вместе с одной PS Plus подпиской.
                     </p>
                   </div>
 
@@ -473,15 +519,30 @@ export function AccountPage() {
                     <span className="block text-sm uppercase tracking-[0.18em] text-white/38">Дата окончания</span>
                     <input
                       type="date"
-                      value={subscriptionEndDate}
-                      onChange={(event) => setSubscriptionEndDate(event.target.value)}
+                      value={psPlusEndDate}
+                      onChange={(event) => setPsPlusEndDate(event.target.value)}
                       className="mt-4 w-full rounded-[18px] border border-white/10 bg-black/28 px-4 py-3 text-sm text-white outline-none [color-scheme:dark] focus:border-white/24"
                     />
                     <span className="mt-3 block text-sm text-white/48">
-                      {subscriptionEndDate ? `Подписка активна до ${subscriptionEndDate}` : 'Укажите дату окончания подписки'}
+                      {psPlusEndDate ? `PS Plus активна до ${psPlusEndDate}` : 'Укажите дату окончания PS Plus'}
                     </span>
                   </label>
                 </div>
+
+                {isEaPlayEnabled ? (
+                  <label className="mt-4 block rounded-[24px] border border-white/10 bg-black/18 p-5">
+                    <span className="block text-sm uppercase tracking-[0.18em] text-white/38">Дата окончания EA Play</span>
+                    <input
+                      type="date"
+                      value={eaPlayEndDate}
+                      onChange={(event) => setEaPlayEndDate(event.target.value)}
+                      className="mt-4 w-full rounded-[18px] border border-white/10 bg-black/28 px-4 py-3 text-sm text-white outline-none [color-scheme:dark] focus:border-white/24"
+                    />
+                    <span className="mt-3 block text-sm text-white/48">
+                      {eaPlayEndDate ? `EA Play активна до ${eaPlayEndDate}` : 'Укажите дату окончания EA Play'}
+                    </span>
+                  </label>
+                ) : null}
               </section>
             ) : null}
 
