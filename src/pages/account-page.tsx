@@ -576,26 +576,11 @@ export function AccountPage() {
             ) : null}
 
             {activeSection === 'purchases' ? (
-              <section className="rounded-[30px] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.035))] p-6 sm:p-8">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <div className="text-xs uppercase tracking-[0.2em] text-white/38">Раздел кабинета</div>
-                    <h1 className="mt-3 font-display text-4xl text-sheen">История покупок</h1>
-                  </div>
-                  <CreditCard size={22} className="text-white/38" />
-                </div>
-                <div className="mt-7 rounded-[24px] border border-white/10 bg-black/18 p-5">
-                  <div className="text-xl font-semibold text-white">Заказов пока нет</div>
-                  <p className="mt-3 max-w-2xl text-sm leading-6 text-white/52">
-                    После оплаты здесь появятся номер заказа, статус, сумма, список товаров и выданные коды пополнения.
-                  </p>
-                  <Link
-                    to="/catalog"
-                    className="mt-6 inline-flex cursor-pointer rounded-full bg-white px-6 py-3 text-sm font-semibold !text-black transition hover:bg-zinc-100"
-                  >
-                    Перейти в каталог
-                  </Link>
-                </div>
+              <section className="min-h-[520px] p-2 sm:p-4">
+                <h1 className="text-4xl font-semibold tracking-[-0.04em] text-white">История покупок</h1>
+                <p className="mt-4 max-w-2xl text-base leading-7 text-white/58">
+                  Все ваши заказы, ключи и данные об аккаунте будут храниться здесь.
+                </p>
               </section>
             ) : null}
           </div>
