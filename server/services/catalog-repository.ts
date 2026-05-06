@@ -649,6 +649,54 @@ export class CatalogRepository {
     return this.getOrder(row.id)
   }
 
+  attachPayment(orderId: number, input: {
+    provider: string
+    paymentId: string
+    paymentStatus: string
+    confirmationUrl: string | null
+    fulfillmentMode: 'manual' | 'automatic'
+  }) {
+    this.db
+      .prepare(
+        `
+        UPDATE orders
+        SET payment_provider = ?, payment_id = ?, payment_status = ?, payment_confirmation_url = ?,
+            fulfillment_mode = ?, updated_at = ?
+        WHERE id = ?
+        `,
+      )
+      .run(input.provider, input.paymentId, input.paymentStatus, input.confirmationUrl, input.fulfillmentMode, nowIso(), orderId)
+  }
+
+  updatePaymentStatus(orderId: number, paymentStatus: string) {
+    this.db.prepare('UPDATE orders SET payment_status = ?, updated_at = ? WHERE id = ?').run(paymentStatus, nowIso(), orderId)
+  }
+
+  markOrderPaid(orderId: number) {
+    this.db
+      .prepare(
+        `
+        UPDATE orders
+        SET status = CASE WHEN status = 'code_sent' THEN status ELSE 'paid' END,
+            paid_at = COALESCE(paid_at, ?),
+            updated_at = ?
+        WHERE id = ?
+        `,
+      )
+      .run(nowIso(), nowIso(), orderId)
+    return this.getOrder(orderId)
+  }
+
+  markOrderCancelled(orderId: number) {
+    this.db.prepare("UPDATE orders SET status = 'cancelled', updated_at = ? WHERE id = ?").run(nowIso(), orderId)
+    return this.getOrder(orderId)
+  }
+
+  getOrderByPaymentId(paymentId: string) {
+    const row = this.db.prepare('SELECT id FROM orders WHERE payment_id = ?').get(paymentId) as { id: number } | undefined
+    return row ? this.getOrder(row.id) : null
+  }
+
   getOrder(id: number): OrderRecord | null {
     const row = this.db.prepare('SELECT * FROM orders WHERE id = ?').get(id) as Record<string, unknown> | undefined
     if (!row) {
@@ -662,6 +710,14 @@ export class CatalogRepository {
       status: String(row.status) as OrderRecord['status'],
       acceptedOffer: Number(row.accepted_offer) === 1,
       comment: row.comment === null ? null : String(row.comment),
+      paymentProvider: row.payment_provider === null || row.payment_provider === undefined ? null : String(row.payment_provider),
+      paymentId: row.payment_id === null || row.payment_id === undefined ? null : String(row.payment_id),
+      paymentStatus: row.payment_status === null || row.payment_status === undefined ? null : String(row.payment_status),
+      paymentConfirmationUrl:
+        row.payment_confirmation_url === null || row.payment_confirmation_url === undefined ? null : String(row.payment_confirmation_url),
+      fulfillmentMode: row.fulfillment_mode === 'automatic' ? 'automatic' : 'manual',
+      paidAt: row.paid_at === null || row.paid_at === undefined ? null : String(row.paid_at),
+      issuedAt: row.issued_at === null || row.issued_at === undefined ? null : String(row.issued_at),
       cartSnapshot: parseJson(row.cart_snapshot_json, {
         supported: false,
         region: String(row.region),

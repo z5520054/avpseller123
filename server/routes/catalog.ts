@@ -7,6 +7,8 @@ import { CatalogRepository } from '../services/catalog-repository'
 import { HomeBannersService } from '../services/home-banners'
 import { ManualParseService } from '../services/manual-parse'
 import { PsPlusPricesService, psPlusTiers } from '../services/ps-plus-prices'
+import { FulfillmentService } from '../services/fulfillment'
+import { YooKassaService } from '../services/yookassa'
 
 const listQuerySchema = z.object({
   query: z.string().optional(),
@@ -164,6 +166,35 @@ const adminParseProductsQuerySchema = z.object({
   offset: z.coerce.number().int().min(0).default(0),
 })
 
+const adminDenominationBodySchema = z.object({
+  nominalTry: z.coerce.number().int().positive(),
+  priceRubMinor: z.coerce.number().int().min(0),
+  isActive: z.boolean(),
+})
+
+const adminCodesBodySchema = z.object({
+  nominalTry: z.coerce.number().int().positive(),
+  codes: z.union([
+    z.string().transform((value) => value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean)),
+    z.array(z.string().trim().min(1)),
+  ]),
+})
+
+const adminFulfillmentModeBodySchema = z.object({
+  mode: z.enum(['manual', 'automatic']),
+})
+
+const adminOrdersQuerySchema = z.object({
+  status: z.string().optional().default('all'),
+  query: z.string().trim().optional(),
+  limit: z.coerce.number().int().min(1).max(200).default(100),
+})
+
+const adminManualCodeBodySchema = z.object({
+  nominalTry: z.coerce.number().int().positive(),
+  code: z.string().trim().min(3),
+})
+
 function mapAliasRegion(region?: string) {
   if (!region) {
     return undefined
@@ -196,6 +227,8 @@ export async function registerCatalogRoutes(app: FastifyInstance) {
   const psPlusPrices = new PsPlusPricesService()
   const homeBanners = new HomeBannersService()
   const manualParse = new ManualParseService()
+  const fulfillment = new FulfillmentService()
+  const yookassa = new YooKassaService(repository, fulfillment)
 
   function requireAdminToken(request: { headers: Record<string, unknown> }, reply: { code: (statusCode: number) => unknown }) {
     const token = String(request.headers['x-admin-token'] ?? '')
@@ -524,9 +557,34 @@ export async function registerCatalogRoutes(app: FastifyInstance) {
     return repository.recalculateCart(body)
   })
 
-  app.post('/api/orders', async (request) => {
+  app.post('/api/orders', async (request, reply) => {
     const body = createOrderBodySchema.parse(request.body)
-    return repository.createOrder(body)
+    const order = repository.createOrder(body)
+    if (!order) {
+      reply.code(500)
+      return { error: 'Order creation failed' }
+    }
+
+    try {
+      const paidOrder = await yookassa.createSbpPayment(order)
+      return paidOrder ?? order
+    } catch (error) {
+      if (config.yookassaShopId || config.yookassaSecretKey) {
+        reply.code(502)
+        return { error: error instanceof Error ? error.message : String(error) }
+      }
+
+      return order
+    }
+  })
+
+  app.post('/api/payments/yookassa/webhook', async (request, reply) => {
+    try {
+      return await yookassa.handleWebhook(request.body)
+    } catch (error) {
+      reply.code(400)
+      return { error: error instanceof Error ? error.message : String(error) }
+    }
   })
 
   app.get('/api/orders/:id', async (request, reply) => {
@@ -574,4 +632,80 @@ export async function registerCatalogRoutes(app: FastifyInstance) {
   })
 
   app.get('/api/sync-runs', async () => repository.getLatestSyncRuns())
+
+  app.get('/api/admin/fulfillment/dashboard', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    return fulfillment.getDashboard()
+  })
+
+  app.put('/api/admin/fulfillment/mode', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    const body = adminFulfillmentModeBodySchema.parse(request.body)
+    return fulfillment.updateMode(body.mode)
+  })
+
+  app.put('/api/admin/fulfillment/denomination', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    const body = adminDenominationBodySchema.parse(request.body)
+    return { items: fulfillment.updateDenomination(body) }
+  })
+
+  app.get('/api/admin/fulfillment/codes', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    const query = z.object({
+      nominalTry: z.coerce.number().int().positive().optional(),
+      status: z.string().optional().default('all'),
+      reveal: z.coerce.boolean().default(false),
+    }).parse(request.query)
+    return { items: fulfillment.listCodes(query) }
+  })
+
+  app.post('/api/admin/fulfillment/codes', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    const body = adminCodesBodySchema.parse(request.body)
+    return fulfillment.addCodes(body)
+  })
+
+  app.delete('/api/admin/fulfillment/codes/:id', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    const id = Number((request.params as { id: string }).id)
+    return fulfillment.deleteUnusedCode(id)
+  })
+
+  app.get('/api/admin/fulfillment/orders', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    const query = adminOrdersQuerySchema.parse(request.query)
+    return { items: fulfillment.listOrders(query) }
+  })
+
+  app.post('/api/admin/fulfillment/orders/:id/manual-code', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    const id = Number((request.params as { id: string }).id)
+    const body = adminManualCodeBodySchema.parse(request.body)
+    return fulfillment.assignManualCode(id, body.nominalTry, body.code)
+  })
 }

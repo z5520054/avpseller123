@@ -95,4 +95,69 @@ function ensureMigrations(db: DatabaseSync) {
       updated_at TEXT NOT NULL
     );
   `)
+
+  const orderColumns = db.prepare('PRAGMA table_info(orders)').all() as Array<{ name: string }>
+  const orderColumnNames = new Set(orderColumns.map((column) => column.name))
+
+  const orderColumnSql: Record<string, string> = {
+    payment_provider: 'ALTER TABLE orders ADD COLUMN payment_provider TEXT;',
+    payment_id: 'ALTER TABLE orders ADD COLUMN payment_id TEXT;',
+    payment_status: 'ALTER TABLE orders ADD COLUMN payment_status TEXT;',
+    payment_confirmation_url: 'ALTER TABLE orders ADD COLUMN payment_confirmation_url TEXT;',
+    fulfillment_mode: "ALTER TABLE orders ADD COLUMN fulfillment_mode TEXT NOT NULL DEFAULT 'manual';",
+    paid_at: 'ALTER TABLE orders ADD COLUMN paid_at TEXT;',
+    issued_at: 'ALTER TABLE orders ADD COLUMN issued_at TEXT;',
+  }
+
+  for (const [column, sql] of Object.entries(orderColumnSql)) {
+    if (!orderColumnNames.has(column)) {
+      db.exec(sql)
+    }
+  }
+
+  db.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_payment_id
+      ON orders(payment_id)
+      WHERE payment_id IS NOT NULL;
+
+    CREATE TABLE IF NOT EXISTS top_up_denominations (
+      nominal_try INTEGER PRIMARY KEY,
+      price_rub_minor INTEGER NOT NULL,
+      is_active INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS top_up_codes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nominal_try INTEGER NOT NULL,
+      code TEXT NOT NULL UNIQUE,
+      status TEXT NOT NULL DEFAULT 'active',
+      order_id INTEGER,
+      added_at TEXT NOT NULL,
+      sold_at TEXT,
+      FOREIGN KEY (nominal_try) REFERENCES top_up_denominations(nominal_try),
+      FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_top_up_codes_nominal_status
+      ON top_up_codes(nominal_try, status, id);
+
+    CREATE TABLE IF NOT EXISTS order_code_assignments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_id INTEGER NOT NULL,
+      top_up_code_id INTEGER NOT NULL,
+      nominal_try INTEGER NOT NULL,
+      code_snapshot TEXT NOT NULL,
+      assigned_at TEXT NOT NULL,
+      FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+      FOREIGN KEY (top_up_code_id) REFERENCES top_up_codes(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS fulfillment_settings (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      mode TEXT NOT NULL DEFAULT 'manual',
+      updated_at TEXT NOT NULL
+    );
+  `)
 }

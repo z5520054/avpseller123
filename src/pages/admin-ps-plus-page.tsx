@@ -3,24 +3,32 @@ import {
   createAdminParseTask,
   createAdminProxy,
   deleteAdminProxy,
+  addAdminTopUpCodes,
   getAdminBanners,
+  getAdminFulfillmentDashboard,
+  getAdminFulfillmentOrders,
   getAdminParseProducts,
   getAdminParseTasks,
   getAdminProxies,
   getAdminPsPlusPrices,
+  getAdminTopUpCodes,
   refreshAdminProduct,
   resumeAdminParseTask,
   testAdminProxy,
   toggleAdminProxy,
+  updateAdminDenomination,
   updateAdminBanners,
+  updateAdminFulfillmentMode,
   updateAdminPsPlusPrices,
 } from '../lib/catalog-api'
 import type {
+  AdminFulfillmentDashboard,
   AdminParseProduct,
   AdminParseRegion,
   AdminParseTask,
   AdminParseType,
   AdminProxy,
+  AdminTopUpCode,
   HomeBanner,
   HomeBannerSettings,
   PsPlusDuration,
@@ -101,6 +109,238 @@ const PARSE_TYPES: Array<{ value: AdminParseType; label: string }> = [
 
 function formatTaskDate(value: string | null) {
   return value ? new Date(value).toLocaleString('ru-RU') : '—'
+}
+
+function formatRubMinor(value: number) {
+  return `${Math.round(value / 100).toLocaleString('ru-RU')} ₽`
+}
+
+function CodeFulfillmentPanel({ token }: { token: string }) {
+  const [dashboard, setDashboard] = useState<AdminFulfillmentDashboard | null>(null)
+  const [codes, setCodes] = useState<AdminTopUpCode[]>([])
+  const [orders, setOrders] = useState<Array<Record<string, unknown>>>([])
+  const [selectedNominal, setSelectedNominal] = useState(250)
+  const [codesText, setCodesText] = useState('')
+  const [status, setStatus] = useState('Склад кодов готов.')
+
+  async function load() {
+    const cleanToken = token.trim()
+    if (!cleanToken) return
+    try {
+      const [dashboardResponse, codesResponse, ordersResponse] = await Promise.all([
+        getAdminFulfillmentDashboard(cleanToken),
+        getAdminTopUpCodes(cleanToken, { status: 'all' }),
+        getAdminFulfillmentOrders(cleanToken),
+      ])
+      setDashboard(dashboardResponse)
+      setCodes(codesResponse.items)
+      setOrders(ordersResponse.items as Array<Record<string, unknown>>)
+      setSelectedNominal(dashboardResponse.denominations[0]?.nominal_try ?? 250)
+    } catch (error) {
+      setStatus(error instanceof Error ? `Не удалось загрузить склад: ${error.message}` : 'Не удалось загрузить склад.')
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false
+    async function loadInitial() {
+      const cleanToken = token.trim()
+      if (!cleanToken) return
+      try {
+        const [dashboardResponse, codesResponse, ordersResponse] = await Promise.all([
+          getAdminFulfillmentDashboard(cleanToken),
+          getAdminTopUpCodes(cleanToken, { status: 'all' }),
+          getAdminFulfillmentOrders(cleanToken),
+        ])
+        if (cancelled) return
+        setDashboard(dashboardResponse)
+        setCodes(codesResponse.items)
+        setOrders(ordersResponse.items as Array<Record<string, unknown>>)
+        setSelectedNominal(dashboardResponse.denominations[0]?.nominal_try ?? 250)
+      } catch (error) {
+        if (!cancelled) {
+          setStatus(error instanceof Error ? `Не удалось загрузить склад: ${error.message}` : 'Не удалось загрузить склад.')
+        }
+      }
+    }
+    void loadInitial()
+    return () => {
+      cancelled = true
+    }
+  }, [token])
+
+  async function saveMode(mode: 'manual' | 'automatic') {
+    await updateAdminFulfillmentMode(token.trim(), mode)
+    setStatus(mode === 'automatic' ? 'Включена автоматическая выдача новых оплаченных заказов.' : 'Включена ручная выдача новых оплаченных заказов.')
+    await load()
+  }
+
+  async function saveDenomination(nominalTry: number, priceRub: string, isActive: boolean) {
+    const rub = Number(priceRub.replace(/\s+/g, '').replace(',', '.'))
+    if (!Number.isFinite(rub) || rub < 0) {
+      setStatus('Некорректная цена номинала.')
+      return
+    }
+
+    await updateAdminDenomination(token.trim(), { nominalTry, priceRubMinor: Math.round(rub * 100), isActive })
+    setStatus(`Номинал ${nominalTry} TL обновлен.`)
+    await load()
+  }
+
+  async function addCodes() {
+    const response = await addAdminTopUpCodes(token.trim(), { nominalTry: selectedNominal, codes: codesText })
+    setCodesText('')
+    setStatus(`Добавлено кодов: ${response.added}.`)
+    await load()
+  }
+
+  return (
+    <section className="rounded-[28px] border border-white/10 bg-black/20 p-5">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h2 className="font-display text-3xl text-sheen">Выдача кодов и склад</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/50">
+            Тестовая ЮKassa SBP создает оплату, webhook переводит заказ в paid и в автоматическом режиме берет коды из пула active.
+          </p>
+        </div>
+        <button type="button" onClick={() => void load()} className="quiet-button">Обновить</button>
+      </div>
+      <div className="mt-4 rounded-2xl border border-white/8 bg-black/20 px-4 py-3 text-sm text-white/58">{status}</div>
+
+      {dashboard ? (
+        <>
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+              <div className="text-xs uppercase tracking-[0.18em] text-white/38">Заказов сегодня</div>
+              <div className="mt-3 text-3xl font-semibold text-white">{dashboard.ordersToday}</div>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+              <div className="text-xs uppercase tracking-[0.18em] text-white/38">Ожидают выдачи</div>
+              <div className="mt-3 text-3xl font-semibold text-white">{dashboard.waitingOrders}</div>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+              <div className="text-xs uppercase tracking-[0.18em] text-white/38">Режим выдачи</div>
+              <div className="mt-3 flex gap-2">
+                {(['manual', 'automatic'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => void saveMode(mode)}
+                    className={`rounded-full px-4 py-2 text-sm ${dashboard.mode === mode ? 'bg-white text-black' : 'border border-white/10 text-white/60'}`}
+                  >
+                    {mode === 'manual' ? 'Ручной' : 'Авто'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 overflow-x-auto">
+            <table className="w-full min-w-[780px] text-left text-sm">
+              <thead className="text-xs uppercase tracking-[0.16em] text-white/40">
+                <tr>
+                  <th className="py-2">Номинал</th>
+                  <th>Цена</th>
+                  <th>Активен</th>
+                  <th>Остаток active</th>
+                  <th>Продано</th>
+                  <th>Сохранить</th>
+                </tr>
+              </thead>
+              <tbody className="text-white/64">
+                {dashboard.denominations.map((item) => (
+                  <DenominationRow key={item.nominal_try} item={item} onSave={saveDenomination} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-6 grid gap-5 xl:grid-cols-[0.8fr_1.2fr]">
+            <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4">
+              <h3 className="text-xl font-semibold text-white">Добавить коды</h3>
+              <select value={selectedNominal} onChange={(event) => setSelectedNominal(Number(event.target.value))} className="mt-4 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none">
+                {dashboard.denominations.map((item) => <option key={item.nominal_try} value={item.nominal_try}>{item.nominal_try} TL</option>)}
+              </select>
+              <textarea value={codesText} onChange={(event) => setCodesText(event.target.value)} rows={8} placeholder="Один код на строку" className="mt-3 w-full resize-none rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35" />
+              <button type="button" onClick={() => void addCodes()} className="mt-3 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black">Сохранить</button>
+            </div>
+
+            <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4">
+              <h3 className="text-xl font-semibold text-white">Пул кодов</h3>
+              <div className="mt-4 max-h-[330px] overflow-auto">
+                <table className="w-full min-w-[620px] text-left text-sm">
+                  <thead className="text-xs uppercase tracking-[0.16em] text-white/40">
+                    <tr><th>ID</th><th>Номинал</th><th>Код</th><th>Статус</th><th>Заказ</th></tr>
+                  </thead>
+                  <tbody className="text-white/62">
+                    {codes.map((code) => (
+                      <tr key={code.id} className="border-t border-white/8">
+                        <td className="py-2">{code.id}</td>
+                        <td>{code.nominalTry} TL</td>
+                        <td>{code.code}</td>
+                        <td>{code.status}</td>
+                        <td>{code.orderId ?? '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 rounded-[24px] border border-white/10 bg-white/[0.03] p-4">
+            <h3 className="text-xl font-semibold text-white">Заказы</h3>
+            <div className="mt-4 max-h-[360px] overflow-auto">
+              <table className="w-full min-w-[880px] text-left text-sm">
+                <thead className="text-xs uppercase tracking-[0.16em] text-white/40">
+                  <tr><th>ID</th><th>Email</th><th>Статус</th><th>Оплата</th><th>Режим</th><th>Создан</th></tr>
+                </thead>
+                <tbody className="text-white/62">
+                  {orders.map((order) => (
+                    <tr key={String(order.id)} className="border-t border-white/8">
+                      <td className="py-2 text-white">{String(order.id)}</td>
+                      <td>{String(order.email ?? '—')}</td>
+                      <td>{String(order.status ?? '—')}</td>
+                      <td>{String(order.payment_status ?? '—')}</td>
+                      <td>{String(order.fulfillment_mode ?? '—')}</td>
+                      <td>{formatTaskDate(String(order.created_at ?? ''))}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      ) : null}
+    </section>
+  )
+}
+
+function DenominationRow({
+  item,
+  onSave,
+}: {
+  item: AdminFulfillmentDashboard['denominations'][number]
+  onSave: (nominalTry: number, priceRub: string, isActive: boolean) => Promise<void>
+}) {
+  const [price, setPrice] = useState(String(Math.round(item.price_rub_minor / 100)))
+  const [isActive, setIsActive] = useState(item.is_active === 1)
+
+  return (
+    <tr className="border-t border-white/8">
+      <td className="py-3 text-white">{item.nominal_try} TL</td>
+      <td>
+        <input value={price} onChange={(event) => setPrice(event.target.value)} className="w-28 rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none" />
+        <span className="ml-2 text-xs text-white/34">{formatRubMinor(item.price_rub_minor)}</span>
+      </td>
+      <td><input type="checkbox" checked={isActive} onChange={(event) => setIsActive(event.target.checked)} /></td>
+      <td>{item.active_count}</td>
+      <td>{item.sold_count}</td>
+      <td>
+        <button type="button" onClick={() => void onSave(item.nominal_try, price, isActive)} className="rounded-full border border-white/10 px-4 py-2 text-xs text-white/70">Сохранить</button>
+      </td>
+    </tr>
+  )
 }
 
 function ManualParsingPanel({ token }: { token: string }) {
@@ -623,6 +863,8 @@ export function AdminPsPlusPage() {
         ) : (
           <div className="mt-6 space-y-8">
             <div className="rounded-2xl border border-white/8 bg-black/20 px-4 py-3 text-sm text-white/58">{status}</div>
+
+            <CodeFulfillmentPanel token={token} />
 
             <ManualParsingPanel token={token} />
 

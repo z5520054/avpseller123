@@ -85,6 +85,11 @@ export function CheckoutPage() {
                 items: cart,
               })
               clearCart()
+              if (created.paymentConfirmationUrl) {
+                window.location.href = created.paymentConfirmationUrl
+                return
+              }
+
               setOrder(created)
             } catch {
               setError('Не удалось создать заказ. Повторите попытку.')

@@ -253,9 +253,16 @@ export interface OrderRecord {
   id: number
   email: string
   region: string
-  status: 'pending' | 'paid' | 'fulfilled' | 'cancelled'
+  status: 'pending' | 'paid' | 'code_sent' | 'fulfilled' | 'cancelled' | 'expired' | 'refunded'
   acceptedOffer: boolean
   comment: string | null
+  paymentProvider: string | null
+  paymentId: string | null
+  paymentStatus: string | null
+  paymentConfirmationUrl: string | null
+  fulfillmentMode: 'manual' | 'automatic'
+  paidAt: string | null
+  issuedAt: string | null
   cartSnapshot: CartRecalculationResult
   createdAt: string
   updatedAt: string

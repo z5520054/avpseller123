@@ -219,12 +219,44 @@ export interface OrderRecord {
   id: number
   email: string
   region: string
-  status: 'pending' | 'paid' | 'fulfilled' | 'cancelled'
+  status: 'pending' | 'paid' | 'code_sent' | 'fulfilled' | 'cancelled' | 'expired' | 'refunded'
   acceptedOffer: boolean
   comment: string | null
+  paymentProvider: string | null
+  paymentId: string | null
+  paymentStatus: string | null
+  paymentConfirmationUrl: string | null
+  fulfillmentMode: 'manual' | 'automatic'
+  paidAt: string | null
+  issuedAt: string | null
   cartSnapshot: CartRecalculationResponse
   createdAt: string
   updatedAt: string
+}
+
+export interface AdminFulfillmentDashboard {
+  mode: 'manual' | 'automatic'
+  ordersToday: number
+  waitingOrders: number
+  denominations: AdminTopUpDenomination[]
+}
+
+export interface AdminTopUpDenomination {
+  nominal_try: number
+  price_rub_minor: number
+  is_active: number
+  active_count: number
+  sold_count: number
+}
+
+export interface AdminTopUpCode {
+  id: number
+  nominalTry: number
+  code: string
+  status: string
+  orderId: number | null
+  addedAt: string
+  soldAt: string | null
 }
 
 export type AdminParseType = 'price' | 'editions' | 'images'

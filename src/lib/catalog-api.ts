@@ -12,6 +12,9 @@ import type {
   AdminParseTask,
   AdminParseType,
   AdminProxy,
+  AdminFulfillmentDashboard,
+  AdminTopUpCode,
+  AdminTopUpDenomination,
 } from '../types'
 
 const API_BASE = import.meta.env.VITE_CATALOG_API_BASE?.replace(/\/$/, '') ?? ''
@@ -319,6 +322,63 @@ export function createOrder(input: {
         quantity: item.quantity,
       })),
     }),
+  })
+}
+
+export function getAdminFulfillmentDashboard(token: string) {
+  return fetchJson<AdminFulfillmentDashboard>('/api/admin/fulfillment/dashboard', {
+    headers: { 'x-admin-token': token },
+  })
+}
+
+export function updateAdminFulfillmentMode(token: string, mode: 'manual' | 'automatic') {
+  return fetchJson<{ mode: 'manual' | 'automatic' }>('/api/admin/fulfillment/mode', {
+    method: 'PUT',
+    headers: { 'x-admin-token': token },
+    body: JSON.stringify({ mode }),
+  })
+}
+
+export function updateAdminDenomination(
+  token: string,
+  input: { nominalTry: number; priceRubMinor: number; isActive: boolean },
+) {
+  return fetchJson<{ items: AdminTopUpDenomination[] }>('/api/admin/fulfillment/denomination', {
+    method: 'PUT',
+    headers: { 'x-admin-token': token },
+    body: JSON.stringify(input),
+  })
+}
+
+export function getAdminTopUpCodes(
+  token: string,
+  params: { nominalTry?: number; status?: string; reveal?: boolean } = {},
+) {
+  const search = new URLSearchParams()
+  if (params.nominalTry) search.set('nominalTry', String(params.nominalTry))
+  if (params.status) search.set('status', params.status)
+  if (params.reveal) search.set('reveal', 'true')
+  const suffix = search.toString() ? `?${search.toString()}` : ''
+  return fetchJson<{ items: AdminTopUpCode[] }>(`/api/admin/fulfillment/codes${suffix}`, {
+    headers: { 'x-admin-token': token },
+  })
+}
+
+export function addAdminTopUpCodes(token: string, input: { nominalTry: number; codes: string }) {
+  return fetchJson<{ added: number; codes: AdminTopUpCode[] }>('/api/admin/fulfillment/codes', {
+    method: 'POST',
+    headers: { 'x-admin-token': token },
+    body: JSON.stringify(input),
+  })
+}
+
+export function getAdminFulfillmentOrders(token: string, params: { status?: string; query?: string } = {}) {
+  const search = new URLSearchParams()
+  if (params.status) search.set('status', params.status)
+  if (params.query) search.set('query', params.query)
+  const suffix = search.toString() ? `?${search.toString()}` : ''
+  return fetchJson<{ items: unknown[] }>(`/api/admin/fulfillment/orders${suffix}`, {
+    headers: { 'x-admin-token': token },
   })
 }
 

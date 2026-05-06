@@ -34,6 +34,10 @@ export const config = {
   schedulerEnabled: process.env.CATALOG_SCHEDULER_ENABLED === 'true',
   defaultProvider: process.env.CATALOG_PROVIDER ?? 'playstation-store',
   adminToken: process.env.ADMIN_TOKEN ?? '',
+  publicSiteUrl: process.env.PUBLIC_SITE_URL ?? 'https://avpseller.ru',
+  yookassaShopId: process.env.YOOKASSA_SHOP_ID ?? '',
+  yookassaSecretKey: process.env.YOOKASSA_SECRET_KEY ?? '',
+  yookassaReturnUrl: process.env.YOOKASSA_RETURN_URL ?? `${process.env.PUBLIC_SITE_URL ?? 'https://avpseller.ru'}/checkout`,
   staticUploadDir: process.env.STATIC_UPLOAD_DIR ?? path.resolve(process.cwd(), '..', 'current', 'uploads'),
   publicUploadBaseUrl: process.env.PUBLIC_UPLOAD_BASE_URL ?? '/uploads',
   sampleImportPath:

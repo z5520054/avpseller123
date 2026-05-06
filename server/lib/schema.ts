@@ -98,7 +98,58 @@ CREATE TABLE IF NOT EXISTS orders (
   accepted_offer INTEGER NOT NULL,
   comment TEXT,
   cart_snapshot_json TEXT NOT NULL,
+  payment_provider TEXT,
+  payment_id TEXT,
+  payment_status TEXT,
+  payment_confirmation_url TEXT,
+  fulfillment_mode TEXT NOT NULL DEFAULT 'manual',
+  paid_at TEXT,
+  issued_at TEXT,
   created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_payment_id
+  ON orders(payment_id)
+  WHERE payment_id IS NOT NULL;
+
+CREATE TABLE IF NOT EXISTS top_up_denominations (
+  nominal_try INTEGER PRIMARY KEY,
+  price_rub_minor INTEGER NOT NULL,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS top_up_codes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nominal_try INTEGER NOT NULL,
+  code TEXT NOT NULL UNIQUE,
+  status TEXT NOT NULL DEFAULT 'active',
+  order_id INTEGER,
+  added_at TEXT NOT NULL,
+  sold_at TEXT,
+  FOREIGN KEY (nominal_try) REFERENCES top_up_denominations(nominal_try),
+  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_top_up_codes_nominal_status
+  ON top_up_codes(nominal_try, status, id);
+
+CREATE TABLE IF NOT EXISTS order_code_assignments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  order_id INTEGER NOT NULL,
+  top_up_code_id INTEGER,
+  nominal_try INTEGER NOT NULL,
+  code_snapshot TEXT NOT NULL,
+  assigned_at TEXT NOT NULL,
+  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+  FOREIGN KEY (top_up_code_id) REFERENCES top_up_codes(id)
+);
+
+CREATE TABLE IF NOT EXISTS fulfillment_settings (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  mode TEXT NOT NULL DEFAULT 'manual',
   updated_at TEXT NOT NULL
 );
 
