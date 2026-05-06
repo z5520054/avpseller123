@@ -78,13 +78,23 @@ function loadVkIdSdk() {
   return vkSdkPromise
 }
 
-export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+export function AuthModal({
+  isOpen,
+  isAuthenticated,
+  onAuthenticated,
+  onClose,
+}: {
+  isOpen: boolean
+  isAuthenticated: boolean
+  onAuthenticated: (profile: unknown) => void
+  onClose: () => void
+}) {
   const widgetRef = useRef<HTMLDivElement | null>(null)
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    if (!isOpen || !widgetRef.current) {
+    if (!isOpen || isAuthenticated || !widgetRef.current) {
       return
     }
 
@@ -131,7 +141,9 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
             VKID.Auth.exchangeCode(data.code, data.device_id)
               .then((data: unknown) => {
                 window.localStorage.setItem('avp-vkid-profile', JSON.stringify(data))
+                onAuthenticated(data)
                 setStatus('success')
+                window.setTimeout(onClose, 700)
                 setMessage('Авторизация через VK ID выполнена.')
               })
               .catch((error: unknown) => {
@@ -153,7 +165,7 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
       cancelled = true
       container.innerHTML = ''
     }
-  }, [isOpen])
+  }, [isAuthenticated, isOpen, onAuthenticated, onClose])
 
   if (!isOpen) {
     return null
@@ -179,7 +191,23 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
           </p>
         </div>
 
-        <div className="relative z-10 mt-7 min-h-[126px] rounded-[20px] border border-white/10 bg-black/20 p-3" ref={widgetRef} />
+        {isAuthenticated ? (
+          <div className="relative z-10 mt-7 rounded-[20px] border border-emerald-300/18 bg-emerald-400/10 p-5">
+            <div className="text-base font-semibold text-emerald-100">Вы авторизованы через VK ID</div>
+            <p className="mt-2 text-sm leading-6 text-white/58">
+              Профиль подключён. Можно закрыть это окно и продолжить покупки.
+            </p>
+            <button
+              type="button"
+              onClick={onClose}
+              className="mt-5 inline-flex w-full cursor-pointer items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-medium text-black transition hover:bg-white/88"
+            >
+              Продолжить
+            </button>
+          </div>
+        ) : (
+          <div className="relative z-10 mt-7 min-h-[126px] rounded-[20px] border border-white/10 bg-black/20 p-3" ref={widgetRef} />
+        )}
 
         {status === 'loading' ? (
           <div className="relative z-10 mt-4 rounded-[16px] bg-white/8 px-4 py-3 text-sm text-white/60">Загружаем VK ID...</div>

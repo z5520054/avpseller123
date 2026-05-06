@@ -17,6 +17,13 @@ export function RootLayout() {
   const location = useLocation()
   const category = new URLSearchParams(location.search).get('category')
   const [isAuthOpen, setIsAuthOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false
+    }
+
+    return Boolean(window.localStorage.getItem('avp-vkid-profile'))
+  })
 
   function isNavigationActive(active: string) {
     if (active === 'subscriptions') {
@@ -111,10 +118,13 @@ export function RootLayout() {
             <button
               type="button"
               onClick={() => setIsAuthOpen(true)}
-              className="header-icon-button"
+              className={`header-icon-button ${isAuthenticated ? 'border-emerald-300/45 bg-emerald-300/14 text-emerald-100' : ''}`}
               aria-label="Профиль"
             >
               <User size={18} />
+              {isAuthenticated ? (
+                <span className="absolute bottom-1 right-1 h-2.5 w-2.5 rounded-full border border-[#171719] bg-emerald-300" />
+              ) : null}
             </button>
             <NavLink
               to="/support"
@@ -131,7 +141,12 @@ export function RootLayout() {
         <Outlet />
       </main>
 
-      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+      <AuthModal
+        isOpen={isAuthOpen}
+        isAuthenticated={isAuthenticated}
+        onAuthenticated={() => setIsAuthenticated(true)}
+        onClose={() => setIsAuthOpen(false)}
+      />
 
       <nav className="fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 rounded-[24px] border border-white/10 bg-[#171719]/95 px-2 py-2 shadow-[0_18px_50px_rgba(0,0,0,.55)] backdrop-blur-2xl lg:hidden">
         {navigation.map((item) => (
