@@ -146,7 +146,7 @@ function ensureMigrations(db: DatabaseSync) {
     CREATE TABLE IF NOT EXISTS order_code_assignments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       order_id INTEGER NOT NULL,
-      top_up_code_id INTEGER NOT NULL,
+      top_up_code_id INTEGER,
       nominal_try INTEGER NOT NULL,
       code_snapshot TEXT NOT NULL,
       assigned_at TEXT NOT NULL,

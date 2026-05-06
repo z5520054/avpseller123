@@ -109,10 +109,6 @@ CREATE TABLE IF NOT EXISTS orders (
   updated_at TEXT NOT NULL
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_payment_id
-  ON orders(payment_id)
-  WHERE payment_id IS NOT NULL;
-
 CREATE TABLE IF NOT EXISTS top_up_denominations (
   nominal_try INTEGER PRIMARY KEY,
   price_rub_minor INTEGER NOT NULL,
