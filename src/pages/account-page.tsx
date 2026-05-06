@@ -7,9 +7,44 @@ import { useAppState } from '../store/use-app-state'
 
 type ConsoleType = 'ps5' | 'ps4'
 type AccountSection = 'account' | 'subscription' | 'purchases'
+type ActiveSubscription = 'essential' | 'extra' | 'deluxe' | 'ea-play'
 
 const ACCOUNT_EMAIL_KEY = 'avp-account-email'
 const ACCOUNT_CONSOLE_KEY = 'avp-account-console'
+const ACCOUNT_SUBSCRIPTION_KEY = 'avp-account-subscription'
+const ACCOUNT_SUBSCRIPTION_END_KEY = 'avp-account-subscription-end'
+
+const subscriptionOptions: Array<{
+  id: ActiveSubscription
+  eyebrow: string
+  title: string
+  tone: string
+}> = [
+  {
+    id: 'essential',
+    eyebrow: 'PS Plus',
+    title: 'Essential',
+    tone: 'from-zinc-100 via-slate-300 to-slate-500 text-black',
+  },
+  {
+    id: 'extra',
+    eyebrow: 'PS Plus',
+    title: 'Extra',
+    tone: 'from-yellow-200 via-amber-400 to-orange-500 text-black',
+  },
+  {
+    id: 'deluxe',
+    eyebrow: 'PS Plus',
+    title: 'Deluxe',
+    tone: 'from-[#141414] via-[#272018] to-amber-500 text-amber-200',
+  },
+  {
+    id: 'ea-play',
+    eyebrow: 'EA',
+    title: 'EA Play',
+    tone: 'from-[#071030] via-[#10205c] to-[#f24a5f] text-white',
+  },
+]
 
 function readVkProfile() {
   if (typeof window === 'undefined') {
@@ -169,6 +204,20 @@ export function AccountPage() {
 
     return (window.localStorage.getItem(ACCOUNT_CONSOLE_KEY) as ConsoleType | null) ?? 'ps5'
   })
+  const [activeSubscription, setActiveSubscription] = useState<ActiveSubscription>(() => {
+    if (typeof window === 'undefined') {
+      return 'essential'
+    }
+
+    return (window.localStorage.getItem(ACCOUNT_SUBSCRIPTION_KEY) as ActiveSubscription | null) ?? 'essential'
+  })
+  const [subscriptionEndDate, setSubscriptionEndDate] = useState(() => {
+    if (typeof window === 'undefined') {
+      return ''
+    }
+
+    return window.localStorage.getItem(ACCOUNT_SUBSCRIPTION_END_KEY) ?? ''
+  })
   const { products: cartProducts } = useCatalogProductsByIds(cart.map((item) => item.productId))
   const { products: favoriteProducts } = useCatalogProductsByIds(favorites.slice(0, 3))
   const avatar = getAvatar(profile)
@@ -180,6 +229,14 @@ export function AccountPage() {
   useEffect(() => {
     window.localStorage.setItem(ACCOUNT_CONSOLE_KEY, consoleType)
   }, [consoleType])
+
+  useEffect(() => {
+    window.localStorage.setItem(ACCOUNT_SUBSCRIPTION_KEY, activeSubscription)
+  }, [activeSubscription])
+
+  useEffect(() => {
+    window.localStorage.setItem(ACCOUNT_SUBSCRIPTION_END_KEY, subscriptionEndDate)
+  }, [subscriptionEndDate])
 
   function handleLogout() {
     window.localStorage.removeItem('avp-vkid-profile')
@@ -459,20 +516,61 @@ export function AccountPage() {
                   <div>
                     <div className="text-xs uppercase tracking-[0.2em] text-white/38">Раздел кабинета</div>
                     <h1 className="mt-3 font-display text-4xl text-sheen">Активная подписка</h1>
+                    <p className="mt-3 max-w-2xl text-sm leading-6 text-white/52">
+                      Выберите свою действующую подписку и укажите дату окончания. Так мы сможем показывать актуальный статус в кабинете.
+                    </p>
                   </div>
                   <Gift size={22} className="text-white/38" />
                 </div>
-                <div className="mt-7 rounded-[24px] border border-white/10 bg-black/18 p-5">
-                  <div className="text-xl font-semibold text-white">Подписка не выбрана</div>
-                  <p className="mt-3 max-w-2xl text-sm leading-6 text-white/52">
-                    Когда пользователь купит PS Plus, здесь будет отображаться тариф, срок действия, регион и дата следующего продления.
-                  </p>
-                  <Link
-                    to="/catalog?category=subscriptions"
-                    className="mt-6 inline-flex cursor-pointer rounded-full bg-white px-6 py-3 text-sm font-semibold !text-black transition hover:bg-zinc-100"
-                  >
-                    Выбрать подписку
-                  </Link>
+
+                <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  {subscriptionOptions.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setActiveSubscription(item.id)}
+                      className={`group cursor-pointer rounded-[26px] border p-3 text-left transition ${
+                        activeSubscription === item.id
+                          ? 'border-white/42 bg-white/[0.08] shadow-[0_18px_55px_rgba(255,255,255,.08)]'
+                          : 'border-white/10 bg-black/16 hover:border-white/22 hover:bg-white/[0.05]'
+                      }`}
+                    >
+                      <div className={`relative h-28 overflow-hidden rounded-[20px] bg-gradient-to-br ${item.tone} p-4`}>
+                        <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full border border-current/25" />
+                        <div className="absolute bottom-3 right-4 text-4xl font-black opacity-18">+</div>
+                        <div className="text-xs font-semibold uppercase tracking-[0.18em] opacity-70">{item.eyebrow}</div>
+                        <div className="mt-8 text-2xl font-black uppercase tracking-[-0.04em]">{item.title}</div>
+                      </div>
+                      <div className="mt-4 text-center text-sm text-white/58">{item.eyebrow}</div>
+                      <div className="mt-1 text-center text-base font-semibold text-white">{item.title}</div>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_320px]">
+                  <div className="rounded-[24px] border border-white/10 bg-black/18 p-5">
+                    <div className="text-sm uppercase tracking-[0.18em] text-white/38">Текущий выбор</div>
+                    <div className="mt-3 text-2xl font-semibold text-white">
+                      {subscriptionOptions.find((item) => item.id === activeSubscription)?.eyebrow}{' '}
+                      {subscriptionOptions.find((item) => item.id === activeSubscription)?.title}
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-white/48">
+                      Эта информация хранится в личном кабинете и помогает фильтровать предложения под вашу подписку.
+                    </p>
+                  </div>
+
+                  <label className="rounded-[24px] border border-white/10 bg-black/18 p-5">
+                    <span className="block text-sm uppercase tracking-[0.18em] text-white/38">Дата окончания</span>
+                    <input
+                      type="date"
+                      value={subscriptionEndDate}
+                      onChange={(event) => setSubscriptionEndDate(event.target.value)}
+                      className="mt-4 w-full rounded-[18px] border border-white/10 bg-black/28 px-4 py-3 text-sm text-white outline-none [color-scheme:dark] focus:border-white/24"
+                    />
+                    <span className="mt-3 block text-sm text-white/48">
+                      {subscriptionEndDate ? `Подписка активна до ${subscriptionEndDate}` : 'Укажите дату окончания подписки'}
+                    </span>
+                  </label>
                 </div>
               </section>
             ) : null}
