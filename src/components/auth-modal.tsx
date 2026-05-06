@@ -36,6 +36,8 @@ interface VkIdSdk {
   }
   Auth: {
     exchangeCode: (code: string, deviceId: string) => Promise<unknown>
+    userInfo?: (accessToken: string) => Promise<unknown>
+    publicInfo?: (idToken: string) => Promise<unknown>
   }
 }
 
@@ -76,6 +78,45 @@ function loadVkIdSdk() {
   }
 
   return vkSdkPromise
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
+
+async function enrichVkProfile(VKID: VkIdSdk, tokenData: unknown) {
+  if (!isRecord(tokenData)) {
+    return tokenData
+  }
+
+  const accessToken = typeof tokenData.access_token === 'string' ? tokenData.access_token : ''
+  const idToken = typeof tokenData.id_token === 'string' ? tokenData.id_token : ''
+  let profileData: unknown = null
+
+  if (accessToken && VKID.Auth.userInfo) {
+    profileData = await VKID.Auth.userInfo(accessToken).catch((error: unknown) => {
+      console.error('VK ID userInfo error', error)
+      return null
+    })
+  }
+
+  if (!profileData && idToken && VKID.Auth.publicInfo) {
+    profileData = await VKID.Auth.publicInfo(idToken).catch((error: unknown) => {
+      console.error('VK ID publicInfo error', error)
+      return null
+    })
+  }
+
+  if (!isRecord(profileData)) {
+    return tokenData
+  }
+
+  const user = isRecord(profileData.user) ? profileData.user : profileData
+  return {
+    ...tokenData,
+    ...profileData,
+    user,
+  }
 }
 
 export function AuthModal({
@@ -139,9 +180,10 @@ export function AuthModal({
             }
 
             VKID.Auth.exchangeCode(data.code, data.device_id)
-              .then((data: unknown) => {
-                window.localStorage.setItem('avp-vkid-profile', JSON.stringify(data))
-                onAuthenticated(data)
+              .then((tokenData: unknown) => enrichVkProfile(VKID, tokenData))
+              .then((profileData: unknown) => {
+                window.localStorage.setItem('avp-vkid-profile', JSON.stringify(profileData))
+                onAuthenticated(profileData)
                 setStatus('success')
                 window.setTimeout(onClose, 700)
                 setMessage('Авторизация через VK ID выполнена.')
