@@ -27,18 +27,91 @@ function readVkProfile() {
   }
 }
 
-function getProfileName(profile: Record<string, unknown> | null) {
-  const user = profile?.user as Record<string, unknown> | undefined
-  const firstName = typeof user?.first_name === 'string' ? user.first_name : ''
-  const lastName = typeof user?.last_name === 'string' ? user.last_name : ''
-  const fullName = `${firstName} ${lastName}`.trim()
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
 
-  return fullName || 'Покупатель AVP Seller'
+function decodeJwtPayload(token: unknown) {
+  if (typeof token !== 'string' || token.split('.').length < 2) {
+    return null
+  }
+
+  try {
+    const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
+    const decoded = window.atob(payload.padEnd(Math.ceil(payload.length / 4) * 4, '='))
+    const json = decodeURIComponent(
+      Array.from(decoded)
+        .map((char) => `%${char.charCodeAt(0).toString(16).padStart(2, '0')}`)
+        .join(''),
+    )
+
+    return JSON.parse(json) as Record<string, unknown>
+  } catch {
+    return null
+  }
+}
+
+function collectProfileSources(profile: Record<string, unknown> | null) {
+  if (!profile) {
+    return []
+  }
+
+  const sources: Record<string, unknown>[] = [profile]
+  for (const key of ['user', 'user_info', 'profile', 'account', 'vk_user']) {
+    const nested = profile[key]
+    if (isRecord(nested)) {
+      sources.push(nested)
+    }
+  }
+
+  for (const key of ['id_token', 'idToken']) {
+    const decoded = decodeJwtPayload(profile[key])
+    if (decoded) {
+      sources.push(decoded)
+    }
+  }
+
+  return sources
+}
+
+function pickString(source: Record<string, unknown>, keys: string[]) {
+  for (const key of keys) {
+    const value = source[key]
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim()
+    }
+  }
+
+  return ''
+}
+
+function getProfileName(profile: Record<string, unknown> | null) {
+  for (const source of collectProfileSources(profile)) {
+    const fullName = pickString(source, ['name', 'full_name', 'fullName', 'display_name', 'displayName'])
+    if (fullName) {
+      return fullName
+    }
+
+    const firstName = pickString(source, ['first_name', 'firstName', 'given_name', 'givenName'])
+    const lastName = pickString(source, ['last_name', 'lastName', 'family_name', 'familyName'])
+    const name = `${firstName} ${lastName}`.trim()
+    if (name) {
+      return name
+    }
+  }
+
+  return 'Покупатель AVP Seller'
 }
 
 function getAvatar(profile: Record<string, unknown> | null) {
-  const user = profile?.user as Record<string, unknown> | undefined
-  return typeof user?.avatar === 'string' ? user.avatar : null
+  for (const source of collectProfileSources(profile)) {
+    const avatar = pickString(source, ['avatar', 'photo', 'photo_100', 'photo200', 'picture'])
+    if (avatar) {
+      return avatar
+    }
+  }
+
+  return null
 }
 
 function AccountMenuButton({
