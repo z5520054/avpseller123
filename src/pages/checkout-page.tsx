@@ -7,6 +7,8 @@ import { formatMoneyMinor } from '../lib/format'
 import { useAppState } from '../store/use-app-state'
 import type { OrderRecord } from '../types'
 
+const ACCOUNT_EMAIL_KEY = 'avp-account-email'
+
 function formatTryMinor(value: number | null) {
   if (value === null) {
     return null
@@ -21,7 +23,13 @@ function formatTryMinor(value: number | null) {
 export function CheckoutPage() {
   const { cart, region, clearCart } = useAppState()
   const { result, loading } = useCartRecalculation()
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(() => {
+    if (typeof window === 'undefined') {
+      return ''
+    }
+
+    return window.localStorage.getItem(ACCOUNT_EMAIL_KEY) ?? ''
+  })
   const [telegram, setTelegram] = useState('')
   const [comment, setComment] = useState('')
   const [needsNewAccount, setNeedsNewAccount] = useState(false)

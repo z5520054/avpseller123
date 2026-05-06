@@ -285,6 +285,10 @@ export function AccountPage() {
 
   function handleSubscriptionSelect(id: ActiveSubscription) {
     if (isPsPlusSubscription(id)) {
+      if (psPlusEndDate && id !== activePsPlusSubscription) {
+        return
+      }
+
       setActivePsPlusSubscription(id)
       return
     }
@@ -490,27 +494,34 @@ export function AccountPage() {
                 </div>
 
                 <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                  {subscriptionOptions.map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => handleSubscriptionSelect(item.id)}
-                      className={`group cursor-pointer rounded-[26px] border p-3 text-left transition ${
-                        (isPsPlusSubscription(item.id) && activePsPlusSubscription === item.id) || (item.id === 'ea-play' && isEaPlayEnabled)
-                          ? 'border-white/42 bg-white/[0.08] shadow-[0_18px_55px_rgba(255,255,255,.08)]'
-                          : 'border-white/10 bg-black/16 hover:border-white/22 hover:bg-white/[0.05]'
-                      }`}
-                    >
-                      <div className={`relative h-28 overflow-hidden rounded-[20px] bg-gradient-to-br ${item.tone} p-4`}>
-                        <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full border border-current/25" />
-                        <div className="absolute bottom-3 right-4 text-4xl font-black opacity-18">+</div>
-                        <div className="text-xs font-semibold uppercase tracking-[0.18em] opacity-70">{item.eyebrow}</div>
-                        <div className="mt-8 text-2xl font-black uppercase tracking-[-0.04em]">{item.title}</div>
-                      </div>
-                      <div className="mt-4 text-center text-sm text-white/58">{item.eyebrow}</div>
-                      <div className="mt-1 text-center text-base font-semibold text-white">{item.title}</div>
-                    </button>
-                  ))}
+                  {subscriptionOptions.map((item) => {
+                    const isActive = (isPsPlusSubscription(item.id) && activePsPlusSubscription === item.id) || (item.id === 'ea-play' && isEaPlayEnabled)
+                    const isLocked = psPlusEndDate && isPsPlusSubscription(item.id) && item.id !== activePsPlusSubscription
+
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleSubscriptionSelect(item.id)}
+                        aria-disabled={Boolean(isLocked)}
+                        title={isLocked ? 'Очистите дату окончания PS Plus, чтобы сменить тариф' : undefined}
+                        className={`group rounded-[26px] border p-3 text-left transition ${
+                          isActive
+                            ? 'border-white/42 bg-white/[0.08] shadow-[0_18px_55px_rgba(255,255,255,.08)]'
+                            : 'border-white/10 bg-black/16 hover:border-white/22 hover:bg-white/[0.05]'
+                        } ${isLocked ? 'cursor-not-allowed opacity-40 hover:border-white/10 hover:bg-black/16' : 'cursor-pointer'}`}
+                      >
+                        <div className={`relative h-28 overflow-hidden rounded-[20px] bg-gradient-to-br ${item.tone} p-4`}>
+                          <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full border border-current/25" />
+                          <div className="absolute bottom-3 right-4 text-4xl font-black opacity-18">+</div>
+                          <div className="text-xs font-semibold uppercase tracking-[0.18em] opacity-70">{item.eyebrow}</div>
+                          <div className="mt-8 text-2xl font-black uppercase tracking-[-0.04em]">{item.title}</div>
+                        </div>
+                        <div className="mt-4 text-center text-sm text-white/58">{item.eyebrow}</div>
+                        <div className="mt-1 text-center text-base font-semibold text-white">{item.title}</div>
+                      </button>
+                    )
+                  })}
                 </div>
 
                 <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_320px]">
