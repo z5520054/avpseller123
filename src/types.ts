@@ -226,3 +226,52 @@ export interface OrderRecord {
   createdAt: string
   updatedAt: string
 }
+
+export type AdminParseType = 'price' | 'editions' | 'images'
+export type AdminParseRegion = 'turkey' | 'india' | 'all'
+export type AdminProxyStatus = 'active' | 'disabled' | 'banned'
+
+export interface AdminProxy {
+  id: number
+  name: string
+  type: 'http' | 'https' | 'socks5'
+  host: string
+  port: number
+  username: string
+  password: string
+  region: 'turkey' | 'india'
+  status: AdminProxyStatus
+  last_checked: string | null
+  last_response_time_ms: number | null
+  last_http_code: number | null
+  error_count: number
+  created_at: string
+  updated_at: string
+}
+
+export interface AdminParseTask {
+  id: number
+  type: AdminParseType
+  region: AdminParseRegion
+  product_ids: string | null
+  proxy_id: number | null
+  status: 'pending' | 'running' | 'done' | 'failed'
+  total_items: number
+  processed_items: number
+  created_at: string
+  started_at: string | null
+  finished_at: string | null
+  error_message: string | null
+}
+
+export interface AdminParseProduct {
+  id: number
+  source_key: string
+  title: string
+  cover_url: string | null
+  last_updated: string | null
+  last_status: string | null
+  error_count: number
+  editions_count: number
+  price_minor: number | null
+}

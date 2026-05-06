@@ -1,6 +1,31 @@
-import { useState } from 'react'
-import { getAdminBanners, getAdminPsPlusPrices, refreshAdminProduct, updateAdminBanners, updateAdminPsPlusPrices } from '../lib/catalog-api'
-import type { HomeBanner, HomeBannerSettings, PsPlusDuration, PsPlusPrice, PsPlusTier } from '../types'
+import { useEffect, useState } from 'react'
+import {
+  createAdminParseTask,
+  createAdminProxy,
+  deleteAdminProxy,
+  getAdminBanners,
+  getAdminParseProducts,
+  getAdminParseTasks,
+  getAdminProxies,
+  getAdminPsPlusPrices,
+  refreshAdminProduct,
+  testAdminProxy,
+  toggleAdminProxy,
+  updateAdminBanners,
+  updateAdminPsPlusPrices,
+} from '../lib/catalog-api'
+import type {
+  AdminParseProduct,
+  AdminParseRegion,
+  AdminParseTask,
+  AdminParseType,
+  AdminProxy,
+  HomeBanner,
+  HomeBannerSettings,
+  PsPlusDuration,
+  PsPlusPrice,
+  PsPlusTier,
+} from '../types'
 
 const TIERS: PsPlusTier[] = ['Essential', 'Extra', 'Deluxe']
 const DURATIONS: PsPlusDuration[] = [1, 3, 12]
@@ -65,6 +90,322 @@ async function readFileDataUrl(file: File) {
     reader.onerror = () => reject(reader.error)
     reader.readAsDataURL(file)
   })
+}
+
+const PARSE_TYPES: Array<{ value: AdminParseType; label: string }> = [
+  { value: 'price', label: 'Цены' },
+  { value: 'editions', label: 'Издания' },
+  { value: 'images', label: 'Изображения' },
+]
+
+function formatTaskDate(value: string | null) {
+  return value ? new Date(value).toLocaleString('ru-RU') : '—'
+}
+
+function ManualParsingPanel({ token }: { token: string }) {
+  const [proxies, setProxies] = useState<AdminProxy[]>([])
+  const [tasks, setTasks] = useState<AdminParseTask[]>([])
+  const [products, setProducts] = useState<AdminParseProduct[]>([])
+  const [selectedIds, setSelectedIds] = useState<number[]>([])
+  const [parseRegion, setParseRegion] = useState<AdminParseRegion>('turkey')
+  const [productRegion, setProductRegion] = useState<AdminParseRegion>('turkey')
+  const [proxyId, setProxyId] = useState('')
+  const [productQuery, setProductQuery] = useState('')
+  const [manualStatus, setManualStatus] = useState('Ручной парсинг готов к работе.')
+  const [loadingManual, setLoadingManual] = useState(false)
+  const [newProxy, setNewProxy] = useState({
+    name: '',
+    type: 'http' as AdminProxy['type'],
+    host: '',
+    port: '8080',
+    username: '',
+    password: '',
+    region: 'turkey' as 'turkey' | 'india',
+    testBeforeSave: true,
+  })
+
+  async function loadManualData() {
+    const cleanToken = token.trim()
+    if (!cleanToken) return
+
+    try {
+      const [proxyResponse, taskResponse, productResponse] = await Promise.all([
+        getAdminProxies(cleanToken),
+        getAdminParseTasks(cleanToken),
+        getAdminParseProducts(cleanToken, { region: productRegion, query: productQuery, limit: 30 }),
+      ])
+      setProxies(proxyResponse.items)
+      setTasks(taskResponse.tasks)
+      setProducts(productResponse.items)
+    } catch (error) {
+      setManualStatus(error instanceof Error ? `Не удалось загрузить ручной парсинг: ${error.message}` : 'Не удалось загрузить ручной парсинг.')
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false
+    const cleanToken = token.trim()
+
+    async function load() {
+      if (!cleanToken) return
+
+      try {
+        const [proxyResponse, taskResponse, productResponse] = await Promise.all([
+          getAdminProxies(cleanToken),
+          getAdminParseTasks(cleanToken),
+          getAdminParseProducts(cleanToken, { region: productRegion, query: productQuery, limit: 30 }),
+        ])
+
+        if (cancelled) return
+
+        setProxies(proxyResponse.items)
+        setTasks(taskResponse.tasks)
+        setProducts(productResponse.items)
+      } catch (error) {
+        if (!cancelled) {
+          setManualStatus(error instanceof Error ? `Не удалось загрузить ручной парсинг: ${error.message}` : 'Не удалось загрузить ручной парсинг.')
+        }
+      }
+    }
+
+    void load()
+    const timer = window.setInterval(() => void load(), 5000)
+    return () => {
+      cancelled = true
+      window.clearInterval(timer)
+    }
+  }, [token, productRegion, productQuery])
+
+  async function addProxy() {
+    setLoadingManual(true)
+    setManualStatus('Добавляю прокси...')
+    try {
+      await createAdminProxy(token.trim(), {
+        ...newProxy,
+        port: Number(newProxy.port),
+      })
+      setNewProxy({ name: '', type: 'http', host: '', port: '8080', username: '', password: '', region: 'turkey', testBeforeSave: true })
+      setManualStatus('Прокси добавлен.')
+      await loadManualData()
+    } catch (error) {
+      setManualStatus(error instanceof Error ? `Прокси не сохранён: ${error.message}` : 'Прокси не сохранён.')
+    } finally {
+      setLoadingManual(false)
+    }
+  }
+
+  async function runProxyTest(id: number) {
+    setLoadingManual(true)
+    setManualStatus('Тестирую прокси...')
+    try {
+      const result = await testAdminProxy(token.trim(), id)
+      setManualStatus(result.message)
+      await loadManualData()
+    } catch (error) {
+      setManualStatus(error instanceof Error ? `Тест прокси не выполнен: ${error.message}` : 'Тест прокси не выполнен.')
+    } finally {
+      setLoadingManual(false)
+    }
+  }
+
+  async function toggleProxyStatus(id: number) {
+    await toggleAdminProxy(token.trim(), id)
+    await loadManualData()
+  }
+
+  async function removeProxy(id: number) {
+    await deleteAdminProxy(token.trim(), id)
+    await loadManualData()
+  }
+
+  async function createTask(type: AdminParseType, selectedOnly: boolean) {
+    setLoadingManual(true)
+    setManualStatus('Создаю задачу парсинга...')
+    try {
+      const response = await createAdminParseTask(token.trim(), type, {
+        region: parseRegion,
+        productIds: selectedOnly ? selectedIds : null,
+        proxyId: proxyId ? Number(proxyId) : null,
+      })
+      setManualStatus(`Задача #${response.taskId} создана. Товаров: ${response.totalItems}.`)
+      setSelectedIds([])
+      await loadManualData()
+    } catch (error) {
+      setManualStatus(error instanceof Error ? `Не удалось создать задачу: ${error.message}` : 'Не удалось создать задачу.')
+    } finally {
+      setLoadingManual(false)
+    }
+  }
+
+  const activeProxies = proxies.filter((proxy) => proxy.status === 'active' && (parseRegion === 'all' || proxy.region === parseRegion))
+
+  return (
+    <section className="rounded-[28px] border border-white/10 bg-black/20 p-5">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h2 className="font-display text-3xl text-sheen">Ручной парсинг PS Store</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/50">
+            Задачи создаются только вручную из админки. Автоматический cron отключен. При 403 прокси помечается как banned, при 429 задача останавливается с ошибкой.
+          </p>
+        </div>
+        <button type="button" onClick={() => void loadManualData()} className="quiet-button">
+          Обновить статус
+        </button>
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-white/8 bg-black/20 px-4 py-3 text-sm text-white/58">{manualStatus}</div>
+
+      <div className="mt-6 grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+        <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-xl font-semibold text-white">Прокси</h3>
+            <span className="text-sm text-white/42">{proxies.length} шт.</span>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <input className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none" placeholder="Название" value={newProxy.name} onChange={(event) => setNewProxy((current) => ({ ...current, name: event.target.value }))} />
+            <select className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none" value={newProxy.type} onChange={(event) => setNewProxy((current) => ({ ...current, type: event.target.value as AdminProxy['type'] }))}>
+              <option value="http">HTTP</option>
+              <option value="https">HTTPS</option>
+              <option value="socks5">SOCKS5</option>
+            </select>
+            <input className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none" placeholder="Host" value={newProxy.host} onChange={(event) => setNewProxy((current) => ({ ...current, host: event.target.value }))} />
+            <input className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none" placeholder="Port" inputMode="numeric" value={newProxy.port} onChange={(event) => setNewProxy((current) => ({ ...current, port: event.target.value }))} />
+            <input className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none" placeholder="Логин" value={newProxy.username} onChange={(event) => setNewProxy((current) => ({ ...current, username: event.target.value }))} />
+            <input className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none" placeholder="Пароль" type="password" value={newProxy.password} onChange={(event) => setNewProxy((current) => ({ ...current, password: event.target.value }))} />
+            <select className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none" value={newProxy.region} onChange={(event) => setNewProxy((current) => ({ ...current, region: event.target.value as 'turkey' | 'india' }))}>
+              <option value="turkey">Turkey</option>
+              <option value="india">India</option>
+            </select>
+            <label className="flex items-center gap-2 text-sm text-white/58">
+              <input type="checkbox" checked={newProxy.testBeforeSave} onChange={(event) => setNewProxy((current) => ({ ...current, testBeforeSave: event.target.checked }))} />
+              Тест перед сохранением
+            </label>
+          </div>
+          <button type="button" onClick={() => void addProxy()} disabled={loadingManual} className="mt-3 rounded-full bg-white px-5 py-3 text-sm font-semibold !text-black disabled:opacity-50">
+            Добавить прокси
+          </button>
+
+          <div className="mt-5 space-y-3">
+            {proxies.map((proxy) => (
+              <div key={proxy.id} className="rounded-2xl border border-white/10 bg-black/24 px-4 py-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="font-medium text-white">{proxy.name}</div>
+                    <div className="mt-1 text-xs text-white/45">{proxy.type.toUpperCase()} {proxy.host}:{proxy.port} · {proxy.region}</div>
+                    <div className="mt-1 text-xs text-white/45">Ответ: {proxy.last_response_time_ms ? `${proxy.last_response_time_ms}ms` : '—'} · HTTP {proxy.last_http_code ?? '—'} · ошибок {proxy.error_count}</div>
+                  </div>
+                  <span className={`rounded-full px-3 py-1 text-xs ${proxy.status === 'active' ? 'bg-emerald-400 text-black' : proxy.status === 'banned' ? 'bg-red-500/20 text-red-100' : 'bg-white/10 text-white/56'}`}>{proxy.status}</span>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button type="button" onClick={() => void runProxyTest(proxy.id)} className="rounded-full border border-white/10 px-4 py-2 text-sm text-white/70">Тест</button>
+                  <button type="button" onClick={() => void toggleProxyStatus(proxy.id)} className="rounded-full border border-white/10 px-4 py-2 text-sm text-white/70">{proxy.status === 'active' ? 'Выключить' : 'Включить'}</button>
+                  <button type="button" onClick={() => void removeProxy(proxy.id)} className="rounded-full border border-white/10 px-4 py-2 text-sm text-white/70">Удалить</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4">
+          <h3 className="text-xl font-semibold text-white">Парсинг</h3>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <label className="text-sm text-white/50">
+              Регион
+              <select className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none" value={parseRegion} onChange={(event) => setParseRegion(event.target.value as AdminParseRegion)}>
+                <option value="turkey">Turkey</option>
+                <option value="india">India</option>
+                <option value="all">All</option>
+              </select>
+            </label>
+            <label className="text-sm text-white/50 md:col-span-2">
+              Прокси
+              <select className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none" value={proxyId} onChange={(event) => setProxyId(event.target.value)}>
+                <option value="">Автовыбор активного</option>
+                {activeProxies.map((proxy) => (
+                  <option key={proxy.id} value={proxy.id}>{proxy.name} ({proxy.host}:{proxy.port})</option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {PARSE_TYPES.map((item) => (
+              <button key={item.value} type="button" onClick={() => void createTask(item.value, false)} disabled={loadingManual} className="rounded-full bg-white px-4 py-3 text-sm font-semibold !text-black disabled:opacity-50">
+                Все {item.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-3">
+            <div className="grid gap-3 sm:grid-cols-[1fr_150px]">
+              <input className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none" placeholder="Поиск товара" value={productQuery} onChange={(event) => setProductQuery(event.target.value)} />
+              <select className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none" value={productRegion} onChange={(event) => setProductRegion(event.target.value as AdminParseRegion)}>
+                <option value="turkey">Turkey</option>
+                <option value="india">India</option>
+                <option value="all">All</option>
+              </select>
+            </div>
+            <div className="mt-3 max-h-[430px] overflow-y-auto pr-1">
+              {products.map((product) => (
+                <label key={product.id} className="mt-2 grid cursor-pointer grid-cols-[auto_1fr_auto] items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-sm">
+                  <input type="checkbox" checked={selectedIds.includes(product.id)} onChange={(event) => setSelectedIds((current) => event.target.checked ? [...current, product.id] : current.filter((id) => id !== product.id))} />
+                  <span className="min-w-0">
+                    <span className="block truncate text-white">{product.title}</span>
+                    <span className="block truncate text-xs text-white/40">{product.source_key} · editions {product.editions_count ?? 0}</span>
+                  </span>
+                  <span className="text-xs text-white/42">#{product.id}</span>
+                </label>
+              ))}
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-white/54">
+              <span>Выбрано: {selectedIds.length}</span>
+              <button type="button" onClick={() => setSelectedIds(products.map((item) => item.id))} className="rounded-full border border-white/10 px-3 py-1.5">Выбрать все</button>
+              <button type="button" onClick={() => setSelectedIds([])} className="rounded-full border border-white/10 px-3 py-1.5">Снять</button>
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              {PARSE_TYPES.map((item) => (
+                <button key={item.value} type="button" onClick={() => void createTask(item.value, true)} disabled={loadingManual || selectedIds.length === 0} className="rounded-full border border-white/10 px-4 py-3 text-sm text-white disabled:opacity-40">
+                  Выбранные {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 rounded-[24px] border border-white/10 bg-white/[0.03] p-4">
+        <h3 className="text-xl font-semibold text-white">Последние задачи</h3>
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[760px] text-left text-sm">
+            <thead className="text-xs uppercase tracking-[0.16em] text-white/40">
+              <tr>
+                <th className="py-2">#</th>
+                <th>Тип</th>
+                <th>Регион</th>
+                <th>Статус</th>
+                <th>Обработано</th>
+                <th>Создана</th>
+                <th>Ошибка</th>
+              </tr>
+            </thead>
+            <tbody className="text-white/64">
+              {tasks.map((task) => (
+                <tr key={task.id} className="border-t border-white/8">
+                  <td className="py-3 text-white">{task.id}</td>
+                  <td>{task.type}</td>
+                  <td>{task.region}</td>
+                  <td>{task.status}</td>
+                  <td>{task.processed_items}/{task.total_items}</td>
+                  <td>{formatTaskDate(task.created_at)}</td>
+                  <td className="max-w-xs truncate text-red-200/70">{task.error_message ?? '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  )
 }
 
 export function AdminPsPlusPage() {
@@ -240,6 +581,8 @@ export function AdminPsPlusPage() {
         ) : (
           <div className="mt-6 space-y-8">
             <div className="rounded-2xl border border-white/8 bg-black/20 px-4 py-3 text-sm text-white/58">{status}</div>
+
+            <ManualParsingPanel token={token} />
 
             <section className="rounded-[28px] border border-white/10 bg-black/20 p-5">
               <div className="flex flex-wrap items-end justify-between gap-4">

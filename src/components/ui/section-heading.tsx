@@ -17,7 +17,7 @@ export function SectionHeading({
         <div className="inline-flex rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5 text-[11px] uppercase tracking-[0.32em] text-white/42">
           {eyebrow}
         </div>
-        <h2 className="mt-4 max-w-xl font-display text-3xl leading-tight text-sheen sm:text-4xl">
+        <h2 className="mt-4 max-w-xl font-display text-[2rem] leading-tight text-sheen sm:text-4xl">
           {title}
         </h2>
         {description ? <p className="mt-3 max-w-xl text-sm leading-6 text-white/54">{description}</p> : null}

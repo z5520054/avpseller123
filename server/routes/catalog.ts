@@ -5,6 +5,7 @@ import { hashText, translateToRussian } from '../lib/translate'
 import { getProvider } from '../providers'
 import { CatalogRepository } from '../services/catalog-repository'
 import { HomeBannersService } from '../services/home-banners'
+import { ManualParseService } from '../services/manual-parse'
 import { PsPlusPricesService, psPlusTiers } from '../services/ps-plus-prices'
 
 const listQuerySchema = z.object({
@@ -134,6 +135,35 @@ const adminRefreshProductBodySchema = z.object({
   message: 'productId or sourceKey is required',
 })
 
+const adminProxyBodySchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  type: z.enum(['http', 'https', 'socks5']).default('http'),
+  host: z.string().trim().min(1).max(200),
+  port: z.coerce.number().int().min(1).max(65535),
+  username: z.string().trim().max(200).optional().default(''),
+  password: z.string().max(500).optional().default(''),
+  region: z.enum(['turkey', 'india', 'tr', 'in']),
+  status: z.enum(['active', 'disabled', 'banned']).optional(),
+  testBeforeSave: z.boolean().optional().default(false),
+})
+
+const adminProxyUpdateBodySchema = adminProxyBodySchema.partial()
+
+const adminParseBodySchema = z.object({
+  region: z.enum(['turkey', 'india', 'all', 'tr', 'in']).default('turkey'),
+  productIds: z.array(z.union([z.coerce.number().int().positive(), z.string().trim().min(1)])).nullable().optional(),
+  product_ids: z.array(z.union([z.coerce.number().int().positive(), z.string().trim().min(1)])).nullable().optional(),
+  proxyId: z.coerce.number().int().positive().nullable().optional(),
+  proxy_id: z.coerce.number().int().positive().nullable().optional(),
+})
+
+const adminParseProductsQuerySchema = z.object({
+  region: z.enum(['turkey', 'india', 'all', 'tr', 'in']).optional().default('all'),
+  query: z.string().trim().optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(30),
+  offset: z.coerce.number().int().min(0).default(0),
+})
+
 function mapAliasRegion(region?: string) {
   if (!region) {
     return undefined
@@ -165,6 +195,7 @@ export async function registerCatalogRoutes(app: FastifyInstance) {
   const repository = new CatalogRepository()
   const psPlusPrices = new PsPlusPricesService()
   const homeBanners = new HomeBannersService()
+  const manualParse = new ManualParseService()
 
   function requireAdminToken(request: { headers: Record<string, unknown> }, reply: { code: (statusCode: number) => unknown }) {
     const token = String(request.headers['x-admin-token'] ?? '')
@@ -296,6 +327,125 @@ export async function registerCatalogRoutes(app: FastifyInstance) {
       }
     }
   })
+
+  app.get('/api/admin/proxy', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    return { items: manualParse.listProxies() }
+  })
+
+  app.post('/api/admin/proxy', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    const body = adminProxyBodySchema.parse(request.body)
+    try {
+      return { item: await manualParse.createProxy(body) }
+    } catch (error) {
+      reply.code(400)
+      return { error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  app.put('/api/admin/proxy/:id', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    const id = Number((request.params as { id: string }).id)
+    const body = adminProxyUpdateBodySchema.parse(request.body)
+    const item = manualParse.updateProxy(id, body)
+    if (!item) {
+      reply.code(404)
+      return { error: 'Proxy not found' }
+    }
+    return { item }
+  })
+
+  app.delete('/api/admin/proxy/:id', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    const id = Number((request.params as { id: string }).id)
+    return manualParse.deleteProxy(id)
+  })
+
+  app.post('/api/admin/proxy/:id/test', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    const id = Number((request.params as { id: string }).id)
+    try {
+      return await manualParse.testProxy(id)
+    } catch (error) {
+      reply.code(404)
+      return { error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  app.post('/api/admin/proxy/:id/toggle', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    const id = Number((request.params as { id: string }).id)
+    const item = manualParse.toggleProxy(id)
+    if (!item) {
+      reply.code(404)
+      return { error: 'Proxy not found' }
+    }
+    return { item }
+  })
+
+  app.get('/api/admin/parse/products', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    const query = adminParseProductsQuerySchema.parse(request.query)
+    return manualParse.listParseProducts(query)
+  })
+
+  app.get('/api/admin/parse/tasks', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    return { tasks: manualParse.listTasks(30) }
+  })
+
+  app.get('/api/admin/parse/task/:id', async (request, reply) => {
+    if (!requireAdminToken(request, reply)) {
+      return { error: 'Unauthorized' }
+    }
+
+    const id = Number((request.params as { id: string }).id)
+    const task = manualParse.getTask(id)
+    if (!task) {
+      reply.code(404)
+      return { error: 'Task not found' }
+    }
+    return { task }
+  })
+
+  for (const type of ['price', 'editions', 'images'] as const) {
+    app.post(`/api/admin/parse/${type}`, async (request, reply) => {
+      if (!requireAdminToken(request, reply)) {
+        return { error: 'Unauthorized' }
+      }
+
+      const body = adminParseBodySchema.parse(request.body)
+      const normalizedRegion = body.region === 'tr' ? 'turkey' : body.region === 'in' ? 'india' : body.region
+      const productIds = body.productIds ?? body.product_ids ?? null
+      const proxyId = body.proxyId ?? body.proxy_id ?? null
+      return manualParse.createTask({ type, region: normalizedRegion, productIds, proxyId })
+    })
+  }
 
   app.get('/api/catalog/:id', async (request, reply) => {
     const id = Number((request.params as { id: string }).id)

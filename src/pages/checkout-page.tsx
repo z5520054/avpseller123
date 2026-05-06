@@ -54,9 +54,9 @@ export function CheckoutPage() {
 
   return (
     <div className="page-shell section-space">
-      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+      <div className="grid gap-5 lg:grid-cols-[1fr_380px] lg:gap-6">
         <form
-          className="satin-panel rounded-[32px] border border-white/10 p-6"
+          className="satin-panel rounded-[24px] border border-white/10 p-4 sm:rounded-[32px] sm:p-6"
           onSubmit={async (event) => {
             event.preventDefault()
             if (submitDisabled) return
@@ -85,7 +85,7 @@ export function CheckoutPage() {
             }
           }}
         >
-          <div className="font-display text-3xl text-sheen">Оформление заказа</div>
+          <div className="font-display text-[2rem] leading-tight text-sheen sm:text-3xl">Оформление заказа</div>
           <p className="mt-3 text-sm leading-6 text-white/56">
             Вы покупаете коды пополнения. Этого хватит для оплаты выбранных товаров в PS Store.
           </p>
@@ -160,13 +160,13 @@ export function CheckoutPage() {
           <button
             type="submit"
             disabled={submitDisabled}
-            className="mt-6 inline-flex cursor-pointer rounded-full bg-white px-7 py-3 text-sm font-bold text-black shadow-[0_10px_28px_rgba(255,255,255,.10)] transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:bg-white disabled:!text-black disabled:opacity-100 disabled:shadow-none"
+            className="mt-6 inline-flex w-full cursor-pointer justify-center rounded-full bg-white px-7 py-3 text-sm font-bold text-black shadow-[0_10px_28px_rgba(255,255,255,.10)] transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:bg-white disabled:!text-black disabled:opacity-100 disabled:shadow-none sm:w-auto"
           >
             {submitting ? 'Создание заказа...' : 'Перейти к оплате'}
           </button>
         </form>
 
-        <aside className="satin-panel h-fit rounded-[30px] border border-white/10 p-6">
+        <aside className="satin-panel h-fit rounded-[24px] border border-white/10 p-5 sm:rounded-[30px] sm:p-6 lg:sticky lg:top-32">
           <div className="font-display text-3xl text-sheen">Ваш заказ</div>
           <div className="mt-5 space-y-4">
             {loading

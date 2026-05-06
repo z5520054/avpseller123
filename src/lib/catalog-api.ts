@@ -7,6 +7,11 @@ import type {
   HomeBanner,
   HomeBannerSettings,
   PsPlusPrice,
+  AdminParseProduct,
+  AdminParseRegion,
+  AdminParseTask,
+  AdminParseType,
+  AdminProxy,
 } from '../types'
 
 const API_BASE = import.meta.env.VITE_CATALOG_API_BASE?.replace(/\/$/, '') ?? ''
@@ -176,6 +181,96 @@ export function refreshAdminProduct(
     headers: {
       'x-admin-token': token,
     },
+    body: JSON.stringify(input),
+  })
+}
+
+export function getAdminProxies(token: string) {
+  return fetchJson<{ items: AdminProxy[] }>('/api/admin/proxy', {
+    headers: { 'x-admin-token': token },
+  })
+}
+
+export function createAdminProxy(
+  token: string,
+  input: {
+    name: string
+    type: 'http' | 'https' | 'socks5'
+    host: string
+    port: number
+    username?: string
+    password?: string
+    region: 'turkey' | 'india'
+    testBeforeSave?: boolean
+  },
+) {
+  return fetchJson<{ item: AdminProxy }>('/api/admin/proxy', {
+    method: 'POST',
+    headers: { 'x-admin-token': token },
+    body: JSON.stringify(input),
+  })
+}
+
+export function deleteAdminProxy(token: string, id: number) {
+  return fetchJson<{ success: boolean }>(`/api/admin/proxy/${id}`, {
+    method: 'DELETE',
+    headers: { 'x-admin-token': token },
+  })
+}
+
+export function toggleAdminProxy(token: string, id: number) {
+  return fetchJson<{ item: AdminProxy }>(`/api/admin/proxy/${id}/toggle`, {
+    method: 'POST',
+    headers: { 'x-admin-token': token },
+  })
+}
+
+export function testAdminProxy(token: string, id: number) {
+  return fetchJson<{
+    success: boolean
+    status: string
+    responseTimeMs: number
+    httpCode: number | null
+    errorMessage: string | null
+    message: string
+  }>(`/api/admin/proxy/${id}/test`, {
+    method: 'POST',
+    headers: { 'x-admin-token': token },
+  })
+}
+
+export function getAdminParseProducts(
+  token: string,
+  params: { region?: AdminParseRegion; query?: string; limit?: number; offset?: number },
+) {
+  const search = new URLSearchParams()
+  if (params.region) search.set('region', params.region)
+  if (params.query) search.set('query', params.query)
+  if (params.limit) search.set('limit', String(params.limit))
+  if (params.offset) search.set('offset', String(params.offset))
+  return fetchJson<{ items: AdminParseProduct[]; total: number }>(`/api/admin/parse/products?${search.toString()}`, {
+    headers: { 'x-admin-token': token },
+  })
+}
+
+export function getAdminParseTasks(token: string) {
+  return fetchJson<{ tasks: AdminParseTask[] }>('/api/admin/parse/tasks', {
+    headers: { 'x-admin-token': token },
+  })
+}
+
+export function createAdminParseTask(
+  token: string,
+  type: AdminParseType,
+  input: {
+    region: AdminParseRegion
+    productIds?: Array<number | string> | null
+    proxyId?: number | null
+  },
+) {
+  return fetchJson<{ taskId: number; status: string; totalItems: number }>(`/api/admin/parse/${type}`, {
+    method: 'POST',
+    headers: { 'x-admin-token': token },
     body: JSON.stringify(input),
   })
 }

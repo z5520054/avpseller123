@@ -28,19 +28,19 @@ export function RootLayout() {
   }
 
   return (
-    <div className="min-h-screen pb-10 text-silver-300">
-      <header className="page-shell sticky top-0 z-50 pt-4">
-        <div className="header-shell grid gap-4 rounded-[30px] border border-white/10 px-4 py-4 sm:px-6 lg:grid-cols-[auto_1fr_auto] lg:items-center">
+    <div className="min-h-screen pb-24 text-silver-300 lg:pb-10">
+      <header className="page-shell sticky top-0 z-50 pt-2 sm:pt-4">
+        <div className="header-shell grid gap-3 rounded-[24px] border border-white/10 px-3 py-3 sm:rounded-[30px] sm:px-6 sm:py-4 lg:grid-cols-[auto_1fr_auto] lg:items-center">
           <div className="flex items-center justify-between gap-4">
             <NavLink to="/" className="group inline-flex cursor-pointer items-center gap-3.5">
-              <div className="header-brand-mark flex h-12 w-12 items-center justify-center rounded-[18px] border border-white/12 transition group-hover:border-white/22">
-                <img src={avpIconUrl} alt="AVP Seller" className="h-8 w-8 object-contain" />
+              <div className="header-brand-mark flex h-10 w-10 items-center justify-center rounded-[15px] border border-white/12 transition group-hover:border-white/22 sm:h-12 sm:w-12 sm:rounded-[18px]">
+                <img src={avpIconUrl} alt="AVP Seller" className="h-7 w-7 object-contain sm:h-8 sm:w-8" />
               </div>
               <div>
-                <div className="font-display text-xl leading-none tracking-[0.16em] text-sheen">
+                <div className="font-display text-base leading-none tracking-[0.13em] text-sheen sm:text-xl sm:tracking-[0.16em]">
                   AVP SELLER
                 </div>
-                <div className="mt-1 text-[11px] uppercase tracking-[0.2em] text-white/42">
+                <div className="mt-1 text-[9px] uppercase tracking-[0.18em] text-white/42 sm:text-[11px] sm:tracking-[0.2em]">
                   Game market
                 </div>
               </div>
@@ -50,8 +50,8 @@ export function RootLayout() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <nav className="flex flex-wrap gap-2 text-sm text-white/72">
+          <div className="flex min-w-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <nav className="hidden min-w-0 gap-2 text-sm text-white/72 lg:flex">
               {navigation.map((item) => (
                 <NavLink
                   key={item.to}
@@ -63,7 +63,7 @@ export function RootLayout() {
               ))}
             </nav>
 
-            <label className="header-search flex min-w-0 items-center gap-3 rounded-full border border-white/10 px-4 py-3 text-sm text-white/52 transition duration-300 ease-out focus-within:border-white/20 lg:max-w-[380px] lg:flex-1">
+            <label className="header-search flex min-w-0 items-center gap-2 rounded-full border border-white/10 px-3 py-2.5 text-sm text-white/52 transition duration-300 ease-out focus-within:border-white/20 sm:gap-3 sm:px-4 sm:py-3 lg:max-w-[380px] lg:flex-1">
               <Search size={16} />
               <span className="sr-only">Поиск</span>
               <input
@@ -85,7 +85,7 @@ export function RootLayout() {
             </label>
           </div>
 
-          <div className="flex items-center justify-between gap-2 sm:justify-end">
+          <div className="hidden items-center justify-between gap-1.5 sm:justify-end sm:gap-2 lg:flex">
             <div className="hidden lg:block">
               <RegionSwitch compact />
             </div>
@@ -119,9 +119,47 @@ export function RootLayout() {
         </div>
       </header>
 
-      <main className="pt-6">
+      <main className="pt-3 sm:pt-6">
         <Outlet />
       </main>
+
+      <nav className="fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 rounded-[24px] border border-white/10 bg-[#171719]/95 px-2 py-2 shadow-[0_18px_50px_rgba(0,0,0,.55)] backdrop-blur-2xl lg:hidden">
+        {navigation.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            className={`flex min-h-12 flex-col items-center justify-center rounded-[18px] px-1 text-[10px] font-medium transition ${
+              isNavigationActive(item.active) ? 'bg-white text-black' : 'text-white/64'
+            }`}
+          >
+            {item.label}
+          </NavLink>
+        ))}
+        <NavLink
+          to="/favorites"
+          className={({ isActive }) => `relative flex min-h-12 flex-col items-center justify-center rounded-[18px] px-1 text-[10px] font-medium transition ${isActive ? 'bg-white text-black' : 'text-white/64'}`}
+        >
+          <Heart size={18} />
+          <span>Избранное</span>
+          {favoritesCount > 0 ? (
+            <span className="absolute right-2 top-1 rounded-full bg-white px-1.5 py-0.5 text-[9px] font-semibold text-black">
+              {favoritesCount}
+            </span>
+          ) : null}
+        </NavLink>
+        <NavLink
+          to="/cart"
+          className={({ isActive }) => `relative flex min-h-12 flex-col items-center justify-center rounded-[18px] px-1 text-[10px] font-medium transition ${isActive ? 'bg-white text-black' : 'text-white/64'}`}
+        >
+          <ShoppingBag size={18} />
+          <span>Корзина</span>
+          {cartCount > 0 ? (
+            <span className="absolute right-2 top-1 rounded-full bg-white px-1.5 py-0.5 text-[9px] font-semibold text-black">
+              {cartCount}
+            </span>
+          ) : null}
+        </NavLink>
+      </nav>
     </div>
   )
 }

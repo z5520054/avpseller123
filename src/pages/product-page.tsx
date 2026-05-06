@@ -177,17 +177,17 @@ export function ProductPage() {
   return (
     <div className="page-shell section-space">
       <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
-        <div className="overflow-hidden rounded-[32px] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_34%),#050505]">
+        <div className="overflow-hidden rounded-[24px] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_34%),#050505] sm:rounded-[32px]">
           {image ? (
-            <img src={image} alt={product.title} className="h-[560px] w-full object-contain p-5" />
+            <img src={image} alt={product.title} className="h-[320px] w-full object-contain p-3 sm:h-[460px] sm:p-5 lg:h-[560px]" />
           ) : (
-            <div className="flex h-[560px] items-center justify-center text-white/28">Нет изображения</div>
+            <div className="flex h-[320px] items-center justify-center text-white/28 sm:h-[460px] lg:h-[560px]">Нет изображения</div>
           )}
         </div>
 
-        <div className="satin-panel rounded-[32px] border border-white/10 p-6 lg:p-8">
+        <div className="satin-panel rounded-[24px] border border-white/10 p-4 sm:rounded-[32px] sm:p-6 lg:p-8">
           <div className="text-xs uppercase tracking-[0.24em] text-white/42">{storeTypeLabel(product)}</div>
-          <h1 className="mt-4 font-display text-4xl text-sheen sm:text-5xl">{product.title}</h1>
+          <h1 className="mt-4 font-display text-[2.15rem] leading-tight text-sheen sm:text-5xl">{product.title}</h1>
           {subtitle ? <p className="mt-4 text-base leading-7 text-white/60">{subtitle}</p> : null}
 
           <div className="mt-6 flex flex-wrap gap-2">
@@ -203,8 +203,8 @@ export function ProductPage() {
             ) : null}
           </div>
 
-          <div className="mt-8 rounded-[28px] border border-white/10 bg-black/20 p-5">
-            <div className="text-4xl font-semibold text-white">{currentPrice ?? 'Цена уточняется'}</div>
+          <div className="mt-8 rounded-[24px] border border-white/10 bg-black/20 p-4 sm:rounded-[28px] sm:p-5">
+            <div className="text-3xl font-semibold text-white sm:text-4xl">{currentPrice ?? 'Цена уточняется'}</div>
             {discountPercent && oldPrice && currentPrice !== oldPrice ? (
               <div className="mt-2 flex flex-wrap items-center gap-3 text-base">
                 <span className="text-white/34 line-through">{oldPrice}</span>
@@ -280,12 +280,12 @@ export function ProductPage() {
                   }`
                   const content = (
                     <>
-                      <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-3">
                         <div>
                           <div className="text-lg font-medium text-white">{edition.editionName || edition.title}</div>
                           <div className="mt-1 text-sm text-white/45">{edition.title}</div>
                         </div>
-                        <div className="text-right text-lg font-semibold text-white">{price ?? '???? ??????????'}</div>
+                        <div className="text-left text-lg font-semibold text-white sm:text-right">{price ?? '???? ??????????'}</div>
                       </div>
                       {edition.price.discountPercent ? (
                         <div className="mt-2 inline-flex rounded-full border border-emerald-400/30 bg-emerald-500/12 px-3 py-1 text-xs text-emerald-300">

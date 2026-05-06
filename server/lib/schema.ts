@@ -179,4 +179,52 @@ CREATE INDEX IF NOT EXISTS idx_products_title ON products(title_normalized);
 CREATE INDEX IF NOT EXISTS idx_offers_region ON offers(region);
 CREATE INDEX IF NOT EXISTS idx_product_source_ranks_lookup ON product_source_ranks(tag, region, rank);
 CREATE INDEX IF NOT EXISTS idx_price_history_product_checked ON price_history(product_id, checked_at DESC);
+
+CREATE TABLE IF NOT EXISTS proxies (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'http',
+  host TEXT NOT NULL,
+  port INTEGER NOT NULL,
+  username TEXT NOT NULL DEFAULT '',
+  password TEXT NOT NULL DEFAULT '',
+  region TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'active',
+  last_checked TEXT,
+  last_response_time_ms INTEGER,
+  last_http_code INTEGER,
+  error_count INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS proxy_checks (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  proxy_id INTEGER NOT NULL,
+  checked_at TEXT NOT NULL,
+  response_time_ms INTEGER,
+  http_code INTEGER,
+  status TEXT NOT NULL,
+  error_message TEXT,
+  FOREIGN KEY (proxy_id) REFERENCES proxies(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS parse_tasks (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  type TEXT NOT NULL,
+  region TEXT NOT NULL,
+  product_ids TEXT,
+  proxy_id INTEGER,
+  status TEXT NOT NULL DEFAULT 'pending',
+  total_items INTEGER NOT NULL DEFAULT 0,
+  processed_items INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL,
+  started_at TEXT,
+  finished_at TEXT,
+  error_message TEXT,
+  FOREIGN KEY (proxy_id) REFERENCES proxies(id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_tasks_status ON parse_tasks(status, created_at);
+CREATE INDEX IF NOT EXISTS idx_proxies_region_status ON proxies(region, status);
 `

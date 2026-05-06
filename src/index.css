@@ -42,6 +42,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
   background:
     radial-gradient(circle at top, rgba(255, 255, 255, 0.08), transparent 22%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.03), transparent 30%),
@@ -235,11 +236,21 @@ textarea {
 }
 
 .page-shell {
-  @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-10;
+  @apply mx-auto w-full max-w-[1440px] px-3 sm:px-6 lg:px-10;
 }
 
 .section-space {
-  @apply py-8 sm:py-10 lg:py-12;
+  @apply py-5 sm:py-10 lg:py-12;
+}
+
+@media (max-width: 640px) {
+  .header-nav-pill {
+    @apply whitespace-nowrap px-3 py-2 text-xs;
+  }
+
+  .header-icon-button {
+    @apply h-10 w-10;
+  }
 }
 
 .card-hover {

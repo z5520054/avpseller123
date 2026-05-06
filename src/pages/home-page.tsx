@@ -153,13 +153,13 @@ function BannerSlider() {
         : 'animate-[slide-in_560ms_cubic-bezier(.2,.8,.2,1)]'
 
   return (
-    <section className="overflow-hidden rounded-[34px] border border-white/10 bg-black/30 p-3 shadow-[0_32px_90px_rgba(0,0,0,0.42)]">
-      <div key={`${activeIndex}-${settings.animation}`} className={`grid gap-3 sm:grid-cols-2 xl:grid-cols-4 ${animationClass}`}>
+    <section className="overflow-hidden rounded-[26px] border border-white/10 bg-black/30 p-2 shadow-[0_32px_90px_rgba(0,0,0,0.42)] sm:rounded-[34px] sm:p-3">
+      <div key={`${activeIndex}-${settings.animation}`} className={`flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-4 [&::-webkit-scrollbar]:hidden ${animationClass}`}>
         {visibleBanners.map((banner) => (
           <Link
             key={banner.id}
             to={banner.linkUrl}
-            className="group relative block aspect-[3/4] overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.03]"
+            className="group relative block aspect-[3/4] min-w-[72%] snap-start overflow-hidden rounded-[22px] border border-white/10 bg-white/[0.03] sm:min-w-0 sm:rounded-[26px]"
             aria-label={banner.title}
           >
             <img
@@ -177,7 +177,7 @@ function BannerSlider() {
       </div>
 
       {banners.length > 1 ? (
-        <div className="flex gap-2 px-5 py-4">
+        <div className="flex gap-2 px-3 py-3 sm:px-5 sm:py-4">
           {banners.map((banner, index) => (
             <button
               key={banner.id}
@@ -214,13 +214,13 @@ function Shelf({
     <section>
       <ShelfHeading title={title} count={count} href={href} />
       {loading ? (
-        <div className={`grid gap-5 md:grid-cols-2 ${columns}`}>
+        <div className={`grid gap-4 sm:gap-5 md:grid-cols-2 ${columns}`}>
           {Array.from({ length: 6 }).map((_, index) => (
             <ProductSkeleton key={index} />
           ))}
         </div>
       ) : items.length > 0 ? (
-        <div className={`grid gap-5 md:grid-cols-2 ${columns}`}>
+        <div className={`grid gap-4 sm:gap-5 md:grid-cols-2 ${columns}`}>
           {items.map((product) => (
             <CatalogApiProductCard key={product.id} product={product} />
           ))}
@@ -303,8 +303,8 @@ function SearchResults() {
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-4">
-        <label className="flex min-w-[260px] items-center gap-3 text-sm text-white/60">
+      <div className="flex flex-col gap-3 rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:rounded-[28px] sm:px-5">
+        <label className="flex min-w-0 flex-col gap-2 text-sm text-white/60 sm:flex-row sm:items-center sm:gap-3">
           <span className="text-white/42">Сортировка</span>
           <select
             value={sort}
@@ -312,7 +312,7 @@ function SearchResults() {
               setSort(event.target.value as CatalogSort)
               setPage(1)
             }}
-            className="rounded-2xl border border-white/10 bg-black px-4 py-2.5 text-sm text-white outline-none"
+            className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm text-white outline-none sm:w-auto sm:py-2.5"
           >
             {SORT_OPTIONS.map((item) => (
               <option key={item.value} value={item.value}>
@@ -321,14 +321,14 @@ function SearchResults() {
             ))}
           </select>
         </label>
-        <button type="button" onClick={() => setFiltersOpen(true)} className="quiet-button">
+        <button type="button" onClick={() => setFiltersOpen(true)} className="quiet-button w-full sm:w-auto">
           <SlidersHorizontal size={16} />
           Фильтр{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
         </button>
       </div>
 
       {loading ? (
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
             <ProductSkeleton key={index} />
           ))}
@@ -339,7 +339,7 @@ function SearchResults() {
         </div>
       ) : state.items.length > 0 ? (
         <>
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3">
             {state.items.map((product) => (
               <CatalogApiProductCard key={product.id} product={product} />
             ))}
@@ -422,8 +422,8 @@ function FilterDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-[80] bg-black/70 px-4 py-6 backdrop-blur-sm" role="dialog" aria-modal="true">
-      <div className="mx-auto max-w-xl rounded-[28px] border border-white/10 bg-[#090909] p-5 shadow-2xl">
+    <div className="fixed inset-0 z-[80] bg-black/70 px-3 py-4 backdrop-blur-sm sm:px-4 sm:py-6" role="dialog" aria-modal="true">
+      <div className="mx-auto max-h-[calc(100svh-2rem)] max-w-xl overflow-y-auto rounded-[24px] border border-white/10 bg-[#090909] p-4 shadow-2xl sm:max-h-[calc(100vh-3rem)] sm:rounded-[28px] sm:p-5">
         <div className="flex items-center justify-between gap-4">
           <div className="font-display text-3xl text-white">Фильтр</div>
           <button type="button" onClick={onClose} className="header-icon-button">
@@ -512,33 +512,33 @@ function SubscriptionPreview() {
   }, [region])
 
   return (
-    <section className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[#0b0b0c] px-5 py-7 shadow-[0_30px_110px_rgba(0,0,0,.56),0_0_70px_rgba(255,255,255,.045)_inset] sm:px-7 lg:px-9 lg:py-9">
+    <section className="relative overflow-hidden rounded-[24px] border border-white/10 bg-[#0b0b0c] px-4 py-6 shadow-[0_30px_110px_rgba(0,0,0,.56),0_0_70px_rgba(255,255,255,.045)_inset] sm:rounded-[30px] sm:px-7 lg:px-9 lg:py-9">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_2%_48%,rgba(255,255,255,.09),transparent_10%),radial-gradient(circle_at_92%_78%,rgba(180,132,43,.12),transparent_24%),linear-gradient(180deg,rgba(255,255,255,.045),transparent_42%)]" />
       <div className="pointer-events-none absolute left-10 top-28 h-px w-48 bg-gradient-to-r from-transparent via-white/42 to-transparent shadow-[0_0_14px_rgba(255,255,255,.2)]" />
       <div className="pointer-events-none absolute right-[22%] top-8 h-16 w-16 rotate-45 border-[11px] border-white/8 shadow-[0_0_22px_rgba(255,255,255,.08)]" />
       <div className="pointer-events-none absolute right-[34%] top-34 h-13 w-13 rotate-45 before:absolute before:left-1/2 before:top-0 before:h-full before:w-2.5 before:-translate-x-1/2 before:rounded-full before:bg-white/10 before:shadow-[0_0_14px_rgba(255,255,255,.12)] after:absolute after:left-0 after:top-1/2 after:h-2.5 after:w-full after:-translate-y-1/2 after:rounded-full after:bg-white/10 after:shadow-[0_0_14px_rgba(255,255,255,.12)]" />
       <div className="pointer-events-none absolute -bottom-24 right-0 h-56 w-[38rem] rounded-[100%] border-t-[18px] border-white/10 shadow-[0_-18px_34px_rgba(255,255,255,.06)]" />
 
-      <div className="relative flex flex-wrap items-center justify-between gap-5">
-        <h2 className="max-w-4xl text-[clamp(1.8rem,3.2vw,3.15rem)] font-black uppercase leading-none tracking-[-0.05em] text-[#eef5ff] drop-shadow-[0_5px_0_rgba(255,255,255,.07)]">
+      <div className="relative flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-5">
+        <h2 className="max-w-4xl text-[clamp(1.45rem,8vw,3.15rem)] font-black uppercase leading-none tracking-[-0.05em] text-[#eef5ff] drop-shadow-[0_5px_0_rgba(255,255,255,.07)]">
           Подписки PS Plus
         </h2>
         <Link
           to={buildCatalogHref('subscriptions')}
-          className="inline-flex cursor-pointer items-center gap-3 rounded-full border border-white/18 bg-white/[0.04] px-6 py-3 text-sm font-semibold text-white shadow-[0_0_18px_rgba(255,255,255,.06)_inset] transition hover:border-white/30 hover:bg-white/[0.08]"
+          className="inline-flex w-full cursor-pointer items-center justify-center gap-3 rounded-full border border-white/18 bg-white/[0.04] px-6 py-3 text-sm font-semibold text-white shadow-[0_0_18px_rgba(255,255,255,.06)_inset] transition hover:border-white/30 hover:bg-white/[0.08] sm:w-auto"
         >
           Смотреть все
           <ArrowRight size={18} />
         </Link>
       </div>
 
-      <div className="relative mt-7 flex flex-wrap gap-4">
+      <div className="-mx-1 mt-6 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] sm:mt-7 sm:gap-4 [&::-webkit-scrollbar]:hidden">
         {SUBSCRIPTION_DURATIONS.map((duration) => (
           <button
             key={duration.months}
             type="button"
             onClick={() => setActiveDuration(duration)}
-            className={`min-w-36 cursor-pointer rounded-full border px-6 py-3 text-base font-semibold transition duration-300 ${
+            className={`min-w-32 shrink-0 cursor-pointer rounded-full border px-5 py-3 text-sm font-semibold transition duration-300 sm:min-w-36 sm:px-6 sm:text-base ${
               activeDuration.months === duration.months
                 ? 'border-white/35 bg-white text-black shadow-[0_0_0_1px_rgba(255,255,255,.18)_inset,0_0_18px_rgba(255,255,255,.18)]'
                 : 'border-white/10 bg-white/[0.035] text-white/58 hover:border-white/18 hover:text-white'
@@ -549,7 +549,7 @@ function SubscriptionPreview() {
         ))}
       </div>
 
-      <div className="relative mt-7 grid gap-5 lg:grid-cols-3">
+      <div className="relative mt-6 grid gap-4 sm:mt-7 sm:gap-5 lg:grid-cols-3">
         {SUBSCRIPTION_PLANS.map((plan) => {
           const price = prices.find((item) => item.tier === plan.tier && item.durationMonths === activeDuration.months)
           const canBuy = Boolean(price?.isActive && price.priceRubMinor !== null)
@@ -557,13 +557,13 @@ function SubscriptionPreview() {
           const isInCart = cart.some((item) => item.productId === productId)
 
           return (
-            <article key={plan.tier} className={`relative flex min-h-[330px] overflow-hidden rounded-[22px] border p-5 transition duration-300 hover:-translate-y-1 ${plan.cardClass}`}>
+            <article key={plan.tier} className={`relative flex min-h-[300px] overflow-hidden rounded-[20px] border p-4 transition duration-300 hover:-translate-y-1 sm:min-h-[330px] sm:rounded-[22px] sm:p-5 ${plan.cardClass}`}>
               <div className={`pointer-events-none absolute inset-0 opacity-90 ${plan.waveClass}`} />
               <div className={`pointer-events-none absolute scale-75 rounded-[10px] border-[9px] opacity-80 ${plan.symbolClass}`} />
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_0%,rgba(255,255,255,.18),transparent_18%),linear-gradient(180deg,rgba(255,255,255,.06),transparent_35%)]" />
               <div className="relative flex h-full min-h-[288px] w-full flex-col">
                 <div className={`inline-flex w-fit rounded-lg border px-3.5 py-1.5 text-base font-semibold ${plan.badgeClass}`}>PS Plus</div>
-                <div className={`mt-11 text-[clamp(2.1rem,3.15vw,3rem)] font-black uppercase leading-none tracking-[-0.07em] ${plan.titleClass}`}>
+                <div className={`mt-9 text-[clamp(1.95rem,12vw,2.7rem)] font-black uppercase leading-none tracking-[-0.07em] sm:mt-11 sm:text-[clamp(2.1rem,3.15vw,3rem)] ${plan.titleClass}`}>
                   {plan.label}
                 </div>
                 <p className={`mt-4 max-w-sm text-base font-medium leading-6 ${plan.bodyClass}`}>{plan.text}</p>

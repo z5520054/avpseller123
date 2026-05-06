@@ -21,6 +21,34 @@ export function getDb() {
 }
 
 function ensureMigrations(db: DatabaseSync) {
+  const productColumns = db.prepare('PRAGMA table_info(products)').all() as Array<{ name: string }>
+  const productColumnNames = new Set(productColumns.map((column) => column.name))
+
+  if (!productColumnNames.has('region')) {
+    db.exec('ALTER TABLE products ADD COLUMN region TEXT;')
+  }
+
+  if (!productColumnNames.has('last_updated')) {
+    db.exec('ALTER TABLE products ADD COLUMN last_updated TEXT;')
+  }
+
+  if (!productColumnNames.has('last_status')) {
+    db.exec('ALTER TABLE products ADD COLUMN last_status TEXT;')
+  }
+
+  if (!productColumnNames.has('error_count')) {
+    db.exec('ALTER TABLE products ADD COLUMN error_count INTEGER NOT NULL DEFAULT 0;')
+  }
+
+  if (!productColumnNames.has('next_retry_at')) {
+    db.exec('ALTER TABLE products ADD COLUMN next_retry_at TEXT;')
+  }
+
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_products_region ON products(region);
+    CREATE INDEX IF NOT EXISTS idx_products_last_updated ON products(last_updated);
+  `)
+
   const columns = db.prepare('PRAGMA table_info(product_details)').all() as Array<{ name: string }>
   const columnNames = new Set(columns.map((column) => column.name))
 

@@ -43,8 +43,8 @@ export function CatalogApiProductCard({ product }: { product: CatalogApiProduct 
   const meta = shortMeta(product, formatDate(offer?.saleEndAt) ?? null)
 
   return (
-    <article className="satin-panel shine-border card-hover group overflow-hidden rounded-[28px] border border-white/10">
-      <div className="relative h-56 overflow-hidden bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_32%),linear-gradient(180deg,#191919_0%,#0a0a0a_100%)]">
+    <article className="satin-panel shine-border card-hover group overflow-hidden rounded-[24px] border border-white/10 sm:rounded-[28px]">
+      <div className="relative h-44 overflow-hidden bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_32%),linear-gradient(180deg,#191919_0%,#0a0a0a_100%)] sm:h-56">
         {product.coverUrl ? (
           <img
             src={product.coverUrl}
@@ -54,17 +54,17 @@ export function CatalogApiProductCard({ product }: { product: CatalogApiProduct 
           />
         ) : null}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_18%),linear-gradient(180deg,transparent_25%,rgba(0,0,0,0.85)_100%)]" />
-        <div className="absolute left-4 top-4 flex flex-wrap gap-2">
+        <div className="absolute left-3 top-3 flex max-w-[calc(100%-4.25rem)] flex-wrap gap-1.5 sm:left-4 sm:top-4 sm:gap-2">
           {offer?.discountPercent ? (
-            <span className="rounded-full border border-emerald-400/30 bg-emerald-500/12 px-3 py-1 text-xs text-emerald-300">
+            <span className="rounded-full border border-emerald-400/30 bg-emerald-500/12 px-2.5 py-1 text-[11px] text-emerald-300 sm:px-3 sm:text-xs">
               -{offer.discountPercent}%
             </span>
           ) : null}
-          <span className="rounded-full border border-white/16 bg-black/45 px-3 py-1 text-xs text-white/70">
+          <span className="rounded-full border border-white/16 bg-black/45 px-2.5 py-1 text-[11px] text-white/70 sm:px-3 sm:text-xs">
             {region}
           </span>
           {product.russianLanguageSupport === 'full' || product.russianLanguageSupport === 'subtitles' ? (
-            <span className="rounded-full border border-white/16 bg-black/45 px-3 py-1 text-xs text-white/70">
+            <span className="rounded-full border border-white/16 bg-black/45 px-2.5 py-1 text-[11px] text-white/70 sm:px-3 sm:text-xs">
               {product.russianLanguageSupport === 'full' ? 'RU FULL' : 'RU SUB'}
             </span>
           ) : null}
@@ -72,7 +72,7 @@ export function CatalogApiProductCard({ product }: { product: CatalogApiProduct 
         <button
           type="button"
           onClick={() => toggleFavorite(product.id)}
-          className={`absolute right-4 top-4 inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border backdrop-blur-xl transition ${
+          className={`absolute right-3 top-3 inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border backdrop-blur-xl transition sm:right-4 sm:top-4 ${
             isFavorite
               ? 'border-white/20 bg-white text-black'
               : 'border-white/12 bg-black/35 text-white hover:border-white/20'
@@ -83,7 +83,7 @@ export function CatalogApiProductCard({ product }: { product: CatalogApiProduct 
         </button>
       </div>
 
-      <div className="space-y-4 p-5">
+      <div className="space-y-3.5 p-4 sm:space-y-4 sm:p-5">
         <div className="flex flex-wrap gap-2">
           <span className="rounded-full border border-white/8 px-2.5 py-1 text-xs text-white/55">
             {getStoreTypeLabel(product)}
@@ -97,12 +97,12 @@ export function CatalogApiProductCard({ product }: { product: CatalogApiProduct 
 
         <div>
           <Link to={`/product/${product.id}`} className="cursor-pointer">
-            <h3 className="text-xl font-medium text-white transition hover:text-white/82">{product.title}</h3>
+            <h3 className="line-clamp-2 text-lg font-medium leading-snug text-white transition hover:text-white/82 sm:text-xl">{product.title}</h3>
           </Link>
           {meta ? <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/55">{meta}</p> : null}
         </div>
 
-        <div className="flex items-end justify-between gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="text-xl font-semibold text-white">{price ?? 'Цена уточняется'}</div>
             {oldPrice && price !== oldPrice ? <div className="text-sm text-white/35 line-through">{oldPrice}</div> : null}
@@ -110,7 +110,7 @@ export function CatalogApiProductCard({ product }: { product: CatalogApiProduct 
           {isInCart ? (
             <Link
               to="/cart"
-              className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-emerald-300/60 bg-emerald-400 px-4 py-2 text-sm font-medium text-black transition hover:bg-emerald-300"
+              className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-emerald-300/60 bg-emerald-400 px-4 py-2.5 text-sm font-medium text-black transition hover:bg-emerald-300 sm:w-auto"
             >
               <ShoppingBag size={16} />
               Перейти в корзину
@@ -119,7 +119,7 @@ export function CatalogApiProductCard({ product }: { product: CatalogApiProduct 
             <button
               type="button"
               onClick={() => addToCart(product.id)}
-              className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/12 bg-white/8 px-4 py-2 text-sm text-white transition hover:border-white/20 hover:bg-white/12"
+              className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-white/12 bg-white/8 px-4 py-2.5 text-sm text-white transition hover:border-white/20 hover:bg-white/12 sm:w-auto"
             >
             <ShoppingBag size={16} />
             В корзину

@@ -96,6 +96,8 @@ interface ParsedEnv {
   cache: Record<string, unknown>
 }
 
+type HtmlFetcher = (url: string) => Promise<string>
+
 const REGION_CONFIGS: RegionConfig[] = [
   { region: 'india', locale: 'en-in', currency: 'INR' },
   { region: 'turkey', locale: 'en-tr', currency: 'TRY' },
@@ -471,6 +473,8 @@ async function mapWithConcurrency<T, R>(
 export class PlayStationStoreProvider implements CatalogProvider {
   name = 'playstation-store'
 
+  constructor(private readonly htmlFetcher?: HtmlFetcher) {}
+
   async fetchProducts(context: ProviderContext): Promise<ImportedProduct[]> {
     void context
     const products = new Map<string, ProductAccumulator>()
@@ -810,6 +814,16 @@ export class PlayStationStoreProvider implements CatalogProvider {
   }
 
   private async fetchNextData(url: string) {
+    if (this.htmlFetcher) {
+      const html = await this.htmlFetcher(url)
+      const match = html.match(/<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/)
+      if (!match) {
+        throw new Error(`Unable to locate __NEXT_DATA__ on ${url}`)
+      }
+
+      return JSON.parse(match[1]) as NextData
+    }
+
     const response = await fetch(url, {
       signal: AbortSignal.timeout(45_000),
       headers: {

@@ -31,6 +31,7 @@ export const config = {
   catalogSyncCron: process.env.CATALOG_SYNC_CRON ?? '0 3 * * *',
   priceSyncCron: process.env.PRICE_SYNC_CRON ?? '0 */6 * * *',
   productDetailsSyncCron: process.env.PRODUCT_DETAILS_SYNC_CRON ?? '30 4 * * *',
+  schedulerEnabled: process.env.CATALOG_SCHEDULER_ENABLED === 'true',
   defaultProvider: process.env.CATALOG_PROVIDER ?? 'playstation-store',
   adminToken: process.env.ADMIN_TOKEN ?? '',
   staticUploadDir: process.env.STATIC_UPLOAD_DIR ?? path.resolve(process.cwd(), '..', 'current', 'uploads'),

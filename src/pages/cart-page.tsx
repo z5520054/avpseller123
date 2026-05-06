@@ -38,7 +38,7 @@ export function CartPage() {
 
   return (
     <div className="page-shell section-space">
-      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+      <div className="grid gap-5 lg:grid-cols-[1fr_380px] lg:gap-6">
         <div className="space-y-4">
           {loading
             ? Array.from({ length: 3 }).map((_, index) => (
@@ -47,15 +47,15 @@ export function CartPage() {
             : result.sourceItems.map((item) => (
                 <div
                   key={item.product.id}
-                  className="satin-panel grid gap-4 rounded-[28px] border border-white/10 p-4 sm:grid-cols-[120px_1fr_auto]"
+                  className="satin-panel grid grid-cols-[88px_1fr] gap-3 rounded-[24px] border border-white/10 p-3 sm:grid-cols-[120px_1fr_auto] sm:gap-4 sm:rounded-[28px] sm:p-4"
                 >
                   {item.product.coverUrl ? (
-                    <img src={item.product.coverUrl} alt={item.product.title} className="h-28 w-full rounded-2xl object-cover sm:w-30" />
+                    <img src={item.product.coverUrl} alt={item.product.title} className="h-24 w-22 rounded-2xl object-cover sm:h-28 sm:w-30" />
                   ) : (
-                    <div className="h-28 rounded-2xl bg-white/[0.03]" />
+                    <div className="h-24 rounded-2xl bg-white/[0.03] sm:h-28" />
                   )}
-                  <div>
-                    <div className="text-xl text-white">{item.product.title}</div>
+                  <div className="min-w-0">
+                    <div className="line-clamp-2 text-base leading-snug text-white sm:text-xl">{item.product.title}</div>
                     <div className="mt-2 text-sm text-white/56">
                       {item.product.platforms.join(' / ') || item.product.storeType}
                     </div>
@@ -63,7 +63,7 @@ export function CartPage() {
                       {formatMoneyMinor(item.unitPriceRubMinor, 'RUB') ?? 'Цена уточняется'}
                     </div>
                   </div>
-                  <div className="flex flex-col items-start gap-3 sm:items-end">
+                  <div className="col-span-2 flex items-center justify-between gap-3 sm:col-span-1 sm:flex-col sm:items-end sm:justify-start">
                     <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 p-1">
                       <button
                         type="button"
@@ -96,11 +96,11 @@ export function CartPage() {
               ))}
 
           {!loading && result.autoCodeItems.length > 0 ? (
-            <div className="satin-panel rounded-[28px] border border-white/10 p-5">
+            <div className="satin-panel rounded-[24px] border border-white/10 p-4 sm:rounded-[28px] sm:p-5">
               <div className="text-sm uppercase tracking-[0.18em] text-white/58">Автоматически добавленные коды</div>
               <div className="mt-4 space-y-3">
                 {result.autoCodeItems.map((item) => (
-                  <div key={item.code} className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4">
+                  <div key={item.code} className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-4 sm:px-4">
                     <div>
                       <div className="text-white">{item.title}</div>
                       <div className="mt-1 text-sm text-white/48">Номинал: {item.nominalTry} TRY</div>
@@ -131,7 +131,7 @@ export function CartPage() {
           ) : null}
         </div>
 
-        <aside className="satin-panel h-fit rounded-[30px] border border-white/10 p-6">
+        <aside className="satin-panel h-fit rounded-[24px] border border-white/10 p-5 sm:rounded-[30px] sm:p-6 lg:sticky lg:top-32">
           <div className="font-display text-3xl text-sheen">Итого</div>
           <div className="mt-6 flex items-center justify-between text-sm text-white/56">
             <span>Регион</span>

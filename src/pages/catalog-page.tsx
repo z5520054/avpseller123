@@ -164,15 +164,15 @@ function SubscriptionChooser() {
   }, [region])
 
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-white/8 bg-[#070b14] p-4 shadow-[0_18px_70px_rgba(0,0,0,.42)] sm:p-5">
+    <div className="relative overflow-hidden rounded-[24px] border border-white/8 bg-[#070b14] p-3 shadow-[0_18px_70px_rgba(0,0,0,.42)] sm:rounded-[28px] sm:p-5">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(61,112,255,.12),transparent_28%),radial-gradient(circle_at_70%_10%,rgba(255,184,41,.1),transparent_26%)]" />
-      <div className="relative flex flex-wrap gap-3">
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] sm:gap-3 [&::-webkit-scrollbar]:hidden">
         {SUBSCRIPTION_DURATIONS.map((item) => (
           <button
             key={item.value}
             type="button"
             onClick={() => setDuration(item.value)}
-            className={`cursor-pointer rounded-full border px-6 py-3 text-sm font-medium transition duration-300 ${
+            className={`shrink-0 cursor-pointer rounded-full border px-5 py-3 text-sm font-medium transition duration-300 sm:px-6 ${
               duration === item.value
                 ? 'border-[#6ea0ff]/80 bg-[#10182a] text-white shadow-[0_0_0_1px_rgba(255,255,255,.14)_inset,0_0_24px_rgba(69,122,255,.72)]'
                 : 'border-white/8 bg-white/[0.045] text-white/44 hover:border-white/14 hover:bg-white/[0.07] hover:text-white/72'
@@ -183,7 +183,7 @@ function SubscriptionChooser() {
         ))}
       </div>
 
-      <div className="relative mt-5 grid gap-5 lg:grid-cols-3">
+      <div className="relative mt-5 grid gap-4 lg:grid-cols-3">
         {SUBSCRIPTION_PLANS.map((plan) => {
           const price = prices.find((item) => item.tier === plan.tier && item.durationMonths === duration)
           const canBuy = Boolean(price?.isActive && price.priceRubMinor !== null)
@@ -191,14 +191,14 @@ function SubscriptionChooser() {
           const isInCart = cart.some((item) => item.productId === productId)
 
           return (
-            <article key={plan.tier} className={`relative flex min-h-[575px] overflow-hidden rounded-[18px] border p-5 transition duration-300 hover:-translate-y-1 ${plan.cardClass}`}>
+            <article key={plan.tier} className={`relative flex min-h-[480px] overflow-hidden rounded-[18px] border p-4 transition duration-300 hover:-translate-y-1 sm:min-h-[575px] sm:p-5 ${plan.cardClass}`}>
               <div className={`pointer-events-none absolute inset-0 opacity-80 ${plan.railClass}`} />
               <div className="pointer-events-none absolute -right-8 top-6 h-28 w-28 rounded-full border opacity-80" />
               <div className={`pointer-events-none absolute right-10 top-8 h-12 w-12 rotate-45 border ${plan.glyphClass}`} />
               <div className={`pointer-events-none absolute right-4 top-20 h-16 w-16 rounded-full border ${plan.glyphClass}`} />
               <div className="relative flex h-full w-full flex-col">
                 <div className={`text-xs font-semibold uppercase tracking-[0.24em] ${plan.eyebrowClass}`}>PlayStation Plus</div>
-                <h3 className={`mt-7 text-[clamp(3rem,5vw,4.15rem)] font-semibold leading-none tracking-[-0.06em] ${plan.titleClass}`}>{plan.tier}</h3>
+                <h3 className={`mt-6 text-[clamp(2.45rem,14vw,3.5rem)] font-semibold leading-none tracking-[-0.06em] sm:mt-7 sm:text-[clamp(3rem,5vw,4.15rem)] ${plan.titleClass}`}>{plan.tier}</h3>
                 <p className={`mt-5 min-h-20 text-sm font-medium leading-6 ${plan.bodyClass}`}>{plan.description}</p>
                 <div className={`mt-auto pt-9 text-sm font-medium ${plan.bodyClass}`}>Срок: {duration} мес.</div>
                 <div className={`mt-2 text-3xl font-extrabold tracking-[-0.04em] ${plan.titleClass}`}>
@@ -373,13 +373,13 @@ export function CatalogPage() {
         <SubscriptionChooser />
       ) : (
         <>
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-4">
-            <label className="flex min-w-[260px] items-center gap-3 text-sm text-white/60">
+          <div className="mb-5 flex flex-col gap-3 rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 sm:mb-6 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:rounded-[28px] sm:px-5">
+            <label className="flex min-w-0 flex-col gap-2 text-sm text-white/60 sm:flex-row sm:items-center sm:gap-3">
               <span className="text-white/42">Сортировка</span>
               <select
                 value={sort}
                 onChange={(event) => updateFilter('sort', event.target.value)}
-                className="rounded-2xl border border-white/10 bg-black px-4 py-2.5 text-sm text-white outline-none"
+                className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm text-white outline-none sm:w-auto sm:py-2.5"
               >
                 {SORT_OPTIONS.map((item) => (
                   <option key={item.value} value={item.value}>
@@ -388,14 +388,14 @@ export function CatalogPage() {
                 ))}
               </select>
             </label>
-            <button type="button" onClick={() => setFiltersOpen(true)} className="quiet-button">
+            <button type="button" onClick={() => setFiltersOpen(true)} className="quiet-button w-full sm:w-auto">
               <SlidersHorizontal size={16} />
               Фильтр{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
             </button>
           </div>
 
           {loading ? (
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3">
               {Array.from({ length: 6 }).map((_, index) => (
                 <ProductSkeleton key={index} />
               ))}
@@ -407,13 +407,13 @@ export function CatalogPage() {
             </div>
           ) : items.length > 0 ? (
             <>
-              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3">
                 {items.map((product) => (
                   <CatalogApiProductCard key={product.id} product={product} />
                 ))}
               </div>
 
-              <div className="mt-8 flex items-center justify-center gap-3">
+              <div className="mt-8 grid grid-cols-2 gap-3 sm:flex sm:items-center sm:justify-center">
                 <button
                   type="button"
                   disabled={page <= 1}
@@ -458,8 +458,8 @@ export function CatalogPage() {
       )}
 
       {filtersOpen ? (
-        <div className="fixed inset-0 z-[80] bg-black/70 px-4 py-6 backdrop-blur-sm" role="dialog" aria-modal="true">
-          <div className="mx-auto max-w-xl rounded-[28px] border border-white/10 bg-[#090909] p-5 shadow-2xl">
+        <div className="fixed inset-0 z-[80] bg-black/70 px-3 py-4 backdrop-blur-sm sm:px-4 sm:py-6" role="dialog" aria-modal="true">
+          <div className="mx-auto max-h-[calc(100svh-2rem)] max-w-xl overflow-y-auto rounded-[24px] border border-white/10 bg-[#090909] p-4 shadow-2xl sm:max-h-[calc(100vh-3rem)] sm:rounded-[28px] sm:p-5">
             <div className="flex items-center justify-between gap-4">
               <div className="font-display text-3xl text-white">Фильтр</div>
               <button type="button" onClick={() => setFiltersOpen(false)} className="header-icon-button">

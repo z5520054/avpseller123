@@ -17,7 +17,7 @@ export function RegionSwitch({ compact = false }: { compact?: boolean }) {
           key={item}
           type="button"
           onClick={() => setRegion(item)}
-          className={`cursor-pointer rounded-full px-4 py-2 transition ${
+          className={`cursor-pointer rounded-full px-3 py-2 transition sm:px-4 ${
             region === item ? 'bg-white text-black' : 'text-white/65 hover:text-white'
           }`}
         >
