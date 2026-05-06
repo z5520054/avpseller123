@@ -539,12 +539,24 @@ export function AccountPage() {
 
                   <label className="rounded-[24px] border border-white/10 bg-black/18 p-5">
                     <span className="block text-sm uppercase tracking-[0.18em] text-white/38">Дата окончания</span>
-                    <input
-                      type="date"
-                      value={psPlusEndDate}
-                      onChange={(event) => setPsPlusEndDate(event.target.value)}
-                      className="mt-4 w-full rounded-[18px] border border-white/10 bg-black/28 px-4 py-3 text-sm text-white outline-none [color-scheme:dark] focus:border-white/24"
-                    />
+                    <span className="relative mt-4 block">
+                      <input
+                        type="date"
+                        value={psPlusEndDate}
+                        onChange={(event) => setPsPlusEndDate(event.target.value)}
+                        className="w-full rounded-[18px] border border-white/10 bg-black/28 px-4 py-3 pr-12 text-sm text-white outline-none [color-scheme:dark] focus:border-white/24"
+                      />
+                      {psPlusEndDate ? (
+                        <button
+                          type="button"
+                          onClick={() => setPsPlusEndDate('')}
+                          aria-label="Очистить дату окончания PS Plus"
+                          className="absolute right-3 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/8 text-lg leading-none text-white/60 transition hover:border-white/20 hover:bg-white/12 hover:text-white"
+                        >
+                          ×
+                        </button>
+                      ) : null}
+                    </span>
                     <span className="mt-3 block text-sm text-white/48">
                       {psPlusEndDate ? `PS Plus активна до ${psPlusEndDate}` : 'Укажите дату окончания PS Plus'}
                     </span>
@@ -554,12 +566,24 @@ export function AccountPage() {
                 {isEaPlayEnabled ? (
                   <label className="mt-4 block rounded-[24px] border border-white/10 bg-black/18 p-5">
                     <span className="block text-sm uppercase tracking-[0.18em] text-white/38">Дата окончания EA Play</span>
-                    <input
-                      type="date"
-                      value={eaPlayEndDate}
-                      onChange={(event) => setEaPlayEndDate(event.target.value)}
-                      className="mt-4 w-full rounded-[18px] border border-white/10 bg-black/28 px-4 py-3 text-sm text-white outline-none [color-scheme:dark] focus:border-white/24"
-                    />
+                    <span className="relative mt-4 block">
+                      <input
+                        type="date"
+                        value={eaPlayEndDate}
+                        onChange={(event) => setEaPlayEndDate(event.target.value)}
+                        className="w-full rounded-[18px] border border-white/10 bg-black/28 px-4 py-3 pr-12 text-sm text-white outline-none [color-scheme:dark] focus:border-white/24"
+                      />
+                      {eaPlayEndDate ? (
+                        <button
+                          type="button"
+                          onClick={() => setEaPlayEndDate('')}
+                          aria-label="Очистить дату окончания EA Play"
+                          className="absolute right-3 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/8 text-lg leading-none text-white/60 transition hover:border-white/20 hover:bg-white/12 hover:text-white"
+                        >
+                          ×
+                        </button>
+                      ) : null}
+                    </span>
                     <span className="mt-3 block text-sm text-white/48">
                       {eaPlayEndDate ? `EA Play активна до ${eaPlayEndDate}` : 'Укажите дату окончания EA Play'}
                     </span>
