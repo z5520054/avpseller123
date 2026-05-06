@@ -6,6 +6,7 @@ import { useCatalogProductsByIds } from '../hooks/use-catalog-products-by-ids'
 import { useAppState } from '../store/use-app-state'
 
 type ConsoleType = 'ps5' | 'ps4'
+type AccountSection = 'account' | 'subscription' | 'purchases'
 
 const ACCOUNT_EMAIL_KEY = 'avp-account-email'
 const ACCOUNT_CONSOLE_KEY = 'avp-account-console'
@@ -118,14 +119,17 @@ function AccountMenuButton({
   active,
   icon,
   label,
+  onClick,
 }: {
   active?: boolean
   icon: ReactNode
   label: string
+  onClick: () => void
 }) {
   return (
     <button
       type="button"
+      onClick={onClick}
       className={`flex w-full cursor-pointer items-center justify-between rounded-[20px] border px-4 py-4 text-left text-sm transition ${
         active
           ? 'border-white/26 bg-white text-black shadow-[0_18px_45px_rgba(255,255,255,.08)]'
@@ -150,6 +154,7 @@ function AccountMenuButton({
 export function AccountPage() {
   const { cart, favorites } = useAppState()
   const [profile, setProfile] = useState<Record<string, unknown> | null>(() => readVkProfile())
+  const [activeSection, setActiveSection] = useState<AccountSection>('account')
   const [email, setEmail] = useState(() => {
     if (typeof window === 'undefined') {
       return ''
@@ -204,12 +209,29 @@ export function AccountPage() {
               </div>
             </div>
 
-            <AccountMenuButton active icon={<UserRound size={16} />} label="Ваш аккаунт" />
-            <AccountMenuButton icon={<ShieldCheck size={16} />} label="Активная подписка" />
-            <AccountMenuButton icon={<Database size={16} />} label="История покупок" />
+            <AccountMenuButton
+              active={activeSection === 'account'}
+              icon={<UserRound size={16} />}
+              label="Ваш аккаунт"
+              onClick={() => setActiveSection('account')}
+            />
+            <AccountMenuButton
+              active={activeSection === 'subscription'}
+              icon={<ShieldCheck size={16} />}
+              label="Активная подписка"
+              onClick={() => setActiveSection('subscription')}
+            />
+            <AccountMenuButton
+              active={activeSection === 'purchases'}
+              icon={<Database size={16} />}
+              label="История покупок"
+              onClick={() => setActiveSection('purchases')}
+            />
           </aside>
 
           <div className="space-y-4">
+            {activeSection === 'account' ? (
+              <>
             <div className="grid gap-4 xl:grid-cols-3">
               <div className="rounded-[28px] border border-white/10 bg-white/[0.045] p-5">
                 <div className="text-xs uppercase tracking-[0.2em] text-white/38">Корзина</div>
@@ -339,6 +361,7 @@ export function AccountPage() {
               </div>
             </section>
 
+            {cart.length < 0 ? (
             <section className="grid gap-4 xl:grid-cols-2">
               <div className="rounded-[30px] border border-white/10 bg-white/[0.045] p-5 sm:p-7">
                 <div className="flex items-center justify-between gap-4">
@@ -366,6 +389,7 @@ export function AccountPage() {
                 </div>
               </div>
             </section>
+            ) : null}
 
             <section className="grid gap-4 xl:grid-cols-2">
               <div className="rounded-[30px] border border-white/10 bg-white/[0.045] p-5 sm:p-7">
@@ -426,6 +450,56 @@ export function AccountPage() {
                 </div>
               </div>
             </section>
+              </>
+            ) : null}
+
+            {activeSection === 'subscription' ? (
+              <section className="rounded-[30px] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.035))] p-6 sm:p-8">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div className="text-xs uppercase tracking-[0.2em] text-white/38">Раздел кабинета</div>
+                    <h1 className="mt-3 font-display text-4xl text-sheen">Активная подписка</h1>
+                  </div>
+                  <Gift size={22} className="text-white/38" />
+                </div>
+                <div className="mt-7 rounded-[24px] border border-white/10 bg-black/18 p-5">
+                  <div className="text-xl font-semibold text-white">Подписка не выбрана</div>
+                  <p className="mt-3 max-w-2xl text-sm leading-6 text-white/52">
+                    Когда пользователь купит PS Plus, здесь будет отображаться тариф, срок действия, регион и дата следующего продления.
+                  </p>
+                  <Link
+                    to="/catalog?category=subscriptions"
+                    className="mt-6 inline-flex cursor-pointer rounded-full bg-white px-6 py-3 text-sm font-semibold !text-black transition hover:bg-zinc-100"
+                  >
+                    Выбрать подписку
+                  </Link>
+                </div>
+              </section>
+            ) : null}
+
+            {activeSection === 'purchases' ? (
+              <section className="rounded-[30px] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.035))] p-6 sm:p-8">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div className="text-xs uppercase tracking-[0.2em] text-white/38">Раздел кабинета</div>
+                    <h1 className="mt-3 font-display text-4xl text-sheen">История покупок</h1>
+                  </div>
+                  <CreditCard size={22} className="text-white/38" />
+                </div>
+                <div className="mt-7 rounded-[24px] border border-white/10 bg-black/18 p-5">
+                  <div className="text-xl font-semibold text-white">Заказов пока нет</div>
+                  <p className="mt-3 max-w-2xl text-sm leading-6 text-white/52">
+                    После оплаты здесь появятся номер заказа, статус, сумма, список товаров и выданные коды пополнения.
+                  </p>
+                  <Link
+                    to="/catalog"
+                    className="mt-6 inline-flex cursor-pointer rounded-full bg-white px-6 py-3 text-sm font-semibold !text-black transition hover:bg-zinc-100"
+                  >
+                    Перейти в каталог
+                  </Link>
+                </div>
+              </section>
+            ) : null}
           </div>
         </div>
       </section>
