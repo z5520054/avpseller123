@@ -605,6 +605,15 @@ async function processTask(task: ParseTaskRow) {
   const targets = service.getTargets(task)
   let processed = 0
 
+  const markAttemptProcessed = async () => {
+    processed += 1
+    if (processed % 5 === 0) {
+      service.updateTaskProgress(task.id, processed)
+    }
+
+    await sleep(3_000 + Math.floor(Math.random() * 2_000))
+  }
+
   for (const target of targets) {
     const proxy = service.selectProxy(target.region, task.proxy_id)
     const provider = new PlayStationStoreProvider(proxy ? (url) => fetchHtmlWithCurl(url, proxy) : undefined)
@@ -618,15 +627,11 @@ async function processTask(task: ParseTaskRow) {
       }
 
       service.markProductParseResult(target.id, 'ok', -1)
-      processed += 1
-      if (processed % 5 === 0) {
-        service.updateTaskProgress(task.id, processed)
-      }
-
-      await sleep(3_000 + Math.floor(Math.random() * 2_000))
+      await markAttemptProcessed()
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
-      service.markProductParseResult(target.id, message.includes('403') || message.includes('429') ? 'blocked' : 'error', 1)
+      const isBlocked = message.includes('403') || message.includes('429')
+      service.markProductParseResult(target.id, isBlocked ? 'blocked' : `error: ${message.slice(0, 180)}`, 1)
 
       if (proxy && message.includes('403')) {
         service.markProxyBanned(proxy.id)
@@ -637,10 +642,11 @@ async function processTask(task: ParseTaskRow) {
         throw new Error(`429 rate limit from PlayStation Store. Task stopped: ${message}`, { cause: error })
       }
 
-      throw error
+      await markAttemptProcessed()
     }
   }
 
+  service.updateTaskProgress(task.id, processed)
   service.markTaskDone(task.id, processed)
 }
 
