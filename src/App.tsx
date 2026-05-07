@@ -9,6 +9,7 @@ import { CatalogPage } from './pages/catalog-page'
 import { CheckoutPage } from './pages/checkout-page'
 import { FavoritesPage } from './pages/favorites-page'
 import { HomePage } from './pages/home-page'
+import { OrderReturnPage } from './pages/order-return-page'
 import { ProductPage } from './pages/product-page'
 import { SupportPage } from './pages/support-page'
 
@@ -24,6 +25,7 @@ function App() {
             <Route path="/product/:productId" element={<ProductPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/orders/:orderId" element={<OrderReturnPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/support" element={<SupportPage />} />
             <Route path="/favorites" element={<FavoritesPage />} />

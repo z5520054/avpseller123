@@ -1,7 +1,10 @@
 import { Minus, Plus, Trash2 } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { AuthModal } from '../components/auth-modal'
 import { formatMoneyMinor } from '../lib/format'
 import { useCartRecalculation } from '../hooks/use-cart-recalculation'
+import { isAuthenticated as getIsAuthenticated } from '../lib/auth'
 import { useAppState } from '../store/use-app-state'
 
 function formatTryMinor(value: number | null) {
@@ -18,6 +21,29 @@ function formatTryMinor(value: number | null) {
 export function CartPage() {
   const { cart, changeQuantity, removeFromCart, region } = useAppState()
   const { result, loading, error } = useCartRecalculation()
+  const navigate = useNavigate()
+  const [isAuthOpen, setIsAuthOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(() => getIsAuthenticated())
+
+  useEffect(() => {
+    const syncAuthState = () => setIsAuthenticated(getIsAuthenticated())
+    window.addEventListener('storage', syncAuthState)
+    window.addEventListener('avp-auth-changed', syncAuthState)
+
+    return () => {
+      window.removeEventListener('storage', syncAuthState)
+      window.removeEventListener('avp-auth-changed', syncAuthState)
+    }
+  }, [])
+
+  function handleCheckoutClick() {
+    if (!isAuthenticated) {
+      setIsAuthOpen(true)
+      return
+    }
+
+    navigate('/checkout')
+  }
 
   if (!loading && cart.length === 0) {
     return (
@@ -151,14 +177,26 @@ export function CartPage() {
               <span>{formatMoneyMinor(result.pricing.payableRubMinor, 'RUB') ?? '—'}</span>
             </div>
           </div>
-          <Link
-            to="/checkout"
-            className="mt-6 inline-flex w-full cursor-pointer items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-bold !text-black shadow-[0_10px_28px_rgba(255,255,255,.10)] transition hover:bg-zinc-100"
+          <button
+            type="button"
+            onClick={handleCheckoutClick}
+            className="mt-6 inline-flex w-full cursor-pointer items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-bold text-black shadow-[0_10px_28px_rgba(255,255,255,.10)] transition hover:bg-zinc-100"
           >
             Оформить заказ
-          </Link>
+          </button>
         </aside>
       </div>
+
+      <AuthModal
+        isOpen={isAuthOpen}
+        isAuthenticated={isAuthenticated}
+        onAuthenticated={() => {
+          setIsAuthenticated(true)
+          setIsAuthOpen(false)
+          navigate('/checkout')
+        }}
+        onClose={() => setIsAuthOpen(false)}
+      />
     </div>
   )
 }

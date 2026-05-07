@@ -39,6 +39,13 @@ import type {
 const TIERS: PsPlusTier[] = ['Essential', 'Extra', 'Deluxe']
 const DURATIONS: PsPlusDuration[] = [1, 3, 12]
 const TOKEN_STORAGE_KEY = 'avp-admin-token'
+type AdminSection = 'codes' | 'parsing' | 'pricing'
+
+const ADMIN_SECTIONS: Array<{ id: AdminSection; label: string; description: string }> = [
+  { id: 'codes', label: 'Работа с кодами', description: 'Выдача кодов, склад и заказы' },
+  { id: 'parsing', label: 'Парсинг данных', description: 'Ручной парсинг PS Store и обновление товаров' },
+  { id: 'pricing', label: 'Работа с ценами', description: 'Цены PS Plus и настройки витрины' },
+]
 const DEFAULT_BANNER_SETTINGS: Pick<HomeBannerSettings, 'autoplayMs' | 'animation'> = {
   autoplayMs: 6000,
   animation: 'slide',
@@ -694,6 +701,7 @@ export function AdminPsPlusPage() {
   const [token, setToken] = useState(() => localStorage.getItem(TOKEN_STORAGE_KEY) ?? '')
   const [region, setRegion] = useState<'turkey' | 'india'>('turkey')
   const [authenticated, setAuthenticated] = useState(false)
+  const [adminSection, setAdminSection] = useState<AdminSection>('codes')
   const [pricesItems, setPricesItems] = useState<PsPlusPrice[]>([])
   const [prices, setPrices] = useState<Record<string, string>>({})
   const [active, setActive] = useState<Record<string, boolean>>({})
@@ -864,9 +872,31 @@ export function AdminPsPlusPage() {
           <div className="mt-6 space-y-8">
             <div className="rounded-2xl border border-white/8 bg-black/20 px-4 py-3 text-sm text-white/58">{status}</div>
 
-            <CodeFulfillmentPanel token={token} />
+            <div className="grid gap-3 lg:grid-cols-3">
+              {ADMIN_SECTIONS.map((section) => (
+                <button
+                  key={section.id}
+                  type="button"
+                  onClick={() => setAdminSection(section.id)}
+                  className={`rounded-[24px] border p-4 text-left transition ${
+                    adminSection === section.id
+                      ? 'border-white/22 bg-white text-black'
+                      : 'border-white/10 bg-black/20 text-white hover:border-white/18 hover:bg-white/[0.04]'
+                  }`}
+                >
+                  <div className="text-base font-semibold">{section.label}</div>
+                  <div className={`mt-2 text-sm ${adminSection === section.id ? 'text-black/55' : 'text-white/46'}`}>
+                    {section.description}
+                  </div>
+                </button>
+              ))}
+            </div>
 
-            <ManualParsingPanel token={token} />
+            {adminSection === 'codes' ? <CodeFulfillmentPanel token={token} /> : null}
+
+            {adminSection === 'parsing' ? (
+              <>
+                <ManualParsingPanel token={token} />
 
             <section className="rounded-[28px] border border-white/10 bg-black/20 p-5">
               <div className="flex flex-wrap items-end justify-between gap-4">
@@ -903,7 +933,11 @@ export function AdminPsPlusPage() {
                 </select>
               </div>
             </section>
+              </>
+            ) : null}
 
+            {adminSection === 'pricing' ? (
+              <>
             <section className="rounded-[28px] border border-white/10 bg-black/20 p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -1158,6 +1192,8 @@ export function AdminPsPlusPage() {
                 </table>
               </div>
             </section>
+              </>
+            ) : null}
           </div>
         )}
       </section>

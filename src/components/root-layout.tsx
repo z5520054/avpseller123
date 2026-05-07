@@ -2,6 +2,7 @@ import { Grid2X2, Heart, LifeBuoy, Search, ShoppingBag, Sparkles, User, X } from
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import avpIconUrl from '../assets/avp-icon.png'
+import { isAuthenticated as getIsAuthenticated } from '../lib/auth'
 import { useAppState } from '../store/use-app-state'
 import { AuthModal } from './auth-modal'
 import { RegionSwitch } from './ui/region-switch'
@@ -23,12 +24,12 @@ export function RootLayout() {
       return false
     }
 
-    return Boolean(window.localStorage.getItem('avp-vkid-profile'))
+    return getIsAuthenticated()
   })
 
   useEffect(() => {
     const syncAuthState = () => {
-      setIsAuthenticated(Boolean(window.localStorage.getItem('avp-vkid-profile')))
+      setIsAuthenticated(getIsAuthenticated())
     }
 
     syncAuthState()

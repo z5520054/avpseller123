@@ -1,9 +1,12 @@
-import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Navigate, useNavigate } from 'react-router-dom'
+import { AuthModal } from '../components/auth-modal'
 import { useCartRecalculation } from '../hooks/use-cart-recalculation'
 import { createOrder } from '../lib/catalog-api'
+import { isAuthenticated as getIsAuthenticated } from '../lib/auth'
 import { regionToApi } from '../lib/catalog-pricing'
 import { formatMoneyMinor } from '../lib/format'
+import { rememberOrder } from '../lib/order-history'
 import { useAppState } from '../store/use-app-state'
 import type { OrderRecord } from '../types'
 
@@ -23,6 +26,9 @@ function formatTryMinor(value: number | null) {
 export function CheckoutPage() {
   const { cart, region, clearCart } = useAppState()
   const { result, loading } = useCartRecalculation()
+  const navigate = useNavigate()
+  const [isAuthOpen, setIsAuthOpen] = useState(() => !getIsAuthenticated())
+  const [isAuthenticated, setIsAuthenticated] = useState(() => getIsAuthenticated())
   const [email, setEmail] = useState(() => {
     if (typeof window === 'undefined') {
       return ''
@@ -37,6 +43,23 @@ export function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [order, setOrder] = useState<OrderRecord | null>(null)
+
+  useEffect(() => {
+    const syncAuthState = () => {
+      const authenticated = getIsAuthenticated()
+      setIsAuthenticated(authenticated)
+      setIsAuthOpen(!authenticated)
+    }
+
+    syncAuthState()
+    window.addEventListener('storage', syncAuthState)
+    window.addEventListener('avp-auth-changed', syncAuthState)
+
+    return () => {
+      window.removeEventListener('storage', syncAuthState)
+      window.removeEventListener('avp-auth-changed', syncAuthState)
+    }
+  }, [])
 
   if (!loading && cart.length === 0 && !order) {
     return <Navigate to="/cart" replace />
@@ -58,7 +81,7 @@ export function CheckoutPage() {
     )
   }
 
-  const submitDisabled = !acceptedOffer || submitting || loading || result.supported === false
+  const submitDisabled = !isAuthenticated || !acceptedOffer || submitting || loading || result.supported === false
 
   return (
     <div className="page-shell section-space">
@@ -84,6 +107,7 @@ export function CheckoutPage() {
                 ].filter(Boolean).join('\n'),
                 items: cart,
               })
+              rememberOrder(created)
               clearCart()
               if (created.paymentConfirmationUrl) {
                 window.location.href = created.paymentConfirmationUrl
@@ -173,7 +197,11 @@ export function CheckoutPage() {
           <button
             type="submit"
             disabled={submitDisabled}
-            className="mt-6 inline-flex w-full cursor-pointer justify-center rounded-full bg-white px-7 py-3 text-sm font-bold text-black shadow-[0_10px_28px_rgba(255,255,255,.10)] transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:bg-white disabled:!text-black disabled:opacity-100 disabled:shadow-none sm:w-auto"
+            className={`mt-6 inline-flex w-full justify-center rounded-full px-7 py-3 text-sm font-bold shadow-[0_10px_28px_rgba(255,255,255,.10)] transition sm:w-auto ${
+              submitDisabled
+                ? 'cursor-not-allowed bg-white/10 text-white/35 shadow-none'
+                : 'cursor-pointer bg-white text-black hover:bg-zinc-100'
+            }`}
           >
             {submitting ? 'Создание заказа...' : 'Перейти к оплате'}
           </button>
@@ -229,6 +257,22 @@ export function CheckoutPage() {
           </div>
         </aside>
       </div>
+
+      <AuthModal
+        isOpen={isAuthOpen}
+        isAuthenticated={isAuthenticated}
+        onAuthenticated={() => {
+          setIsAuthenticated(true)
+          setIsAuthOpen(false)
+        }}
+        onClose={() => {
+          if (isAuthenticated) {
+            setIsAuthOpen(false)
+          } else {
+            navigate('/cart')
+          }
+        }}
+      />
     </div>
   )
 }

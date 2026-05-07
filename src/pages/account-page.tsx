@@ -1,8 +1,12 @@
-import { Database, Gamepad2, Gift, LogOut, Mail, Plus, ShieldCheck, UserRound } from 'lucide-react'
+import { CreditCard, Database, Gamepad2, Gift, Hourglass, LogOut, Mail, Plus, ShieldCheck, UserRound } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { getOrder } from '../lib/catalog-api'
+import { formatDate, formatMoneyMinor } from '../lib/format'
+import { readOrderHistoryIds } from '../lib/order-history'
 import { useAppState } from '../store/use-app-state'
+import type { OrderRecord } from '../types'
 
 type ConsoleType = 'ps5' | 'ps4'
 type AccountSection = 'account' | 'subscription' | 'purchases'
@@ -192,11 +196,90 @@ function AccountMenuButton({
   )
 }
 
+function orderStatusLabel(status: OrderRecord['status']) {
+  switch (status) {
+    case 'paid':
+      return 'Оплачен'
+    case 'code_sent':
+    case 'fulfilled':
+      return 'Код выдан'
+    case 'cancelled':
+      return 'Отменён'
+    case 'expired':
+      return 'Истёк'
+    case 'refunded':
+      return 'Возврат'
+    case 'pending':
+    default:
+      return 'Ожидает оплаты'
+  }
+}
+
+function OrderHistoryCard({ order }: { order: OrderRecord }) {
+  const sourceItems = order.cartSnapshot.sourceItems
+  const autoCodes = order.cartSnapshot.autoCodeItems
+  const payable = formatMoneyMinor(order.cartSnapshot.pricing.payableRubMinor, 'RUB')
+  const orderDate = formatDate(order.createdAt)
+
+  return (
+    <article className="rounded-[30px] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,.085),rgba(255,255,255,.035))] p-5 shadow-[0_22px_70px_rgba(0,0,0,.32)] sm:p-7">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-white/58">
+            <span className="text-white">Заказ №{order.id}</span>
+            {orderDate ? <span>• {orderDate}</span> : null}
+          </div>
+          <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-300/18 bg-amber-400/10 px-3 py-1.5 text-xs font-medium text-amber-100">
+            <Hourglass size={14} />
+            {orderStatusLabel(order.status)}
+          </div>
+        </div>
+        <div className="text-3xl font-semibold tracking-[-0.05em] text-white">{payable ?? '—'}</div>
+      </div>
+
+      <div className="mt-6 space-y-3">
+        {sourceItems.map((item) => (
+          <div key={item.productId} className="flex items-start justify-between gap-4 rounded-[20px] border border-white/8 bg-black/16 p-3">
+            <div className="min-w-0">
+              <div className="line-clamp-2 text-sm font-medium text-white">{item.product.title}</div>
+              <div className="mt-1 text-xs text-white/42">Количество: {item.quantity}</div>
+            </div>
+            <div className="shrink-0 text-sm text-white/78">{formatMoneyMinor(item.linePriceRubMinor, 'RUB') ?? '—'}</div>
+          </div>
+        ))}
+      </div>
+
+      {autoCodes.length > 0 ? (
+        <div className="mt-5 border-t border-white/10 pt-5">
+          <div className="text-xs uppercase tracking-[0.22em] text-white/38">Коды пополнения</div>
+          <div className="mt-3 space-y-2">
+            {autoCodes.map((code) => (
+              <div key={code.code} className="flex items-center justify-between gap-4 rounded-[18px] border border-white/8 bg-black/16 px-3 py-3 text-sm">
+                <div className="flex items-center gap-2 text-white/72">
+                  <CreditCard size={16} />
+                  {code.nominalTry} TRY
+                </div>
+                <div className="text-white">{formatMoneyMinor(code.priceRubMinor, 'RUB')}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </article>
+  )
+}
+
 export function AccountPage() {
   const { cart, favorites } = useAppState()
   const navigate = useNavigate()
+  const [params, setParams] = useSearchParams()
   const [profile, setProfile] = useState<Record<string, unknown> | null>(() => readVkProfile())
-  const [activeSection, setActiveSection] = useState<AccountSection>('account')
+  const [activeSection, setActiveSection] = useState<AccountSection>(() => {
+    const section = params.get('section')
+    return section === 'subscription' || section === 'purchases' ? section : 'account'
+  })
+  const [orders, setOrders] = useState<OrderRecord[]>([])
+  const [ordersLoading, setOrdersLoading] = useState(false)
   const [email, setEmail] = useState(() => {
     if (typeof window === 'undefined') {
       return ''
@@ -249,6 +332,42 @@ export function AccountPage() {
   }, [navigate, profile])
 
   useEffect(() => {
+    if (activeSection !== 'purchases') {
+      return
+    }
+
+    const ids = readOrderHistoryIds()
+    if (ids.length === 0) {
+      window.setTimeout(() => setOrders([]), 0)
+      return
+    }
+
+    let active = true
+    window.setTimeout(() => {
+      if (active) {
+        setOrdersLoading(true)
+      }
+    }, 0)
+    Promise.all(ids.map((id) => getOrder(id).catch(() => null)))
+      .then((items) => {
+        if (!active) {
+          return
+        }
+
+        setOrders(items.filter(Boolean) as OrderRecord[])
+      })
+      .finally(() => {
+        if (active) {
+          setOrdersLoading(false)
+        }
+      })
+
+    return () => {
+      active = false
+    }
+  }, [activeSection])
+
+  useEffect(() => {
     window.localStorage.setItem(ACCOUNT_EMAIL_KEY, email)
   }, [email])
 
@@ -277,6 +396,18 @@ export function AccountPage() {
     window.dispatchEvent(new Event('avp-auth-changed'))
     setProfile(null)
     navigate('/')
+  }
+
+  function switchSection(section: AccountSection) {
+    setActiveSection(section)
+    const next = new URLSearchParams(params)
+    if (section === 'account') {
+      next.delete('section')
+    } else {
+      next.set('section', section)
+    }
+    next.delete('order')
+    setParams(next, { replace: true })
   }
 
   if (!profile) {
@@ -323,19 +454,19 @@ export function AccountPage() {
               active={activeSection === 'account'}
               icon={<UserRound size={16} />}
               label="Ваш аккаунт"
-              onClick={() => setActiveSection('account')}
+              onClick={() => switchSection('account')}
             />
             <AccountMenuButton
               active={activeSection === 'subscription'}
               icon={<ShieldCheck size={16} />}
               label="Активная подписка"
-              onClick={() => setActiveSection('subscription')}
+              onClick={() => switchSection('subscription')}
             />
             <AccountMenuButton
               active={activeSection === 'purchases'}
               icon={<Database size={16} />}
               label="История покупок"
-              onClick={() => setActiveSection('purchases')}
+              onClick={() => switchSection('purchases')}
             />
           </aside>
 
@@ -598,6 +729,23 @@ export function AccountPage() {
                 <p className="mt-4 max-w-2xl text-base leading-7 text-white/58">
                   Все ваши заказы, ключи и данные об аккаунте будут храниться здесь.
                 </p>
+
+                <div className="mt-8 space-y-4">
+                  {ordersLoading ? (
+                    <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6 text-sm text-white/54">
+                      Загружаем заказы...
+                    </div>
+                  ) : orders.length > 0 ? (
+                    orders.map((order) => <OrderHistoryCard key={order.id} order={order} />)
+                  ) : (
+                    <div className="rounded-[28px] border border-white/10 bg-black/18 p-6">
+                      <div className="text-xl font-semibold text-white">Заказов пока нет</div>
+                      <p className="mt-3 text-sm leading-6 text-white/48">
+                        После оплаты здесь появятся номер заказа, статус, сумма и купленные коды.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </section>
             ) : null}
           </div>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
+import { VK_PROFILE_STORAGE_KEY } from '../lib/auth'
 
 const VK_ID_APP_ID = 54580545
 const VK_ID_REDIRECT_URL = import.meta.env.VITE_VK_ID_REDIRECT_URL || 'https://avpseller.ru/'
@@ -135,6 +136,22 @@ export function AuthModal({
   const [message, setMessage] = useState('')
 
   useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
+  useEffect(() => {
     if (!isOpen || isAuthenticated || !widgetRef.current) {
       return
     }
@@ -182,7 +199,7 @@ export function AuthModal({
             VKID.Auth.exchangeCode(data.code, data.device_id)
               .then((tokenData: unknown) => enrichVkProfile(VKID, tokenData))
               .then((profileData: unknown) => {
-                window.localStorage.setItem('avp-vkid-profile', JSON.stringify(profileData))
+                window.localStorage.setItem(VK_PROFILE_STORAGE_KEY, JSON.stringify(profileData))
                 window.dispatchEvent(new Event('avp-auth-changed'))
                 onAuthenticated(profileData)
                 setStatus('success')
@@ -215,12 +232,25 @@ export function AuthModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/72 px-4 backdrop-blur-xl">
-      <div className="relative w-full max-w-[430px] overflow-hidden rounded-[28px] border border-white/12 bg-[linear-gradient(145deg,#262628_0%,#111113_48%,#080809_100%)] p-6 text-white shadow-[0_26px_90px_rgba(0,0,0,.72)] sm:p-8">
+    <div
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/72 px-4 backdrop-blur-xl"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose()
+        }
+      }}
+    >
+      <div className="relative w-full max-w-[430px] overflow-hidden rounded-[28px] border border-white/12 bg-[linear-gradient(145deg,#262628_0%,#111113_48%,#080809_100%)] p-6 text-white shadow-[0_26px_90px_rgba(0,0,0,.72)] sm:p-8" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(255,255,255,0.18),transparent_34%),radial-gradient(circle_at_100%_100%,rgba(255,255,255,0.08),transparent_34%)]" />
         <button
           type="button"
-          onClick={onClose}
+          onMouseDown={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            onClose()
+          }}
           className="absolute right-4 top-4 z-10 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-[14px] border border-white/10 bg-white/8 text-white/58 transition hover:bg-white/12 hover:text-white"
           aria-label="Закрыть авторизацию"
         >
@@ -228,7 +258,7 @@ export function AuthModal({
         </button>
 
         <div className="relative z-10 pr-12">
-          <h2 className="font-display text-3xl tracking-[-0.04em] text-white">Авторизация</h2>
+          <h2 id="auth-modal-title" className="font-display text-3xl tracking-[-0.04em] text-white">Авторизация</h2>
           <p className="mt-4 text-sm leading-6 text-white/58">
             Войдите через VK ID, чтобы сохранять покупки, избранное и получать персональные предложения.
           </p>
