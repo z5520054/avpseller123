@@ -220,6 +220,7 @@ function OrderHistoryCard({ order }: { order: OrderRecord }) {
   const autoCodes = order.cartSnapshot.autoCodeItems
   const payable = formatMoneyMinor(order.cartSnapshot.pricing.payableRubMinor, 'RUB')
   const orderDate = formatDate(order.createdAt)
+  const canPay = order.status === 'pending' && Boolean(order.paymentConfirmationUrl)
 
   return (
     <article className="rounded-[30px] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,.085),rgba(255,255,255,.035))] p-5 shadow-[0_22px_70px_rgba(0,0,0,.32)] sm:p-7">
@@ -229,11 +230,19 @@ function OrderHistoryCard({ order }: { order: OrderRecord }) {
             <span className="text-white">Заказ №{order.id}</span>
             {orderDate ? <span>• {orderDate}</span> : null}
           </div>
-          <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-300/18 bg-amber-400/10 px-3 py-1.5 text-xs font-medium text-amber-100">
-            <Hourglass size={14} />
-            {orderStatusLabel(order.status)}
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-300/18 bg-amber-400/10 px-3 py-1.5 text-xs font-medium text-amber-100">
+              <Hourglass size={14} />
+              {orderStatusLabel(order.status)}
+            </div>
+            {canPay ? (
+              <a
+                href={order.paymentConfirmationUrl ?? '#'}
+                className="mt-4 inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold !text-black transition hover:bg-zinc-100"
+              >
+                Оплатить
+              </a>
+            ) : null}
           </div>
-        </div>
         <div className="text-3xl font-semibold tracking-[-0.05em] text-white">{payable ?? '—'}</div>
       </div>
 
