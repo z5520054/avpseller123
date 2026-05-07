@@ -245,13 +245,16 @@ export function AuthModal({
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(255,255,255,0.18),transparent_34%),radial-gradient(circle_at_100%_100%,rgba(255,255,255,0.08),transparent_34%)]" />
         <button
           type="button"
-          onMouseDown={(event) => event.stopPropagation()}
-          onClick={(event) => {
+          onPointerDown={(event) => {
             event.preventDefault()
             event.stopPropagation()
             onClose()
           }}
-          className="absolute right-4 top-4 z-10 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-[14px] border border-white/10 bg-white/8 text-white/58 transition hover:bg-white/12 hover:text-white"
+          onClick={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+          }}
+          className="absolute right-4 top-4 z-30 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-[14px] border border-white/10 bg-white/8 text-white/58 transition hover:bg-white/12 hover:text-white"
           aria-label="Закрыть авторизацию"
         >
           <X size={20} />
