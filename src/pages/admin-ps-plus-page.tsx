@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   createAdminParseTask,
   createAdminProxy,
+  cancelAdminParseTask,
   deleteAdminProxy,
   addAdminTopUpCodes,
   getAdminBanners,
@@ -499,6 +500,20 @@ function ManualParsingPanel({ token }: { token: string }) {
     }
   }
 
+  async function cancelTask(task: AdminParseTask) {
+    setLoadingManual(true)
+    setManualStatus(`Cancelling task #${task.id}...`)
+    try {
+      await cancelAdminParseTask(token.trim(), task.id)
+      setManualStatus(`Task #${task.id} cancelled. If it was running, the worker will stop before the next product.`)
+      await loadManualData()
+    } catch (error) {
+      setManualStatus(error instanceof Error ? `Unable to cancel task: ${error.message}` : 'Unable to cancel task.')
+    } finally {
+      setLoadingManual(false)
+    }
+  }
+
   const activeProxies = proxies.filter((proxy) => proxy.status === 'active' && (parseRegion === 'all' || proxy.region === parseRegion))
 
   return (
@@ -653,6 +668,7 @@ function ManualParsingPanel({ token }: { token: string }) {
             </thead>
             <tbody className="text-white/64">
               {tasks.map((task) => {
+                const canCancel = task.status === 'pending' || task.status === 'running'
                 const canResume = task.processed_items > 0
                   && task.processed_items < task.total_items
                   && task.status !== 'pending'
@@ -673,6 +689,17 @@ function ManualParsingPanel({ token }: { token: string }) {
                     <td>{formatTaskDate(task.created_at)}</td>
                     <td className="max-w-xs truncate text-red-200/70">{task.error_message ?? '—'}</td>
                     <td>
+                      <div className="flex flex-wrap gap-2">
+                      {canCancel ? (
+                        <button
+                          type="button"
+                          onClick={() => void cancelTask(task)}
+                          disabled={loadingManual}
+                          className="rounded-full border border-red-300/30 bg-red-400/12 px-4 py-2 text-xs font-semibold text-red-100 disabled:opacity-45"
+                        >
+                          Cancel
+                        </button>
+                      ) : null}
                       {canResume ? (
                         <button
                           type="button"
@@ -682,9 +709,10 @@ function ManualParsingPanel({ token }: { token: string }) {
                         >
                           Продолжить
                         </button>
-                      ) : (
+                      ) : !canCancel ? (
                         <span className="text-white/28">—</span>
-                      )}
+                      ) : null}
+                      </div>
                     </td>
                   </tr>
                 )

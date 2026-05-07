@@ -40,7 +40,7 @@ interface ParseTaskRow {
   region: ParseRegion
   product_ids: string | null
   proxy_id: number | null
-  status: 'pending' | 'running' | 'done' | 'failed'
+  status: 'pending' | 'running' | 'done' | 'failed' | 'cancelled'
   total_items: number
   processed_items: number
   created_at: string
@@ -356,6 +356,39 @@ export class ManualParseService {
     }
   }
 
+  cancelTask(id: number) {
+    const task = this.getTask(id) as ParseTaskRow | undefined
+    if (!task) {
+      throw new Error('Task not found')
+    }
+
+    if (task.status !== 'pending' && task.status !== 'running') {
+      throw new Error('Task cannot be cancelled because it is already finished')
+    }
+
+    this.db
+      .prepare(
+        `
+        UPDATE parse_tasks
+        SET status = 'cancelled',
+            finished_at = ?,
+            error_message = CASE
+              WHEN status = 'running' THEN 'Cancelled by admin. Worker will stop before the next product.'
+              ELSE 'Cancelled by admin.'
+            END
+        WHERE id = ? AND status IN ('pending', 'running')
+        `,
+      )
+      .run(nowIso(), id)
+
+    return { success: true, taskId: id, status: 'cancelled' }
+  }
+
+  isTaskCancelled(id: number) {
+    const row = this.db.prepare('SELECT status FROM parse_tasks WHERE id = ?').get(id) as { status: string } | undefined
+    return row?.status === 'cancelled'
+  }
+
   listParseProducts(input: { region?: string; query?: string; limit: number; offset: number }) {
     const region = input.region && input.region !== 'all' ? normalizeRegion(input.region) : null
     const clauses = ["p.source = 'playstation-store'"]
@@ -615,6 +648,11 @@ async function processTask(task: ParseTaskRow) {
   }
 
   for (const target of targets) {
+    if (service.isTaskCancelled(task.id)) {
+      service.updateTaskProgress(task.id, processed)
+      return
+    }
+
     const proxy = service.selectProxy(target.region, task.proxy_id)
     const provider = new PlayStationStoreProvider(proxy ? (url) => fetchHtmlWithCurl(url, proxy) : undefined)
 
@@ -647,7 +685,9 @@ async function processTask(task: ParseTaskRow) {
   }
 
   service.updateTaskProgress(task.id, processed)
-  service.markTaskDone(task.id, processed)
+  if (!service.isTaskCancelled(task.id)) {
+    service.markTaskDone(task.id, processed)
+  }
 }
 
 export function startManualParseWorker() {

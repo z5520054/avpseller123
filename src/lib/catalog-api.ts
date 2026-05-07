@@ -293,6 +293,13 @@ export function resumeAdminParseTask(token: string, taskId: number) {
   })
 }
 
+export function cancelAdminParseTask(token: string, taskId: number) {
+  return fetchJson<{ success: boolean; taskId: number; status: 'cancelled' }>(`/api/admin/parse/task/${taskId}/cancel`, {
+    method: 'POST',
+    headers: { 'x-admin-token': token },
+  })
+}
+
 export function recalculateCart(region: 'turkey' | 'india', items: CartItem[]) {
   return fetchJson<CartRecalculationResponse>('/api/cart/recalculate', {
     method: 'POST',

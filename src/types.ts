@@ -287,7 +287,7 @@ export interface AdminParseTask {
   region: AdminParseRegion
   product_ids: string | null
   proxy_id: number | null
-  status: 'pending' | 'running' | 'done' | 'failed'
+  status: 'pending' | 'running' | 'done' | 'failed' | 'cancelled'
   total_items: number
   processed_items: number
   created_at: string
